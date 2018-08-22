@@ -1,0 +1,1 @@
+This thesis is about building an interface between the software lumen, which is for visualizing probability distributions, and probabilistic programming languages (PPL), which are designed to describe probability distributions. preliminary_thesis.pdf holds first thoughts about the workflow of the thesis.
