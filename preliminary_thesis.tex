@@ -1,6 +1,7 @@
 \documentclass{article}
 
 % packages and configurations
+\usepackage{hyperref}
 \usepackage{animate} % needed for animations and videos
 \usepackage[utf8]{inputenc}	% für Umlaute ect.
 \usepackage{fancyhdr} % für header
@@ -12,11 +13,11 @@
 \usepackage{color}
 \usepackage{listings} % code listings
 \usepackage{graphicx} % für graphics
+\usepackage[toc]{glossaries} % Glossar
 \usepackage{color}
 \usepackage{tikz}
 \usepackage[absolute,overlay]{textpos} %to translate graphics through space
 \usepackage{soul}
-\usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{textpos}
 \usepackage{caption}
@@ -38,12 +39,13 @@
     M. Sc. Phillip Lucas
 	}
 
+\makeglossaries
 
 
 \begin{document}
 
-\maketitle
 
+\maketitle
 
 \begin{abstract}
 (1) grober Fahrplan
@@ -86,11 +88,22 @@ Als Anmelde und Starttermin für Deine MA halten wir Mitte September (Mo, 17. Se
 
 \end{abstract}
 
+\include{glossar}
+\printglossaries
+
 \section{What are Probabilistic Programming Languages}
 
 Modelle spezifizieren/beschreiben
 
 \cite{wiki:Probabilisticprogramminglanguage}
+
+effizienter in der Beschreibung von Modellen als herkömmliche Programmiersprachen \cite{Hardesty2015}
+
+unifying general purpose programming with probabilistic modeling \cite{probabilistic-programming.org}
+
+% how to call a glossar entry: 
+
+\gls{probabilistic model}
 
 \section{Description of existing PPLs}
 
@@ -112,10 +125,9 @@ fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variatinal inf
         
 \section{Literatur}
 
-\bibstyle{ieeetr}
+
 \bibliography{Literatur.bib}
-
-
+\bibliographystyle{ieeetr}
 
 
 \end{document}
