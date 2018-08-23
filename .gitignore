@@ -6,3 +6,11 @@
 *.blg
 *.toc
 *.out
+*.bak
+*.sav
+*.dvi
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.ist
