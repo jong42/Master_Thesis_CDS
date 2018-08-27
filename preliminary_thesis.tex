@@ -101,9 +101,18 @@ effizienter in der Beschreibung von Modellen als herkömmliche Programmiersprach
 
 unifying general purpose programming with probabilistic modeling \cite{probabilistic-programming.org}
 
+
+A \gls{probabilistic reasoning system} uses prior knowledge in the form of a \gls{probabilistic model} to answer a certain query. The particular propertes of the query as well as the prior knowledge are given to an \gls{inference algorithm} which returns an answer in the form of probabilities. Example is shown in figure \ref{fig:example_prs}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.png}
+\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
+\label{fig:example_prs}
+\end{figure}
+
 % how to call a glossar entry: 
 
-\gls{probabilistic model}
+\gls{judgement call}
 
 \section{Description of existing PPLs}
 
@@ -122,9 +131,10 @@ fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variatinal inf
 
 
 \section{Lumen}
+
+\listoffigures
         
 \section{Literatur}
-
 
 \bibliography{Literatur.bib}
 \bibliographystyle{ieeetr}
