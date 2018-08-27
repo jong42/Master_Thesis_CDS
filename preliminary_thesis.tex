@@ -3,6 +3,7 @@
 % packages and configurations
 \usepackage{hyperref}
 \usepackage{animate} % needed for animations and videos
+\usepackage{bm} % bold font in equation environments
 \usepackage[utf8]{inputenc}	% für Umlaute ect.
 \usepackage{fancyhdr} % für header
 \usepackage{lastpage} % für footer
@@ -90,8 +91,29 @@ Als Anmelde und Starttermin für Deine MA halten wir Mitte September (Mo, 17. Se
 
 \include{glossar}
 \printglossaries
+\section{Probabilistic Inference}
 
-\section{What are Probabilistic Programming Languages}
+There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
+
+\subsection{Chain rule}
+
+The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
+
+\begin{equation}
+  P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
+\end{equation}
+
+\subsection{Total probability rule}
+
+The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
+
+\begin{equation}
+P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
+\end{equation} 
+
+\subsection{Bayes' rule}
+
+\section{What is Probabilistic Programming}
 
 Modelle spezifizieren/beschreiben
 
@@ -105,7 +127,7 @@ unifying general purpose programming with probabilistic modeling \cite{probabili
 
 \gls{probabilistic model}
 
-\section{Description of existing PPLs}
+\section{Existing PPLs}
 
 \subsection{Stan for python}
 
@@ -113,7 +135,7 @@ unifying general purpose programming with probabilistic modeling \cite{probabili
 
 python library
 
-fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variatinal inference (VI)
+fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variational inference (VI)
 
 
 \subsection{Edward}
