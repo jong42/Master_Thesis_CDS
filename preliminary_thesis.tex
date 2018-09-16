@@ -89,9 +89,11 @@ Als Anmelde und Starttermin für Deine MA halten wir Mitte September (Mo, 17. Se
 
 \end{abstract}
 
+\tableofcontents
+
 \include{glossar}
 \printglossaries
-\section{Probabilistic Inference}
+\section{Rules of Probabilistic Inference}
 
 There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
 
@@ -119,6 +121,8 @@ Bayes' rule calculates the probability of a cause, given aneffect, by using the 
 P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 \end{equation}
 
+\section{Bayesian models}
+
 \section{What is Probabilistic Programming}
 
 Modelle spezifizieren/beschreiben
@@ -130,7 +134,7 @@ effizienter in der Beschreibung von Modellen als herkömmliche Programmiersprach
 unifying general purpose programming with probabilistic modeling \cite{probabilistic-programming.org}
 
 
-A \gls{probabilistic reasoning system} uses prior knowledge in the form of a \gls{probabilistic model} to answer a certain query. The particular propertes of the query as well as the prior knowledge are given to an \gls{inference algorithm} which returns an answer in the form of probabilities. Example is shown in figure \ref{fig:example_prs}
+A \gls{probabilistic reasoning system} uses prior knowledge in the form of a \gls{probabilistic model} to answer a certain query. The particular propertes of the query as well as the prior knowledge are given to an \gls{inference algorithm} which returns an answer in the form of probabilities. Example is shown in figure \ref{fig:example_prs}. Probabilistic Programming is the implementation of a \gls{probabilistic reasoning system} by using a programming language.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
@@ -139,8 +143,6 @@ A \gls{probabilistic reasoning system} uses prior knowledge in the form of a \gl
 \end{figure}
 
 % how to call a glossar entry: 
-
-\gls{judgement call}
 
 \section{Existing PPLs}
 
