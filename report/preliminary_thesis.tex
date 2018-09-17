@@ -123,6 +123,19 @@ P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 
 \section{Bayesian models}
 
+A Bayesian model is about assigning probabilities to model parameters. The model parameters $\beta$ themselves are considered as random variables which depend on hyperparameters $\alpha$.
+\\
+According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
+
+
+
+\begin{equation}
+p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
+\label{eq:posterior_predictive}
+\end{equation}
+
+
+
 \section{What is Probabilistic Programming}
 
 Modelle spezifizieren/beschreiben
