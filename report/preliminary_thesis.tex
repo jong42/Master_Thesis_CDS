@@ -49,43 +49,61 @@
 \maketitle
 
 \begin{abstract}
-(1) grober Fahrplan
-\begin{itemize}
-   \item read related material:
-        \begin{itemize}
-        \item understand what Probabilistic Programming Languages (PPLs) are
-        \item understand main idea of Lumen and what we want to do with it
-        \item understand and formulate “why \& what”
-        \end{itemize}
-    \item choose a PPL
-        \begin{itemize}
-        \item work out requirements to chose PPL
-        \item work out preferred (but not necessarily required) features
-        \item chose a PPL based on these requirements and preferences
-        \end{itemize}
-    \item get started with PPL
-    	\begin{itemize}
-        \item play around, learn how to use it, what it can do, etc
-              also confirm identified 'pain point', i.e. understand and
-              formulate what problem you are trying to solve, why this is
-              relevant and outline how you plan to solve that pain point
-        \end{itemize}
-    \item design a wrapper of chose PPL for Backend of Lumen
-    \item give presentation about work so far, its justification, relevance, verification ideas, etc etc
-    \item implement and test wrapper
-    \item evaluate implementation in terms of goals set in beginning
 
-\end{itemize}
-(2) interessante PPLs:
 
-\begin{itemize}
-     \item stan for python: https://pystan.readthedocs.io/en/latest/
-    \item pymc3: https://docs.pymc.io/notebooks/getting\_started.html\#Case-study-2:-Coal-mining-disasters
-    \item edward: http://edwardlib.org/getting-started
-    \item pyro: http://pyro.ai/
-\end{itemize}
-Wegen eines Arbeitsplatzes und eines PCs erkundigen wir uns.
-Als Anmelde und Starttermin für Deine MA halten wir Mitte September (Mo, 17. September) im Auge.
+\begin{enumerate}
+   \item Getting started
+        \begin{itemize}
+        \item set up Master thesis document
+        \item Probabilistic Programming Languages
+        	\begin{itemize}
+		\item play at least with: PyMC3, Stan
+		\item read the docs, wiki, ...
+		\item download the libraries
+		\item reproduce the getting started tutorials
+		\item --> understand the ideas and how to use it, get a feeling for it
+	\end{itemize}
+        \item theoretic background: Read Bayesian Data Analysis part I, Chapter 1,2 and part II, chapter 6,7
+        \item Lumen
+	\begin{itemize}
+		\item install locally and play with
+		\item understand main idea of Lumen and what we want to do with it
+	\end{itemize}
+       \item Start filling up your MA thesis document
+	\begin{itemize}
+		\item understand and write down in MA thesis the "why \& what"
+		\item describe the background of the work, e.g. summarize PPLs
+	\end{itemize}
+      \item give a short presentation
+	\begin{itemize}
+		\item what have you done and learned
+		\item what do you plan to do?
+		\item why is it relevant?
+		\item how do you plan to measure the success?
+	\end{itemize}	
+        \end{itemize}
+    \item First connection of PPLs to Lumen
+        \begin{itemize}
+        \item Start from small, very simple and specific example. Generalize later.
+        \item Choose PPL to work with
+	\begin {itemize}
+		\item work out requirements on PPL
+		\item work out preferred features of PPL
+		\item choose a PPL based on these requrements and preferences
+	\end{itemize}
+        \item design wrapper of PPL with Lumen
+	\begin{itemize}
+		\item work out requirement and interface
+		\item identify necessary work on Lumen
+		\item identify necessary work
+	\end{itemize}
+        \item Connect chosen specific example with lumen
+        \item Continue to work on your master thesis document!
+        \end{itemize}
+    \item Improve, generalize and clean up the connection of your PPL to Lumen
+\end{enumerate}
+
+
 
 \end{abstract}
 
@@ -161,6 +179,13 @@ Traditional means for representing models are not always sufficient for probabil
 % how to call a glossar entry: 
 
 \section{Existing PPLs}
+
+\begin{itemize}
+     \item stan for python: https://pystan.readthedocs.io/en/latest/
+    \item pymc3: https://docs.pymc.io/notebooks/getting\_started.html\#Case-study-2:-Coal-mining-disasters
+    \item edward: http://edwardlib.org/getting-started
+    \item pyro: http://pyro.ai/
+\end{itemize}
 
 \subsection{Stan for python}
 
