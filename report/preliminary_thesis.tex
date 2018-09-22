@@ -84,8 +84,6 @@
     \item edward: http://edwardlib.org/getting-started
     \item pyro: http://pyro.ai/
 \end{itemize}
-Wegen eines Arbeitsplatzes und eines PCs erkundigen wir uns.
-Als Anmelde und Starttermin für Deine MA halten wir Mitte September (Mo, 17. September) im Auge.
 
 \end{abstract}
 
@@ -122,8 +120,8 @@ P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 \end{equation}
 
 \section{Bayesian models}
-
-A Bayesian model is about assigning probabilities to model parameters. The model parameters $\beta$ themselves are considered as random variables which depend on hyperparameters $\alpha$.
+Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
+The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
 \\
 According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
 
@@ -160,6 +158,8 @@ A \gls{probabilistic reasoning system} uses prior knowledge in the form of a \gl
 \section{Existing PPLs}
 
 \subsection{Stan for python}
+
+transformed parameters are parameters which depend on hyperparameters.
 
 \subsection{Pymc3}
 
