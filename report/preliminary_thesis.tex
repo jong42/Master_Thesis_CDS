@@ -113,11 +113,18 @@ The thesis will be divided into two main parts, the first part being an overview
 \item Improve, generalize and clean up the connection of your PPL to Lumen
 \end{enumerate}
 
-\section{Rules of Probabilistic Inference}
+\section{Introduction}
 
+\section{The Bayesian Approach}
+
+Statistics in a Bayesian way refers to using data to assess and adjust prior knowledge, as well as calculating posterior distributions from the prior and the data to draw inference. Conditional probabilities play a big role in Bayesian statistics.
+
+According to \cite{1439840954}, there are 3 basic steps in Bayesian data analysis: Setting up a joint probability model, calculating a posterior distribution, and assessing the model performance
+
+\subsection{Rules of Probabilistic Inference}
 There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
 
-\subsection{Chain rule}
+\subsubsection{Chain rule}
 
 The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
 
@@ -125,7 +132,7 @@ The chain rule is used to calculate a \gls{joint probability distribution} of se
   P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
 \end{equation}
 
-\subsection{Total probability rule}
+\subsubsection{Total probability rule}
 
 The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
 
@@ -133,25 +140,25 @@ The total probability rule calculates the probability distribution over a subset
 P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
 \end{equation} 
 
-\subsection{Bayes' rule}
+\subsubsection{Bayes' rule}
 
-Bayes' rule calculates the probability of a cause, given aneffect, by using the prior probability of the cause and the probability of the effect, given the cause. The Bayes' rule can be derived from the chain rule.
+Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. The Bayes' rule can be derived from the chain rule.
 
 \begin{equation}
 P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 \end{equation}
 
-\section{Bayesian models}
+\subsection{Comparison to frequentist approach}
 
-According to \cite{1439840954}, there are 3 basic steps in Bayesian data analysis: Setting up a joint probability model, calculating a posterior distribution, and assessing the model performance
-
-"Classical" approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
-
+Classical approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
+\\
 Bayesian approach: Estimate the parameters conditioned on the outcomes.
-
+\\
 Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
 The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
-\\
+
+
+\subsection{Drawing inference}
 According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
 
 
@@ -163,7 +170,9 @@ p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol
 
 
 
-\section{What is Probabilistic Programming}
+\section{Probabilistic Programming Languages}
+
+\subsection{What are Probabilistic Programming Languages}
 
 Modelle spezifizieren/beschreiben 
 
@@ -187,7 +196,7 @@ Traditional means for representing models are not always sufficient for probabil
 
 % how to call a glossar entry: 
 
-\section{Existing PPLs}
+\subsection{Existing PPLs}
 
 \begin{itemize}
      \item stan for python: https://pystan.readthedocs.io/en/latest/
@@ -196,23 +205,24 @@ Traditional means for representing models are not always sufficient for probabil
     \item pyro: http://pyro.ai/
 \end{itemize}
 
-\subsection{Stan for python}
+\subsubsection{Stan for python}
 
 transformed parameters are parameters which depend on hyperparameters.
 
-\subsection{Pymc3}
+\subsubsection{Pymc3}
 
 python library
 
 fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variational inference (VI)
 
 
-\subsection{Edward}
+\subsubsection{Edward}
 
 \subsection{Pyro}
 
 
-\section{Lumen}
+\section{Practical implementation}
+\subsection{Lumen}
 
 \listoffigures
         
