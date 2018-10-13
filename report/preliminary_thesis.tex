@@ -117,10 +117,24 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \section{The Bayesian Approach}
 
-Statistics in a Bayesian way refers to using data to assess and adjust prior knowledge, as well as calculating posterior distributions from the prior and the data to draw inference. Conditional probabilities play a big role in Bayesian statistics.
+Statistics in a Bayesian way refers to using data(evidence) to assess and adjust prior knowledge, as well as calculating posterior distributions from the prior and the data to draw inference. Conditional probabilities play a big role in Bayesian statistics.
 
 According to \cite{1439840954}, there are 3 basic steps in Bayesian data analysis: Setting up a joint probability model, calculating a posterior distribution, and assessing the model performance
+\\
+The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
+posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. I does not have to be one single connected area  \cite{1439840954}.
+\\
+What is the difference between Bayesian inference and Bayesian data analysis in \cite{1439840954}?
 
+
+\subsection{Choosing an appropriate prior distribution}
+There two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
+
+principle of insufficient reason:
+When nothing is known about the prior distribution, it is assumed that a uniform distribution over all possible values is most appropriate
+\cite{1439840954}
+
+The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution), is called conjugacy.
 \subsection{Rules of Probabilistic Inference}
 There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
 
@@ -153,6 +167,7 @@ P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 Classical approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
 \\
 Bayesian approach: Estimate the parameters conditioned on the outcomes.
+\cite{1439840954}
 \\
 Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
 The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
