@@ -183,9 +183,7 @@ p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol
 \label{eq:posterior_predictive}
 \end{equation}
 
-
-
-\section{Probabilistic Programming Languages}
+\section{Probabilistic Programming}
 
 \subsection{What are Probabilistic Programming Languages}
 
@@ -204,14 +202,18 @@ Traditional means for representing models are not always sufficient for probabil
 
 
 \begin{figure}
-\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
-\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
-\label{fig:example_prs}
+	\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
+	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
+	\label{fig:example_prs}
 \end{figure}
 
-% how to call a glossar entry: 
+\section{Lumen}
 
-\subsection{Existing PPLs}
+\subsection{Functionality}
+
+\subsection{Requirements for a PPL}
+
+\section{Comparing Different Probabilistic Programming Languages}
 
 \begin{itemize}
      \item stan for python: https://pystan.readthedocs.io/en/latest/
@@ -220,24 +222,24 @@ Traditional means for representing models are not always sufficient for probabil
     \item pyro: http://pyro.ai/
 \end{itemize}
 
-\subsubsection{Stan for python}
+\subsection{Stan for python}
 
 transformed parameters are parameters which depend on hyperparameters.
 
-\subsubsection{Pymc3}
+\subsection{Pymc3}
 
 python library
 
 fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variational inference (VI)
 
 
-\subsubsection{Edward}
+\subsection{Edward}
 
 \subsection{Pyro}
 
+\subsection{Choose the PPL for the task at hand}
 
 \section{Practical implementation}
-\subsection{Lumen}
 
 \listoffigures
         
