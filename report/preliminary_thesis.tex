@@ -122,7 +122,11 @@ Statistics in a Bayesian way refers to using data(evidence) to assess and adjust
 According to \cite{1439840954}, there are 3 basic steps in Bayesian data analysis: Setting up a joint probability model, calculating a posterior distribution, and assessing the model performance
 \\
 The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
-posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. I does not have to be one single connected area  \cite{1439840954}.
+posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
+\\
+Often it is about which distribution class should be chosen for the prior and the likelihood. There is (in practice) an important separation between conjugate and nonconjugate distributions. Conjugate distributions are more convenient since posterior and prior distributions have the same form.
+\\
+Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sample distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
 \\
 What is the difference between Bayesian inference and Bayesian data analysis in \cite{1439840954}?
 
@@ -134,9 +138,13 @@ principle of insufficient reason:
 When nothing is known about the prior distribution, it is assumed that a uniform distribution over all possible values is most appropriate
 \cite{1439840954}
 
-The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution), is called conjugacy.
+The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
+\\
+For the posterior distribution, a normal distribution is often assumed.
 \subsection{Rules of Probabilistic Inference}
 There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
+
+
 
 \subsubsection{Chain rule}
 
@@ -175,6 +183,10 @@ The model parameters $\beta$ themselves are also considered as random variables 
 
 \subsection{Drawing inference}
 According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
+\\
+Making predictions for a new data points requires both the probability distribution of the new data point, given a parameter value, as well as the probability distribution of the parameter, given the old data points.
+\\
+If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
 
 
 
@@ -184,6 +196,8 @@ p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol
 \end{equation}
 
 \section{Probabilistic Programming}
+
+stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
 
 \subsection{What are Probabilistic Programming Languages}
 
