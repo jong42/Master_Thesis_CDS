@@ -134,13 +134,22 @@ What is the difference between Bayesian inference and Bayesian data analysis in 
 \subsection{Choosing an appropriate prior distribution}
 There two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
 
-principle of insufficient reason:
-When nothing is known about the prior distribution, it is assumed that a uniform distribution over all possible values is most appropriate
+Laplace's principle of insufficient reason:
+When nothing is known about the prior distribution, it is assumed that a uniform distribution over all possible values is most appropriate. One difficulty of this principle is the question, on which parametrization should it apply? E.g. applying it to $p(x)$ gives a non-uniform distribution when looking at $p(x^2)$ and the other way round.
+
 \cite{1439840954}
 
 The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
 \\
 For the posterior distribution, a normal distribution is often assumed.
+\\
+models can be chosen for mathematical convenience. One could estimate hyperparameters from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
+When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution. If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). Besides that there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter.
+\\
+A prior distribution is called \textit proper if it does not depend on data and sums to 1 \cite{1439840954}. Proper distribution can be normalized. The uniform prior for example is \textit improper, since it can't be normalized.
+\\
+Jeffrey's approach to find noninformative prior distributions:
+A problem of the uniform distribution is, that for different parameterizations(choice of parameter) , distributions for the same parameter can be contradictory (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/). Jeffreys' prior has the property of being invariant of the parameterization. 
 \subsection{Rules of Probabilistic Inference}
 There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
 
@@ -254,6 +263,7 @@ fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variational in
 \subsection{Choose the PPL for the task at hand}
 
 \section{Practical implementation}
+\section{Fallbeispiele}
 
 \listoffigures
         
