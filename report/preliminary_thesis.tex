@@ -130,52 +130,27 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \section{The Bayesian Approach}
 
-Statistics in a Bayesian way refers to using data(evidence) to assess and adjust prior knowledge, as well as calculating posterior distributions from the prior and the data to draw inference. Conditional probabilities play a big role in Bayesian statistics.
+In the field of statistics, one deals usually with the following questions:
 
-According to \cite{1439840954}, there are 3 basic steps in Bayesian data analysis: Setting up a joint probability model, calculating a posterior distribution, and assessing the model performance
-\\
-The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
-posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
-\\
-likelihood of the data, often also referred to as sampling distribution
-\\
-Often it is about which distribution class should be chosen for the prior and the likelihood. There is (in practice) an important separation between conjugate and nonconjugate distributions. Conjugate distributions are more convenient since posterior and prior distributions have the same form.
-\\
-Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sample distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
-\\
-What is the difference between Bayesian inference and Bayesian data analysis in \cite{1439840954}?
+\begin{itemize}
+	\item What kind of model should I choose?
+	\item Which features should I include in my model?
+	\item What are the most likely values for my model parameters?
+	\item What is the most likely outcome for additional observations under certain conditions?
+	\item How certain am I that my estimated parameter values are correct?
+\end{itemize}
+The latter three of these questions can be answered by using a Bayesian approach to statistics. Given a model, Bayesian statistics is about computing a joint probability distribution over all parameters and outcomes, so that a probability density for each possible value of parameters and outcomes can be obtained. Prior knowledge of the problem as well as observed data affect the form of the joint probability distribution. Using marginalization, conditional probability distributions can then be calculated for the desired outcomes. These conditional probability distributions are also called posteriors and can be used for parameter estimation, prediction and assessing the uncertainty of estimates. This chapter will outline how Bayesian statistics are applied to answer the abovementioned questions.
 
-
-\subsection{Choosing an appropriate prior distribution}
-There two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
-
-Laplace's principle of insufficient reason:
-When nothing is known about the prior distribution, it is assumed that a uniform distribution over all possible values is most appropriate. One difficulty of this principle is the question, on which parametrization should it apply? E.g. applying it to $p(x)$ gives a non-uniform distribution when looking at $p(x^2)$ and the other way round.
-
-\cite{1439840954}
-
-The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
-\\
-For the posterior distribution, a normal distribution is often assumed.
-\\
-models can be chosen for mathematical convenience. One could estimate hyperparameters from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
-When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution. If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). Besides that there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter.
-\\
-A prior distribution is called \textit proper if it does not depend on data and sums to 1 \cite{1439840954}. Proper distribution can be normalized. The uniform prior for example is \textit improper, since it can't be normalized.
-\\
-Jeffrey's approach to find noninformative prior distributions:
-A problem of the uniform distribution is, that for different parameterizations(choice of parameter) , distributions for the same parameter can be contradictory (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/). Jeffreys' prior has the property of being invariant of the parameterization. 
 \subsection{Rules of Probabilistic Inference}
-There are three rules of probabilistic inference: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
 
-
+When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
 
 \subsubsection{Chain rule}
 
 The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
 
 \begin{equation}
-  P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
+P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
 \end{equation}
 
 \subsubsection{Total probability rule}
@@ -188,14 +163,13 @@ P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\bold
 
 \subsubsection{Bayes' rule}
 
-Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. The Bayes' rule can be derived from the chain rule.
+Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. 
 
 \begin{equation}
 P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 \end{equation}
 
-\subsection{Comparison to frequentist approach}
-
+\subsection{Difference to frequentist approach}
 Classical approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
 \\
 Bayesian approach: Estimate the parameters conditioned on the outcomes.
@@ -204,6 +178,38 @@ Bayesian approach: Estimate the parameters conditioned on the outcomes.
 Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
 The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
 
+\subsection{Choosing an appropriate prior distribution}
+There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
+
+Laplace's principle of insufficient reason:
+When nothing is known about the prior distribution, it is assumed that a uniform distribution over all possible values is most appropriate. One difficulty of this principle is the question, on which parametrization should it apply? E.g. applying it to $p(x)$ gives a non-uniform distribution when looking at $p(x^2)$ and the other way round.
+\cite{1439840954}
+
+The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
+\\
+Jeffrey's approach to find noninformative prior distributions:
+A problem of the uniform distribution is, that for different parameterizations(choice of parameter) , distributions for the same parameter can be contradictory (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/). Jeffreys' prior has the property of being invariant of the parameterization. 
+\\
+When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution. If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). Besides that there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter.
+informative priors are not always desirable, for fairness reasons (see S56.)
+\\
+A prior distribution is called \textit proper if it does not depend on data and sums to 1 \cite{1439840954}. Proper distribution can be normalized. The uniform prior for example is \textit improper, since it can't be normalized.
+\subsection{Sampling distribution}
+
+likelihood of the data, often also referred to as sampling distribution
+\\
+Often it is about which distribution class should be chosen for the prior and the likelihood. There is (in practice) an important separation between conjugate and nonconjugate distributions. Conjugate distributions are more convenient since posterior and prior distributions have the same form.
+\\
+Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sample distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
+\\
+models can be chosen for mathematical convenience. One could estimate hyperparameters from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
+
+\subsection{Posterior distribution}
+
+The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
+posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
+\\
+For the posterior distribution, a normal distribution is often assumed.
 
 \subsection{Drawing inference}
 According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
