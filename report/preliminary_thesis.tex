@@ -12,7 +12,7 @@
 \usepackage{amsmath} % math stuff
 \usepackage{amssymb} % math stuff
 \usepackage{color}
-\usepackage{listings} % code listings
+\usepackage[procnames]{listings} % code listings
 \usepackage{graphicx} % für graphics
 \usepackage[toc]{glossaries} % Glossar
 \usepackage{color}
@@ -31,6 +31,19 @@
 \usepackage{afterpage}
 \usepackage[section]{placeins}
 
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{0,0,113}
+\definecolor{red}{RGB}{160,0,0}
+\definecolor{green}{RGB}{0,150,0}
+
+\lstset{language=Python, 
+	basicstyle=\ttfamily\small, 
+	keywordstyle=\color{keywords},
+	commentstyle=\color{comments},
+	stringstyle=\color{red},
+	showstringspaces=false,
+	identifierstyle=\color{green},
+	procnamekeys={def,class}}
 
 \title{Bringing together visual analytics and probabilistic programming languages}
 \author{Jonas Aaron Gütter  \\
@@ -123,6 +136,8 @@ According to \cite{1439840954}, there are 3 basic steps in Bayesian data analysi
 \\
 The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
 posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
+\\
+likelihood of the data, often also referred to as sampling distribution
 \\
 Often it is about which distribution class should be chosen for the prior and the likelihood. There is (in practice) an important separation between conjugate and nonconjugate distributions. Conjugate distributions are more convenient since posterior and prior distributions have the same form.
 \\
@@ -234,8 +249,11 @@ Traditional means for representing models are not always sufficient for probabil
 
 \subsection{Functionality}
 
+compare to the plotting methods of PyMC3
+
 \subsection{Requirements for a PPL}
 
+possible criterium: variety of distributions that can be described?
 \section{Comparing Different Probabilistic Programming Languages}
 
 \begin{itemize}
@@ -251,10 +269,37 @@ transformed parameters are parameters which depend on hyperparameters.
 
 \subsection{Pymc3}
 
-python library
+PyMC3 is an open-source probabilistic programming framework for Python \cite{PyMC3_documentation}. Specification of Bayesian models in PyMC3 is done by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they get passed observed data as an argument, that should not be changed by any fitting algorithm.  This kind of random variable can be used to represent sampling distributions.
+\\
+PyMC3 mainly uses simulation techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm, that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
+\\
+The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from the PyMC3 documentation at \cite{PyMC3_documentation}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
 
-fit Bayesian models, including Markov Chai Monte Carlo (MCMC) and variational inference (VI)
+\begin{figure}
+\begin{lstlisting}
+import pymc3 as pm
 
+basic_model = pm.Model()
+
+with basic_model:
+	# describe prior distributions of model parameters. Stochastic variables
+	alpha = pm.Normal('alpha', mu=0, sd=10)
+	beta = pm.Normal('beta', mu=0, sd=10, shape=2)
+	sigma = pm.HalfNormal('sigma', sd=1)
+	# specify model for the output parameter. Deterministic variable
+	mu = alpha + beta[0]*X1 + beta[1]*X2
+	# likelihood of the observations. Observed stochastic variable
+	Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
+
+# model fitting by using sampling strategies   
+with basic_model:
+# draw 500 posterior samples
+trace = pm.sample(500)
+pm.summary(trace)
+\end{lstlisting}
+\label{fig:pymc3_example_code}
+\caption[Example code of a simple Bayesian model using PyMC3]{Example code of a simple Bayesian model using PyMC3}
+\end{figure}
 
 \subsection{Edward}
 
