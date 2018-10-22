@@ -130,6 +130,9 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \section{The Bayesian Approach}
 
+"Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
+
+
 In the field of statistics, one deals usually with the following questions:
 
 \begin{itemize}
@@ -209,13 +212,27 @@ Making predictions for a new data points requires both the probability distribut
 \\
 If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
 
-
-
 \begin{equation}
 p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
 \label{eq:posterior_predictive}
 \end{equation}
 
+\subsection{Evaluating models}
+
+Since "all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality.
+
+This is necessary after a joint probability density and a posterior density are calculated. How good are the prior and the likelihood model?
+\textit{Sensitivity analysis} deals with the question, how much the posterior is changed when one chooses a different model for the likelihood or the prior, or other assumptions affecting the posterior.
+
+In theory: Setting up a 'super-model' as joint-distribution which includes all possible realities. Posterior of this super-model then automatically incorporates the sensitivity analysis. In practice this is conceptually and computationally infeasible and also is still dependent on the assumption made when creating the super-model being correct.
+
+One way is just to compare model predictions with the actual outcomes (this is referred to as external validation). If for some reason it is not possible to get the acutal outcomes (for example if they lie in the future), one needs to approximate external validation with the available data.
+
+Possibility: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
+
+model checking by calculating \textit{test quantities}. \textit{test quantities} are scalar summaries of parameters that are used to compare data to simulations. \textit{test quantities} are similar to test statistics in the classical approach.
+
+Graphical comparison of simulated and data histograms (!! maybe here point out usefulness of Lumen)
 \section{Probabilistic Programming}
 
 stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
@@ -266,11 +283,11 @@ transformed parameters are parameters which depend on hyperparameters.
 
 \subsection{Pymc3}
 
-PyMC3 is an open-source probabilistic programming framework for Python \cite{PyMC3_documentation}. Specification of Bayesian models in PyMC3 is done by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they get passed observed data as an argument, that should not be changed by any fitting algorithm.  This kind of random variable can be used to represent sampling distributions.
+PyMC3 is an open-source probabilistic programming framework for Python. The following explanations are taken from \cite{Salvatier2016}. Specification of Bayesian models in PyMC3 is done by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they get passed observed data as an argument, that should not be changed by any fitting algorithm.  This kind of random variable can be used to represent sampling distributions.
 \\
 PyMC3 mainly uses simulation techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm, that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
 \\
-The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from the PyMC3 documentation at \cite{PyMC3_documentation}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
+The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
 
 \begin{figure}
 \begin{lstlisting}
@@ -298,6 +315,11 @@ pm.summary(trace)
 \caption[Example code of a simple Bayesian model using PyMC3]{Example code of a simple Bayesian model using PyMC3}
 \end{figure}
 
+strictly positive priors are transformed with log transformation, so that they are unconstrained, since that is better for sampling
+
+There is the possibility to create own theano functions in python. Gradient based sampling methods don't work for user-defined functions however, except when a gradient is explicitly added.
+
+Similarily pmc3 allows to define own distributions
 \subsection{Edward}
 
 \subsection{Pyro}
