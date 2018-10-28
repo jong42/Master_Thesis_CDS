@@ -241,6 +241,8 @@ stochastic data types (--> probability distributions) make it easier to perform 
 
 Modelle spezifizieren/beschreiben 
 
+Random Variables can be represented as objects
+
 \cite{wiki:Probabilisticprogramminglanguage}
 
 effizienter in der Beschreibung von Modellen als herkömmliche Programmiersprachen \cite{Hardesty2015}
@@ -258,6 +260,10 @@ Traditional means for representing models are not always sufficient for probabil
 	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
 	\label{fig:example_prs}
 \end{figure}
+
+\subsection{Difference to conventional Programming Languages}
+
+When estimating parameters, not only the most likely value for the parameters is given, but also their uncertainty.
 
 \section{Lumen}
 
@@ -279,7 +285,7 @@ possible criterium: variety of distributions that can be described?
 
 \subsection{Stan for python}
 
-Stan is a program written in C++ that is designed for Bayesian inference on user-specified models. It consists of the following components:
+Stan is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. It consists of the following components:
 \begin{itemize}
 	\item A modeling language that allows users to specify custom models
 	\item An inference engine which uses Hamilton Monte Carlo methods for sampling to get an approximation for the posterior distribution
@@ -288,38 +294,43 @@ Stan is a program written in C++ that is designed for Bayesian inference on user
 	\item Routines to monitor the convergence of parallel chains and compute inferences and effective sample sizes
 	\item Wrappers for Python, R, Julia and other languages
 \end{itemize}
-The code for describing a model by using the aforementioned modeling language is divided into four parts: \textit{data}, \textit{parameters}, \textit{transformed parameters} and \textit{model}: In \textit{data}, the structure of the input data, along with any constraints, is given (for example the data could be constrained to include only positive values). In \textit{parameters} and \textit{transformed parameters}, the parameters of the models are listed, whereat the former contains parameters which do not depend on other parameters, and the latter contains parameters which do. Finally, in \textit{model}, the model structure in the form of prior and likelihood distributions is given. Those four parts are shown in  \ref{fig:stan_example_code}, which is an example from \cite{Gelman_2015}, where the model $y=a_1e^{-b_1x} + a_2e^{-b_2x}$ is fit to data, using the PyStan interface of Stan for Python.
-
-
-
+The code for describing a model by using the aforementioned modeling language is divided into six blocks: \textit{data}, \textit{transformed data}, \textit{parameters}, \textit{transformed parameters}, \textit{model}, and \textit{generated quantities}: In \textit{data} and \textit{transformed data}, the structure of the input data, along with any constraints, is given. The difference between the former and the latter is that variables in \textit{transformed data} are functions of other data variables, whereas variables in \textit{data} are not. For example if in \textit{data}, a variable $x$ is listed, then in \textit{transformed data} one can specify a variable $y=x^2$. In \textit{parameters} and \textit{transformed parameters}, the parameters of the models are described, whereat, as in the data blocks, the latter contains variables that are functions of other parameters. In \textit{model}, the model structure in the form of prior and likelihood distributions is given. Finally, the block \textit{generated quantities} can be used to perform simulations and make predictions. In \ref{fig:stan_example_code}, an example from \cite{Gelman_2015} is shown, where the model $y=a_1e^{-b_1x} + a_2e^{-b_2x}$ is fit to data, using the PyStan interface of Stan for Python. Since not all of the aforementioned blocks are mandatory, only four of them are used in the example.
+\\
+PyStan also provides basic plotting methods for the posterior distributions of the parameters.
 
 is not able to perform inference on discrete parameters. Discrete data and discrete-data models, however, are possible
+
 computes the log-posterior density
-has plotting functions for posterior distributions
 
 \cite{Gelman_2015}
+
+für den Code evtl. https://github.com/stephen-hoover/presentations zitieren
 
 \begin{figure}
 \begin{lstlisting}
 # Specify model
 example_code = """
 	data {
+		// Define input data in this block
 		int N;
 		vector[N] x;
 		vector[N] y;
 	}
 	parameters {
+		// These are random parameters which we want to estimate
 		vector[2] log_a;
 		ordered[2] log_b;
 		real<lower=0> sigma;
 	}
 	transformed parameters {
+		// Create quantities derived from the parameters.
 		vector<lower=0>[2] a;
 		vector<lower=0>[2] b;
 		a <- exp(log_a);
 		b <- exp(log_b);
 	}
 	model {
+		// Define your model here
 		vector[N] ypred;
 		ypred <- a[1]*exp(-b[1]*x) + a[2]*exp(-b[2]*x);
 		y ~ lognormal(log(ypred), sigma);
