@@ -128,6 +128,26 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \section{Introduction}
 
+
+In Bayesian data analysis we have a prior distribution for the parameters, $p(\theta)$, which represents our knowledge about them without seeing any data. We have also the likelihood of our data, $p(X|\theta)$, which represents the probability of obtaining the data $X$ given the parameter $\theta$. Using the Bayes' rule, we can then compute the posterior distribution for $\theta$, $p(X|\theta)$:
+
+\begin{equation}
+p(\theta|X) = p(X|\theta) * p(\theta) / p(X)
+\end{equation}
+
+Since the posterior distribution for $\theta$ can often not be computed analytically, Probabilistic Programming Languages use sampling methods to approximate the posterior distribution for $\theta$.
+
+When we want to visualize parameters and data, and also want to condition and marginalize arbitrarily, we need the joint distribution $p(x,\theta|X)$. The joint distribution can be computed by:
+
+\begin{equation}
+p(x,\theta|X) = p(x|\theta) * p(\theta|X)
+\end{equation}
+
+The posterior distribution of the parameters, $p(\theta|X)$, can be approximated by PPLs through sampling, as stated above. (--> Make sure that this is true!!). To get density values from samples, we have to perform density estimation methods \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity.score_samples}
+
+
+
+
 \section{The Bayesian Approach}
 
 "Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
@@ -255,6 +275,9 @@ p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
 \label{eq:bayesian_p}
 \end{equation}
 
+p-value depends on the chosen test quantity.
+
+
 \section{Probabilistic Programming}
 
 stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
@@ -289,9 +312,19 @@ When estimating parameters, not only the most likely value for the parameters is
 
 \section{Lumen}
 
+uses modelbase as backend: modelbase is a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization.
+
+
 \subsection{Functionality}
 
-compare to the plotting methods of PyMC3
+In the modelbase repository, a model class is described by a python file that includes a class with several prescribed methods \url{https://ci.inf-i2.uni-jena.de/gemod/modelbase/blob/master/mb_modelbase/models_core/models.py} is a template for such a model class file, where all important methods are explained.
+\\
+The first step would be to implement a model there that is built by using a PPL. Then make sure that all necessary methods are correctly implemented and the visualization works as expected. One of the advantages of PPLs is the flexibility of the models specified, which is nullified by describing one fixed model. Therefore, the next steop is about thinking about a possibility to pass more flexible models. Maybe a function where you just give a model object as input that then automatically generates the necessary methods for the use in lumen??  Other possibilities? (would be good to ask that at the presentation)
+
+
+
+
+compare to the plotting methods of PyMC3 / Stan
 
 \subsection{Requirements for a PPL}
 
