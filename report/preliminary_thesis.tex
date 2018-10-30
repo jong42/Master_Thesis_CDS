@@ -219,7 +219,12 @@ p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol
 
 \subsection{Evaluating models}
 
-Since "all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality.
+Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
+
+Different models can lead to different posterior inferences, even if both models have a good fit.
+
+model checking: How good does the model fit the data?
+Sensitivitiy analysis: Comparison of different models with good fit
 
 This is necessary after a joint probability density and a posterior density are calculated. How good are the prior and the likelihood model?
 \textit{Sensitivity analysis} deals with the question, how much the posterior is changed when one chooses a different (but also reasonable) model for the likelihood or the prior, or other assumptions affecting the posterior.
@@ -228,11 +233,28 @@ In theory: Setting up a 'super-model' as joint-distribution which includes all p
 
 One way is just to compare model predictions with the actual outcomes (this is referred to as external validation). If for some reason it is not possible to get the acutal outcomes (for example if they lie in the future), one needs to approximate external validation with the available data.
 
-Possibility: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
+\textit{Posterior predictive checking}: Use global summaries of the data distribution and the predictive distribution to evaluate the model: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
 
-model checking by calculating \textit{test quantities}. \textit{test quantities} are scalar summaries of parameters that are used to compare data to simulations. \textit{test quantities} are similar to test statistics in the classical approach.
+model checking by calculating \textit{test quantities}. \textit{test quantities} are scalar summaries of parameters that are used to compare data to simulations. \textit{test quantities} are similar to test statistics in the classical approach. Besides on the data, \textit{test quantities} can also depend on the parameters.
 
 Graphical comparison of simulated and data histograms (!! maybe here point out usefulness of Lumen)
+
+tail-area-probability: p-value. p-value in classical statistics: Probability, that, given a parameter $\theta$, a test statistic for replicated data is greater or equal the test statistic for the observed data,as shown in equation \ref{eq:classical_p}:
+
+\begin{equation}
+p_C = Pr(T(y^{rep}) >= T(y) | \theta)
+\label{eq:classical_p}
+\end{equation}
+
+\cite{1439840954}
+
+The Bayesian p-value, on the other hand, is not conditional on a fixed $\theta$, since in Bayesian statistics parameters are drawn from a distribution the same way as outcome variables. Instead, the observed data $y$ is the fixed quantity for the Bayesian p-value, as shown in equation \ref{eq:bayesian_p}
+
+\begin{equation}
+p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
+\label{eq:bayesian_p}
+\end{equation}
+
 \section{Probabilistic Programming}
 
 stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
@@ -303,6 +325,8 @@ is not able to perform inference on discrete parameters. Discrete data and discr
 computes the log-posterior density
 
 \cite{Gelman_2015}
+
+\cite{Hoover2016}
 
 für den Code evtl. https://github.com/stephen-hoover/presentations zitieren
 
