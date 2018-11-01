@@ -152,20 +152,16 @@ The posterior distribution of the parameters, $p(\theta|X)$, can be approximated
 \textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.}
 \\
 \\
-"Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
-
-
-In the field of statistics, one deals usually with the following questions:
-
-\begin{itemize}
-	\item What kind of model should I choose?
-	\item Which features should I include in my model?
-	\item What are the most likely values for my model parameters?
-	\item What is the most likely outcome for additional observations under certain conditions?
-	\item How certain am I that my estimated parameter values are correct?
-\end{itemize}
-The latter three of these questions can be answered by using a Bayesian approach to statistics. Given a model, Bayesian statistics is about computing a joint probability distribution over all parameters and outcomes, so that a probability density for each possible value of parameters and outcomes can be obtained. Prior knowledge of the problem as well as observed data affect the form of the joint probability distribution. Using marginalization, conditional probability distributions can then be calculated for the desired outcomes. These conditional probability distributions are also called posteriors and can be used for parameter estimation, prediction and assessing the uncertainty of estimates. This chapter will outline how Bayesian statistics are applied to answer the abovementioned questions.
-
+%In the field of statistics, one deals usually with the following questions:
+%
+%\begin{itemize}
+%	\item What kind of model should I choose?
+%	\item Which features should I include in my model?
+%	\item What are the most likely values for my model parameters?
+%	\item What is the most likely outcome for additional observations under certain conditions?
+%	\item How certain am I that my estimated parameter values are correct?
+%\end{itemize}
+%The latter three of these questions can be answered by using a Bayesian approach to statistics. Given a model, Bayesian statistics is about computing a joint probability distribution over all parameters and outcomes, so that a probability density for each possible value of parameters and outcomes can be obtained. Prior knowledge of the problem as well as observed data affect the form of the joint probability distribution. Using marginalization, conditional probability distributions can then be calculated for the desired outcomes. These conditional probability distributions are also called posteriors and can be used for parameter estimation, prediction and assessing the uncertainty of estimates. This chapter will outline how Bayesian statistics are applied to answer the abovementioned questions.
 \subsection{Rules of Probabilistic Inference}
 
 When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
@@ -194,14 +190,27 @@ Bayes' rule calculates the probability of a cause, given an effect, by using the
 P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
 \end{equation}
 
-\subsection{Difference to frequentist approach}
-Classical approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
+\subsection{General principle}
+Goal of Bayesian Statistics: Setting up a probability model over model parameters and observed data
+
+When doing Bayesian data analysis, we have observed data $Y$ and a prior belief $P(\theta)$ about the mechanism that generated the data, and we use those to set up a full probability model $P(y,\theta|Y)$ over all model parameters $\theta$ and all possible data $y$. The conceptual difference to conventional Statistics is two-fold: First, we don't use prior beliefs in conventional Statistics (at least not for parameter estimation), second, in conventional Statistics we only set up a probability model over the data, not over the model parameters. The model parameters in conventional Statistics are fixed after the parameter estimation.
 \\
-Bayesian approach: Estimate the parameters conditioned on the outcomes.
-\cite{1439840954}
 \\
-Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
-The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
+The principle of setting up the full probability model of Bayesian Statistics (also called the joint probability distribution) is as follows:
+\\
+According to the chain rule, we can compute the full probability model with the following formula:
+\begin{equation}
+p(y,\theta|Y) = p(y|\theta,Y) * p(\theta|Y)
+\end{equation}
+Since the probability for a specific value of $y$ does not depend on the observed data $Y$, if we already know $\theta$, we can write equivalently:
+\begin{equation}
+p(y,\theta|Y) = p(y|\theta) * p(\theta|Y)
+\end{equation}
+$p(y|\theta)$ is usually easy to compute since it is given by the chosen model class. For computing the second term, $P(\theta|Y)$, we use the Bayes rule:
+\begin{equation}
+p(\theta|Y) = p(Y|\theta) * p(\theta) / p(Y)
+\end{equation}
+This is where the prior belief comes into play.
 
 \subsection{Choosing an appropriate prior distribution}
 There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
@@ -212,6 +221,7 @@ Besides informative and noninformative prior distributions there is also the \te
 The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
 \\
 A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
+
 \subsection{Sampling distribution}
 
 The sampling distribution, also called the likelihood of the data.
@@ -219,25 +229,6 @@ The sampling distribution, also called the likelihood of the data.
 Often it is about which distribution class should be chosen for the prior and the likelihood. Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sampling distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
 \\
 distributions can be chosen for mathematical convenience. One could estimate hyperparameters of the likelihood distribution from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
-
-\subsection{Posterior distribution}
-
-The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
-posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
-\\
-For the posterior distribution, a normal distribution is often assumed.
-
-\subsection{Drawing inference}
-According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
-\\
-Making predictions for a new data points requires both the probability distribution of the new data point, given a parameter value, as well as the probability distribution of the parameter, given the old data points.
-\\
-If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
-
-\begin{equation}
-p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
-\label{eq:posterior_predictive}
-\end{equation}
 
 \subsection{Evaluating models}
 
@@ -279,11 +270,42 @@ p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
 
 p-value depends on the chosen test quantity.
 
+\subsection{Stuff that has to be/could be placed somewhere}
+
+\subsubsection{Difference to frequentist approach}
+Classical approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
+\\
+Bayesian approach: Estimate the parameters conditioned on the outcomes.
+\cite{1439840954}
+\\
+Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
+The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
+
+\subsubsection{Posterior distribution}
+
+The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
+posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
+\\
+For the posterior distribution, a normal distribution is often assumed.
+
+\subsubsection{Drawing inference}
+According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
+\\
+Making predictions for a new data points requires both the probability distribution of the new data point, given a parameter value, as well as the probability distribution of the parameter, given the old data points.
+\\
+If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
+
+\begin{equation}
+p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
+\label{eq:posterior_predictive}
+\end{equation}
 
 \section{Probabilistic Programming}
 
 \textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language is, and a number of PPLs are introduced. A focus is laid on the abilities of the PPLs for graphical model checking}
 \\
+\\
+"Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
 \\
 stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
 
