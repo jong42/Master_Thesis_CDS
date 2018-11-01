@@ -210,9 +210,10 @@ $p(y|\theta)$ is usually easy to compute since it is given by the chosen model c
 \begin{equation}
 p(\theta|Y) = p(Y|\theta) * p(\theta) / p(Y)
 \end{equation}
-This is where the prior belief comes into play.
+This is where the prior belief comes into play.  $p(\theta)$ represents the prior belief, the distribution over the model parameters $\theta$, that we assume from prior knowledge. $p(Y|\theta)$ is the likelihood: The probability that the observed data occur at a given parameter. The problems of choosing a suitable likelihood and prior are treated in sections \ref{Choosing an appropriate prior distribution} and \ref{Sampling distribution}. $p(Y)$, the overall probability of the observed data, does not have to be computed since it can be treated as a constant. (TODO: UNDERSTAND THIS BETTER, HOW p(Y) CAN BE IGNORED)
 
 \subsection{Choosing an appropriate prior distribution}
+\label{Choosing an appropriate prior distribution}
 There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
 \\
 When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common noninformative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
@@ -223,6 +224,7 @@ The parameters of the prior distributions are called hyperparameters. The proper
 A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
 
 \subsection{Sampling distribution}
+\label{Sampling distribution}
 
 The sampling distribution, also called the likelihood of the data.
 \\
@@ -270,35 +272,34 @@ p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
 
 p-value depends on the chosen test quantity.
 
-\subsection{Stuff that has to be/could be placed somewhere}
+If the p-value is very low or very high, the predicted values do not fit the data.
 
-\subsubsection{Difference to frequentist approach}
-Classical approach: Evaluate the procedure used to estimate the parameters over the distribution of possible outcome values conditional on the true unknown parameters.
-\\
-Bayesian approach: Estimate the parameters conditioned on the outcomes.
-\cite{1439840954}
-\\
-Bayesian models are about finding a full probability model for a given problem, whereas conventional models only deal with estimation of the most likely parameters.
-The model parameters $\beta$ themselves are also considered as random variables which depend on hyperparameters $\alpha$.
 
-\subsubsection{Posterior distribution}
+Test quantities give information about a specific aspect of the observed/simulated data. A model can predict values that are in some aspects similar to the data, in other aspects different. Therefore it can make sense to compute p-values fur several different test quantities.
+If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) pointwise, eg. in a scatterplot or in a histogram of the differences. The scatterplot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
+Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
 
-The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
-posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
-\\
-For the posterior distribution, a normal distribution is often assumed.
-
-\subsubsection{Drawing inference}
-According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
-\\
-Making predictions for a new data points requires both the probability distribution of the new data point, given a parameter value, as well as the probability distribution of the parameter, given the old data points.
-\\
-If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
-
-\begin{equation}
-p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
-\label{eq:posterior_predictive}
-\end{equation}
+%\subsection{Stuff that has to be/could be placed somewhere}
+%
+%
+%\subsubsection{Posterior distribution}
+%
+%The posterior distribution is a compromise between the prior distribution and the sample distribution, with the prior distribution becoming less important as the sample size increases \cite{1439840954}.
+%posterior distributions can be described numerically by mean, median, modes. The uncertainty can be described by quantiles. The highest posterior density region is also a possibility, it is the area that for example contains 95\% of the posterior probability density, like quantiles, but has the additional constraint that the density on each point inside the area has to be bigger than the density on any point outside the area. It does not have to be one single connected area  \cite{1439840954}.
+%\\
+%For the posterior distribution, a normal distribution is often assumed.
+%
+%\subsubsection{Drawing inference}
+%According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
+%\\
+%Making predictions for a new data points requires both the probability distribution of the new data point, given a parameter value, as well as the probability distribution of the parameter, given the old data points.
+%\\
+%If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
+%
+%\begin{equation}
+%p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
+%\label{eq:posterior_predictive}
+%\end{equation}
 
 \section{Probabilistic Programming}
 
