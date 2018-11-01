@@ -128,7 +128,9 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \section{Introduction}
 
-
+\textit{In this section, the motivation for the thesis is explained, the task of the thesis is made clear. Furthermore, the structure of the thesis is outlined here. It is possible to get the basic ideas and results of the thesis from reading only this section and the conclusion.}
+\\
+\\
 In Bayesian data analysis we have a prior distribution for the parameters, $p(\theta)$, which represents our knowledge about them without seeing any data. We have also the likelihood of our data, $p(X|\theta)$, which represents the probability of obtaining the data $X$ given the parameter $\theta$. Using the Bayes' rule, we can then compute the posterior distribution for $\theta$, $p(X|\theta)$:
 
 \begin{equation}
@@ -145,11 +147,11 @@ p(x,\theta|X) = p(x|\theta) * p(\theta|X)
 
 The posterior distribution of the parameters, $p(\theta|X)$, can be approximated by PPLs through sampling, as stated above. (--> Make sure that this is true!!). To get density values from samples, we have to perform density estimation methods \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity.score_samples}
 
+\section{Concepts of Bayesian Statistics}
 
-
-
-\section{The Bayesian Approach}
-
+\textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.}
+\\
+\\
 "Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
 
 
@@ -280,6 +282,9 @@ p-value depends on the chosen test quantity.
 
 \section{Probabilistic Programming}
 
+\textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language is, and a number of PPLs are introduced. A focus is laid on the abilities of the PPLs for graphical model checking}
+\\
+\\
 stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
 
 \subsection{What are Probabilistic Programming Languages}
@@ -310,35 +315,16 @@ Traditional means for representing models are not always sufficient for probabil
 
 When estimating parameters, not only the most likely value for the parameters is given, but also their uncertainty.
 
-\section{Lumen}
-
-uses modelbase as backend: modelbase is a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization.
-
-
-\subsection{Functionality}
-
-In the modelbase repository, a model class is described by a python file that includes a class with several prescribed methods \url{https://ci.inf-i2.uni-jena.de/gemod/modelbase/blob/master/mb_modelbase/models_core/models.py} is a template for such a model class file, where all important methods are explained.
-\\
-The first step would be to implement a model there that is built by using a PPL. Then make sure that all necessary methods are correctly implemented and the visualization works as expected. One of the advantages of PPLs is the flexibility of the models specified, which is nullified by describing one fixed model. Therefore, the next steop is about thinking about a possibility to pass more flexible models. Maybe a function where you just give a model object as input that then automatically generates the necessary methods for the use in lumen??  Other possibilities? (would be good to ask that at the presentation)
-
-
-
-
-compare to the plotting methods of PyMC3 / Stan
-
-\subsection{Requirements for a PPL}
-
-possible criterium: variety of distributions that can be described?
-\section{Comparing Different Probabilistic Programming Languages}
+\subsection{Comparing Different Probabilistic Programming Languages}
 
 \begin{itemize}
-     \item stan for python: https://pystan.readthedocs.io/en/latest/
-    \item pymc3: https://docs.pymc.io/notebooks/getting\_started.html\#Case-study-2:-Coal-mining-disasters
-    \item edward: http://edwardlib.org/getting-started
-    \item pyro: http://pyro.ai/
+	\item stan for python: https://pystan.readthedocs.io/en/latest/
+	\item pymc3: https://docs.pymc.io/notebooks/getting\_started.html\#Case-study-2:-Coal-mining-disasters
+	\item edward: http://edwardlib.org/getting-started
+	\item pyro: http://pyro.ai/
 \end{itemize}
 
-\subsection{Stan for python}
+\subsubsection{Stan for python}
 
 Stan is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. It consists of the following components:
 \begin{itemize}
@@ -364,50 +350,50 @@ computes the log-posterior density
 für den Code evtl. https://github.com/stephen-hoover/presentations zitieren
 
 \begin{figure}
-\begin{lstlisting}
-# Specify model
-example_code = """
+	\begin{lstlisting}
+	# Specify model
+	example_code = """
 	data {
-		// Define input data in this block
-		int N;
-		vector[N] x;
-		vector[N] y;
+	// Define input data in this block
+	int N;
+	vector[N] x;
+	vector[N] y;
 	}
 	parameters {
-		// These are random parameters which we want to estimate
-		vector[2] log_a;
-		ordered[2] log_b;
-		real<lower=0> sigma;
+	// These are random parameters which we want to estimate
+	vector[2] log_a;
+	ordered[2] log_b;
+	real<lower=0> sigma;
 	}
 	transformed parameters {
-		// Create quantities derived from the parameters.
-		vector<lower=0>[2] a;
-		vector<lower=0>[2] b;
-		a <- exp(log_a);
-		b <- exp(log_b);
+	// Create quantities derived from the parameters.
+	vector<lower=0>[2] a;
+	vector<lower=0>[2] b;
+	a <- exp(log_a);
+	b <- exp(log_b);
 	}
 	model {
-		// Define your model here
-		vector[N] ypred;
-		ypred <- a[1]*exp(-b[1]*x) + a[2]*exp(-b[2]*x);
-		y ~ lognormal(log(ypred), sigma);
-		log_a ~ normal(0,1); 
-		log_b ~ normal(0,1);
+	// Define your model here
+	vector[N] ypred;
+	ypred <- a[1]*exp(-b[1]*x) + a[2]*exp(-b[2]*x);
+	y ~ lognormal(log(ypred), sigma);
+	log_a ~ normal(0,1); 
+	log_b ~ normal(0,1);
 	}
-"""
-
-# Pass data to the model. x and y are the observed data
-example_dat = {'x':x,'y':y,'N':len(x)}
-# Fit model
-sm = pystan.StanModel(model_code=example_code)
-fit = sm.sampling(data=example_dat, iter=1000, chains=4)
-print(fit)
-\end{lstlisting}
-\label{fig:stan_example_code}
-\caption[Example code of a simple Bayesian model using Stan]{Example code of a simple Bayesian model using Stan}
+	"""
+	
+	# Pass data to the model. x and y are the observed data
+	example_dat = {'x':x,'y':y,'N':len(x)}
+	# Fit model
+	sm = pystan.StanModel(model_code=example_code)
+	fit = sm.sampling(data=example_dat, iter=1000, chains=4)
+	print(fit)
+	\end{lstlisting}
+	\label{fig:stan_example_code}
+	\caption[Example code of a simple Bayesian model using Stan]{Example code of a simple Bayesian model using Stan}
 \end{figure}
 
-\subsection{Pymc3}
+\subsubsection{Pymc3}
 
 PyMC3 is an open-source probabilistic programming framework for Python. The following explanations are taken from \cite{Salvatier2016}. Specification of Bayesian models in PyMC3 is done by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they get passed observed data as an argument, that should not be changed by any fitting algorithm.  This kind of random variable can be used to represent sampling distributions.
 \\
@@ -416,12 +402,12 @@ PyMC3 mainly uses simulation techniques to draw inference on posterior distribut
 The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
 
 \begin{figure}
-\begin{lstlisting}
-import pymc3 as pm
-
-basic_model = pm.Model()
-
-with basic_model:
+	\begin{lstlisting}
+	import pymc3 as pm
+	
+	basic_model = pm.Model()
+	
+	with basic_model:
 	# describe prior distributions of model parameters. Stochastic variables
 	alpha = pm.Normal('alpha', mu=0, sd=10)
 	beta = pm.Normal('beta', mu=0, sd=10, shape=2)
@@ -430,15 +416,15 @@ with basic_model:
 	mu = alpha + beta[0]*X1 + beta[1]*X2
 	# likelihood of the observations. Observed stochastic variable
 	Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
-
-# model fitting by using sampling strategies   
-with basic_model:
-# draw 500 posterior samples
-trace = pm.sample(500)
-pm.summary(trace)
-\end{lstlisting}
-\label{fig:pymc3_example_code}
-\caption[Example code of a simple Bayesian model using PyMC3]{Example code of a simple Bayesian model using PyMC3}
+	
+	# model fitting by using sampling strategies   
+	with basic_model:
+	# draw 500 posterior samples
+	trace = pm.sample(500)
+	pm.summary(trace)
+	\end{lstlisting}
+	\label{fig:pymc3_example_code}
+	\caption[Example code of a simple Bayesian model using PyMC3]{Example code of a simple Bayesian model using PyMC3}
 \end{figure}
 
 strictly positive priors are transformed with log transformation, so that they are unconstrained, since that is better for sampling
@@ -446,17 +432,52 @@ strictly positive priors are transformed with log transformation, so that they a
 There is the possibility to create own theano functions in python. Gradient based sampling methods don't work for user-defined functions however, except when a gradient is explicitly added.
 
 Similarily pmc3 allows to define own distributions
-\subsection{Edward}
+\subsubsection{Edward}
 
-\subsection{Pyro}
-\subsection{BUGS and Jags}
+\subsubsection{Pyro}
+\subsubsection{BUGS and Jags}
 mentioned in \cite{Gelman_2015}
 based on graphical models
 
-\subsection{Choose the PPL for the task at hand}
+\section{Lumen}
+
+\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL. Too achieve this is goal it is necessary to understand how Lumen works, so the functionality of Lumen is also explained here.} 
+\\
+\\
+uses modelbase as backend: modelbase is a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization.
+
+
+\subsection{Functionality}
+
+In the modelbase repository, a model class is described by a python file that includes a class with several prescribed methods \url{https://ci.inf-i2.uni-jena.de/gemod/modelbase/blob/master/mb_modelbase/models_core/models.py} is a template for such a model class file, where all important methods are explained.
+\\
+The first step would be to implement a model there that is built by using a PPL. Then make sure that all necessary methods are correctly implemented and the visualization works as expected. One of the advantages of PPLs is the flexibility of the models specified, which is nullified by describing one fixed model. Therefore, the next steop is about thinking about a possibility to pass more flexible models. Maybe a function where you just give a model object as input that then automatically generates the necessary methods for the use in lumen??  Other possibilities? (would be good to ask that at the presentation)
+
+
+
+
+compare to the plotting methods of PyMC3 / Stan
+
+\subsection{Requirements for a PPL}
+
+possible criterium: variety of distributions that can be described?
+
+
+
 
 \section{Practical implementation}
-\section{Fallbeispiele}
+
+\textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated. At first, the choice of the PPL is justified.}
+
+\subsection{Choose the PPL for the task at hand}
+
+\section{Case examples}
+
+\textit{Here, case examples are presented to show how the finished interface performs in practice.}
+
+\section {Conclusion}
+
+\textit{In this section, the result of the thesis is summarized (and maybe also the workflow leading to it?). It is possible to understand the main ideas and results of the thesis by reading only the introduction and this section.}
 
 \listoffigures
         
