@@ -274,10 +274,13 @@ p-value depends on the chosen test quantity.
 
 If the p-value is very low or very high, the predicted values do not fit the data.
 
+Bayesian predictive checking: choose and compute test quantites for the data and for simulations, then compute the p-value for the test quantity (probability that the test quantity of the data could have arisen under the model)
 
 Test quantities give information about a specific aspect of the observed/simulated data. A model can predict values that are in some aspects similar to the data, in other aspects different. Therefore it can make sense to compute p-values fur several different test quantities.
 If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) pointwise, eg. in a scatterplot or in a histogram of the differences. The scatterplot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
 Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
+Graphical visualization can be used to identify useful test quantities.
+If a test quantity has a p-value close to 0 or 1, the aspect that is analysed by the test quantity is not well captured in the model.
 
 %\subsection{Stuff that has to be/could be placed somewhere}
 %
