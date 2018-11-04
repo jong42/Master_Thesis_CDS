@@ -272,7 +272,6 @@ p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
 
 p-value depends on the chosen test quantity.
 
-If the p-value is very low or very high, the predicted values do not fit the data.
 
 Bayesian predictive checking: choose and compute test quantites for the data and for simulations, then compute the p-value for the test quantity (probability that the test quantity of the data could have arisen under the model)
 
@@ -281,6 +280,8 @@ If a test quantity is dependent on the model parameters it has to be simulated b
 Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
 Graphical visualization can be used to identify useful test quantities.
 If a test quantity has a p-value close to 0 or 1, the aspect that is analysed by the test quantity is not well captured in the model.
+\\
+Model checking depends on the data-collection model (how the data was collected), since data has to be replicated for computing a p-value. Posterior Inference however does not depend on the data collection model, as long as the likelihood model stays the same. Because of this, the same posterior results(what are the parameters) can get different model checking results (how well does the model fit) when the data-collection model is changed.
 
 %\subsection{Stuff that has to be/could be placed somewhere}
 %
