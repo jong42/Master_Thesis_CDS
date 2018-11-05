@@ -282,6 +282,26 @@ Graphical visualization can be used to identify useful test quantities.
 If a test quantity has a p-value close to 0 or 1, the aspect that is analysed by the test quantity is not well captured in the model.
 \\
 Model checking depends on the data-collection model (how the data was collected), since data has to be replicated for computing a p-value. Posterior Inference however does not depend on the data collection model, as long as the likelihood model stays the same. Because of this, the same posterior results(what are the parameters) can get different model checking results (how well does the model fit) when the data-collection model is changed.
+\\
+Marginal predictive checks: Instead of replicating data from the joint posterior distribution, one can also compute the probability for a certain outcome, and compare this probability with the data....(p.153).
+\\
+Graphical posterior predictive checks: Basic Idea: Visualize the data alongside simulated data and so find discrepancies --> perfect in Lumen 
+Possibilities:
+\begin{itemize}
+	\item Direct display of all the data
+	\item Display of data summaries (e.g. if the data is so large that it is not helpful to display all the data)
+	\item Display a measure of discrepancy betweem model and data
+\end{itemize}
+
+MAYBE BUILD EXAMPLES WITH LUMEN TO ILLUSTRATE USEFULNESS OF LUMEN
+\paragraph{Direct data display}
+
+Show the complete data and its correspondent simulations. It's best to show several replications.
+
+\paragraph{Display data summaries}
+
+
+
 
 %\subsection{Stuff that has to be/could be placed somewhere}
 %
