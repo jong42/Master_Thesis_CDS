@@ -40,6 +40,8 @@ class FixedProbabilisticModel(Model):
         return ()
 
     def _marginalizeout(self, keep, remove):
+        # maybe something like this?
+        #trace[keep]
         return ()
 
     def _conditionout(self, keep, remove):
