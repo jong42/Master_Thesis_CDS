@@ -34,17 +34,65 @@ class FixedProbabilisticModel(Model):
             mu = alpha + beta[0] * self.data['X1'] + beta[1] * self.data['X2']
             # likelihood of the observations. Observed stochastic variable
             Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
-        # model fitting by using maximum a posteriori
-        map_estimate = pm.find_MAP(model=basic_model)
-        self._model_params = map_estimate
+            # draw samples from the posterior
+            trace = pm.sample(500)
+        # getting the means of the parameters from the samples
+        parameter_means = pm.summary(trace).round(2).iloc[:,0]
+        self._model_params = parameter_means
         return ()
 
     def _marginalizeout(self, keep, remove):
-        # maybe something like this?
-        #trace[keep]
+        # Specify model
+        basic_model = pm.Model()
+        with basic_model:
+            # describe prior distributions of model parameters.
+            alpha = pm.Normal('alpha', mu=0, sd=10)
+            beta = pm.Normal('beta', mu=0, sd=10, shape=2)
+            sigma = pm.HalfNormal('sigma', sd=1)
+            # specify model for the output parameter.
+            mu = alpha + beta[0] * self.data['X1'] + beta[1] * self.data['X2']
+            # likelihood of the observations. Observed stochastic variable
+            Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
+            # sample only over the variables in keep
+            for index,name in enumerate(keep):
+                keep[index] = eval(name)
+            #keep = [eval(name) for name in keep] WHY DOES THIS NOT WORK? --> scope
+            sampling_properties = pm.backends.NDArray(vars=keep)
+            trace = pm.sample(500,trace=sampling_properties)
+        # getting the means of the parameters from the samples
+        parameter_means = pm.summary(trace).round(2).iloc[:,0]
+        self._model_params = parameter_means
         return ()
 
     def _conditionout(self, keep, remove):
+        # Specify model
+        basic_model = pm.Model()
+        with basic_model:
+            # describe prior distributions of model parameters and set variables in remove to a fixed value.
+            if ('alpha' in remove):
+                alpha = 1
+            else:
+                alpha = pm.Normal('alpha', mu=0, sd=10)
+            if ('beta' in remove):
+                beta = [1,1]
+            else:
+                beta = pm.Normal('beta', mu=0, sd=10, shape=2)
+            if ('sigma' in remove):
+                sigma = 1
+            else:
+                sigma = pm.HalfNormal('sigma', sd=1)
+            # specify model for the output parameter.
+            if ('mu' in remove):
+                mu = 1
+            else:
+                mu = alpha + beta[0] * self.data['X1'] + beta[1] * self.data['X2']
+            # likelihood of the observations. Observed stochastic variable
+            Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
+            # draw samples from the posterior
+            trace = pm.sample(500)
+        # getting the means of the parameters from the samples
+        parameter_means = pm.summary(trace).round(2).iloc[:, 0]
+        self._model_params = parameter_means
         return ()
 
     def density(self, x):
@@ -79,7 +127,12 @@ df = pd.DataFrame({'X1':X1, 'X2':X2, 'Y':Y})
 ### Set up and train model
 probabilistic_model_instance = FixedProbabilisticModel('probabilistic_model_instance')
 probabilistic_model_instance._set_data(df,0)
-probabilistic_model_instance._fit()
-
-print(probabilistic_model_instance.fields)
+#probabilistic_model_instance._fit()
+#probabilistic_model_instance._marginalizeout(keep = ['alpha','beta'], remove = ['sigma','mu','X1','X2','Y_obs'])
+#print(probabilistic_model_instance.fields)
+#print(probabilistic_model_instance._model_params)
+probabilistic_model_instance._conditionout(keep = ['alpha', 'beta'], remove = ['sigma','X1','X2','Y_obs'])
+print(probabilistic_model_instance._model_params)
+probabilistic_model_instance._conditionout(keep = ['sigma','X1','X2'], remove = ['alpha','beta','Y_obs'])
+print(probabilistic_model_instance._model_params)
 ###
