@@ -528,8 +528,9 @@ simple, fixed example:
 In Lumen, several methods have to be specified for a model class to work. One of them is the method that fits the model to the data. In Bayesian statistics, fitting means finding the joint posterior distribution.  
 \\
 Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
+In PyMC3, marginalizing means sampling over a subset of the variables.??
 \\
-conditioning: posterior distribution given the values for the variables in remove
+conditioning: posterior distribution given the values for the variables in remove. (Bad) Idea in PyMC3: Set the parameters in remove to a fixed value during the model specification, then sample as normal. 
 \subsection{Choose the PPL for the task at hand}
 
 \section{Case examples}
