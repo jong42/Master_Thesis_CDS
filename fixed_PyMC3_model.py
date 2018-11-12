@@ -7,6 +7,7 @@ import pymc3 as pm
 import numpy as np
 import pandas as pd
 from mb_modelbase.models_core.empirical_model import EmpiricalModel
+from mb_modelbase.models_core import data_operations as data_op
 
 class FixedProbabilisticModel(Model):
     """
@@ -95,14 +96,54 @@ class FixedProbabilisticModel(Model):
         self._model_params = parameter_means
         return ()
 
-    def density(self, x):
-        return ()
+    def _density(self, x):
+        # Mängel: Draw from prior oder posterior?
+        #         Only 3 Parameter are selectable, keine Daten
+        #         Empir
+
+        # Specify model
+        basic_model = pm.Model()
+        with basic_model:
+            # describe prior distributions of model parameters.
+            alpha = pm.Normal('alpha', mu=0, sd=10)
+            beta = pm.Normal('beta', mu=0, sd=10, shape=2)
+            sigma = pm.HalfNormal('sigma', sd=1)
+            # specify model for the output parameter.
+            mu = alpha + beta[0] * self.data['X1'] + beta[1] * self.data['X2']
+            # likelihood of the observations. Observed stochastic variable
+            Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
+            # draw samples from the posterior
+            vars = [alpha, beta, sigma]
+            sampling_properties = pm.backends.NDArray(vars=vars)
+            trace = pm.sample(500,trace=sampling_properties)
+            # Draw samples
+            samples = pd.DataFrame(columns=['alpha', 'beta', 'sigma'])
+            for var in ['alpha', 'beta', 'sigma']:
+                samples[var] = trace.get_values(var)
+            # Calculate empirical density of point x on the samples
+            density = data_op.density(samples, x)
+        return (density)
 
     def _sample(self):
-        return ()
+        # Specify model
+        basic_model = pm.Model()
+        with basic_model:
+            # describe prior distributions of model parameters.
+            alpha = pm.Normal('alpha', mu=0, sd=10)
+            beta = pm.Normal('beta', mu=0, sd=10, shape=2)
+            sigma = pm.HalfNormal('sigma', sd=1)
+            # specify model for the output parameter.
+            mu = alpha + beta[0] * self.data['X1'] + beta[1] * self.data['X2']
+            # likelihood of the observations. Observed stochastic variable
+            Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
+            trace = pm.sample(1)
+            point = trace.point(0)
+        return (point)
 
     def copy(self, name=None):
-        return ()
+        mycopy = self._defaultcopy(name)
+        mycopy._model_params = self._model_params
+        return (mycopy)
 
 
 ### Generate data
@@ -136,3 +177,5 @@ print(probabilistic_model_instance._model_params)
 probabilistic_model_instance._conditionout(keep = ['sigma','X1','X2'], remove = ['alpha','beta','Y_obs'])
 print(probabilistic_model_instance._model_params)
 ###
+print(probabilistic_model_instance._density([1,1,1]))
+print(probabilistic_model_instance._sample())
