@@ -477,6 +477,9 @@ based on graphical models
 
 \textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL. Too achieve this is goal it is necessary to understand how Lumen works, so the functionality of Lumen is also explained here.} 
 \\
+The overall goal of the thesis is to build an API, that makes it possible to a PyMC3 (or other PPL) user to get his model visualized in lumen with minimal effort. For example it would be good if one just has to call one function with a PyMC3 model as parameter to transport the model into the lumen frontend.
+
+
 \\
 uses modelbase as backend: modelbase is a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization.
 \\
@@ -526,18 +529,27 @@ The posterior distribution of the parameters, $p(\theta|X)$, can be approximated
 
 \textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated. At first, the choice of the PPL is justified.}
 
+My first approach will be to write a fixed probabilistic models as a model class, that fits one specific model to a specific set of data. (linear regression)
 
 
 simple, fixed example:
-In Lumen, several methods have to be specified for a model class to work. One of them is the method that fits the model to the data. In Bayesian statistics, fitting means finding the joint posterior distribution.  
+In Lumen, several methods have to be specified for a model class to work. The first, which will always be called first, is the method that assigns data to the model.
+\\
+The second is the method that fits the model to the data. It will always be called second, after the data setting method. In Bayesian statistics, fitting means finding the joint posterior distribution. In the context of PPL, it means drawing samples from all variables, so that the joint posterior distribution can be approximated. The whole model should probably be specified in this method? Or before?
 \\
 Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
-In PyMC3, marginalizing means sampling over a subset of the variables.??
+In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
 \\
+Another method is the one that returns the probability density for a given point.
+
+
 conditioning: posterior distribution given the values for the variables in remove. (Bad) Idea in PyMC3: Set the parameters in remove to a fixed value during the model specification, then sample as normal.
 \\
 First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginalisierungsmethode mit den Datendimensionen als Parameter angewendet. Meine erste Implementierung lässt aber nur Marginalisierungen auf Parameter zu, dadurch gibt es einen Fehler.
 Second Bug in the model: The marginalization method needs to access all variables of the data. However, it gets only the data passed for those variables to keep. So it cannot access the other variables. 
+Problem: Model data is reduced to variables in keep. Lösungsidee: Setze zu Beginn der Methode die Daten auf den vollständigen Datensatz, und setze am Ende der Methode die Daten wieder auf die Dimensionen in keep zurück.
+\\
+Problem: Es ist nicht gut, dass bei jedem Aufruf der _density-Methode gesampelt wird, da das viel Zeit und Speicher braucht. Lösung: Führe das Sampling nur einmal durch und speichere die samples in einer Klassenvariable.
 \subsection{Choose the PPL for the task at hand}
 
 \section{Case examples}
