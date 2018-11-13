@@ -18,11 +18,13 @@ class FixedProbabilisticModel(Model):
     def __init__(self, name):
         super().__init__(name)
         self._model_structure = None
-        self._model_params = None
+
 
     def _set_data(self, df, drop_silently, **kwargs):
-        # TODO: Is there a better place for decribing the whole model?
         self._set_data_mixed(df, drop_silently)
+        return ()
+
+    def _fit(self):
         basic_model = pm.Model()
         with basic_model:
             # describe prior distributions of model parameters.
@@ -34,52 +36,45 @@ class FixedProbabilisticModel(Model):
             mu = alpha + beta1 * self.data['X1'] + beta2 * self.data['X2']
             # likelihood of the observations. Observed stochastic variable
             Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
-        self._model_structure = basic_model
-        return ()
-
-    def _fit(self):
-        # Specify model
-        basic_model = self._model_structure
-        with basic_model:
-            # draw samples from the posterior
+            # Draw samples
             trace = pm.sample(500)
-        # getting the means of the parameters from the samples
-        parameter_means = pm.summary(trace).round(2).iloc[:,0]
-        self._model_params = parameter_means
+        self._model_structure = basic_model
+        self._joint_samples_alpha = trace.get_values('alpha')
+        self._joint_samples_beta1 = trace.get_values('beta1')
+        self._joint_samples_beta2 = trace.get_values('beta2')
+        self._joint_samples_sigma = trace.get_values('sigma')
+        self._joint_samples_X1 = np.random.randn(2000)
+        self._joint_samples_X2 = np.random.randn(2000) * 0.2
+        self._joint_samples_mu = self._joint_samples_alpha + np.multiply(self._joint_samples_beta1,self._joint_samples_X1.T) + np.multiply(self._joint_samples_beta2,self._joint_samples_X2.T)
+        joint_samples_Y = np.random.normal(loc=self._joint_samples_mu, scale=self._joint_samples_sigma)
         return ()
 
     def _marginalizeout(self, keep, remove):
-        # Set data to comlete dataset for this method. change it back at the end of the method
-        data = self.data
-        self._set_data(df, 0)
-        # Specify model
-        basic_model = self._model_structure
-        with basic_model:
-            trace = pm.sample(500)
-        # Get the values of the parameter samples
-        joint_sample = np.zeros(shape=(2000,8))
-        for i,var in enumerate(basic_model.unobserved_RVs):
-            joint_sample[:,i] = trace.get_values(var)
-        # Generate the data samples
-        X1_joint_sample = np.random.randn(2000)
-        X2_joint_sample = np.random.randn(2000) * 0.2
-        joint_sample[:,5] = X1_joint_sample
-        joint_sample[:,6] = X2_joint_sample
-        mu_joint_sample = joint_sample[:,0] + np.multiply(joint_sample[:,1], joint_sample[:,5].T) + np.multiply(joint_sample[:,2], joint_sample[:,6].T)
-        Y_joint_sample = np.random.normal(loc=mu_joint_sample, scale=joint_sample[:,4])
-        joint_sample[:,7] = Y_joint_sample
-         # Get the means of the the sampled dimensions
-        joint_sample_means = []
-        for col in range(0,joint_sample.shape[1]):
-            joint_sample_means = np.append(joint_sample_means,np.mean(joint_sample[:,col]))
-        # write only variables from keep to the model parameters
-        all_vars = {'alpha':0,'beta1':1,'beta2':2,'sigma_log':3,'sigma':4,'X1':5,'X2':6,'Y':7}
-        self._model_params = [joint_sample_means[index] for index in [all_vars[name] for name in keep]]
-        # change data back to previous selections
-        self.data = data
+        # Remove all variables in remove
+        if 'alpha' in remove:
+            self._joint_samples_alpha = None
+        if 'beta1' in remove:
+            self._joint_samples_beta1 = None
+        if 'beta2' in remove:
+            self._joint_samples_beta2 = None
+        if 'sigma' in remove:
+            self._joint_samples_sigma = None
+        if 'X1' in remove:
+            self._joint_samples_X1 = None
+        if 'X2' in remove:
+            self._joint_samples_X2 = None
+        if 'Y' in remove:
+            self._joint_samples_Y = None
         return ()
 
     def _conditionout(self, keep, remove):
+        names = remove
+        fields = self.fields if names is None else self.byname(names)
+        # It's not obvious but this is equivalent to the more detailed code below...
+        cond_domains = [field['domain'] for field in fields]
+
+        #
+
         # Specify model
         basic_model = pm.Model()
         with basic_model:
@@ -117,20 +112,17 @@ class FixedProbabilisticModel(Model):
     def _density(self, x):
         # Mängel: Draw from prior oder posterior?
         #         Only 3 Parameter are selectable, keine Daten
-        #         Empirical density
+        #         Empirical density ist immer 0
 
         # Specify model
         basic_model = self._model_structure
-        with basic_model:
-            vars = basic_model.unobserved_RVs
-            sampling_properties = pm.backends.NDArray(vars=vars)
-            trace = pm.sample(500,trace=sampling_properties)
-            # Draw samples
-            samples = pd.DataFrame(columns=vars)
-            for var in vars:
-                samples[var] = trace.get_values(var)
+        # Draw samples
+        vars = basic_model.unobserved_RVs
+        samples = pd.DataFrame(columns=vars)
+        for var in vars:
+            samples[var] = self._samples.get_values(var)
             # Calculate empirical density of point x on the samples
-            density = data_op.density(samples, x)
+        density = data_op.density(samples, x)
         return (density)
 
     def _sample(self):
@@ -147,39 +139,4 @@ class FixedProbabilisticModel(Model):
         return (mycopy)
 
 
-### Generate data
-#np.random.seed(123)
-# True parameter values
-#alpha, sigma = 1, 1
-#beta = [1, 2.5]
 
-# Size of dataset
-#size = 100
-
-# Predictor variable
-#X1 = np.random.randn(size)
-#X2 = np.random.randn(size) * 0.2
-
-# Simulate outcome variable
-#Y = alpha + beta[0]*X1 + beta[1]*X2 + np.random.randn(size)*sigma
-# Create dataframe
-#df = pd.DataFrame({'X1':X1, 'X2':X2, 'Y':Y})
-###
-
-df = pd.read_csv('fixed_PyMC3_example_data.csv')
-
-### Set up and train model
-probabilistic_model_instance = FixedProbabilisticModel('probabilistic_model_instance')
-probabilistic_model_instance._set_data(df,0)
-#probabilistic_model_instance._fit()
-probabilistic_model_instance._marginalizeout(keep = ['X1'], remove = ['alpha','beta1','beta2','sigma','mu','X1','Y_obs'])
-probabilistic_model_instance._marginalizeout(keep = ['alpha'], remove = ['alpha','beta','sigma','mu','X1','Y_obs'])
-print(probabilistic_model_instance.fields)
-print(probabilistic_model_instance._model_params)
-probabilistic_model_instance._conditionout(keep = ['alpha', 'beta1'], remove = ['beta2','sigma','X1','X2','Y_obs'])
-print(probabilistic_model_instance._model_params)
-probabilistic_model_instance._conditionout(keep = ['sigma','X1','X2'], remove = ['alpha','beta1','beta2','Y_obs'])
-print(probabilistic_model_instance._model_params)
-###
-print(probabilistic_model_instance._density([1,1,1]))
-print(probabilistic_model_instance._sample())
