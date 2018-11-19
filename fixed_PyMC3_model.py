@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from mb_modelbase.models_core.empirical_model import EmpiricalModel
 from mb_modelbase.models_core import data_operations as data_op
+from sklearn.neighbors.kde import KernelDensity
 
 class FixedProbabilisticModel(Model):
     """
@@ -17,11 +18,11 @@ class FixedProbabilisticModel(Model):
 
     def __init__(self, name):
         super().__init__(name)
-        self._model_structure = None
 
 
     def _set_data(self, df, drop_silently, **kwargs):
         self._set_data_mixed(df, drop_silently)
+        self._update_all_field_derivatives()
         return ()
 
     def _fit(self):
@@ -70,60 +71,19 @@ class FixedProbabilisticModel(Model):
     def _conditionout(self, keep, remove):
         names = remove
         fields = self.fields if names is None else self.byname(names)
-        # It's not obvious but this is equivalent to the more detailed code below...
         cond_domains = [field['domain'] for field in fields]
-
-        #
-
-        # Specify model
-        basic_model = pm.Model()
-        with basic_model:
-            # describe prior distributions of model parameters and set variables in remove to a fixed value.
-            if ('alpha' in remove):
-                alpha = 1
-            else:
-                alpha = pm.Normal('alpha', mu=0, sd=10)
-            if ('beta1' in remove):
-                beta1 = 1
-            else:
-                beta1 = pm.Normal('beta1', mu=0, sd=10)
-            if ('beta2' in remove):
-                beta2 = 1
-            else:
-                beta2 = pm.Normal('beta2', mu=0, sd=10)
-            if ('sigma' in remove):
-                sigma = 1
-            else:
-                sigma = pm.HalfNormal('sigma', sd=1)
-            # specify model for the output parameter.
-            if ('mu' in remove):
-                mu = 1
-            else:
-                mu = alpha + beta1 * self.data['X1'] + beta2 * self.data['X2']
-            # likelihood of the observations. Observed stochastic variable
-            Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=self.data['Y'])
-            # draw samples from the posterior
-            trace = pm.sample(500)
-        # getting the means of the parameters from the samples
-        parameter_means = pm.summary(trace).round(2).iloc[:, 0]
-        self._model_params = parameter_means
-        return ()
+        return (cond_domains)
 
     def _density(self, x):
-        # Mängel: Draw from prior oder posterior?
-        #         Only 3 Parameter are selectable, keine Daten
-        #         Empirical density ist immer 0
 
-        # Specify model
-        basic_model = self._model_structure
-        # Draw samples
-        vars = basic_model.unobserved_RVs
-        samples = pd.DataFrame(columns=vars)
-        for var in vars:
-            samples[var] = self._samples.get_values(var)
-            # Calculate empirical density of point x on the samples
-        density = data_op.density(samples, x)
-        return (density)
+        X = np.array([self._joint_samples_alpha,self._joint_samples_beta1,
+                      self._joint_samples_beta2, self._joint_samples_sigma,
+                      self._joint_samples_X1, self._joint_samples_X2,
+                      self._joint_samples_mu]).T
+        kde = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(X)
+        x = np.reshape(x,(1,len(x)))
+        logdensity = kde.score_samples(x)
+        return (np.exp(logdensity))
 
     def _sample(self):
         # Specify model
