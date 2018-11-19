@@ -47,7 +47,7 @@ class FixedProbabilisticModel(Model):
         self._joint_samples_X1 = np.random.randn(2000)
         self._joint_samples_X2 = np.random.randn(2000) * 0.2
         self._joint_samples_mu = self._joint_samples_alpha + np.multiply(self._joint_samples_beta1,self._joint_samples_X1.T) + np.multiply(self._joint_samples_beta2,self._joint_samples_X2.T)
-        joint_samples_Y = np.random.normal(loc=self._joint_samples_mu, scale=self._joint_samples_sigma)
+        self._joint_samples_Y = np.random.normal(loc=self._joint_samples_mu, scale=self._joint_samples_sigma)
         return ()
 
     def _marginalizeout(self, keep, remove):
@@ -95,7 +95,16 @@ class FixedProbabilisticModel(Model):
 
     def copy(self, name=None):
         mycopy = self._defaultcopy(name)
-        mycopy._model_params = self._model_params
+        mycopy._model_structure = self._model_structure
+        mycopy._joint_samples_alpha = self._joint_samples_alpha
+        mycopy._joint_samples_beta1 = self._joint_samples_beta1
+        mycopy._joint_samples_beta2 = self._joint_samples_beta2
+        mycopy._joint_samples_sigma = self._joint_samples_sigma
+        mycopy._joint_samples_X1 = self._joint_samples_X1
+        mycopy._joint_samples_X2 = self._joint_samples_X2
+        mycopy._joint_samples_mu = self._joint_samples_mu
+        mycopy.joint_samples_Y = self._joint_samples_Y
+
         return (mycopy)
 
 
