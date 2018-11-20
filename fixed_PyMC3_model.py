@@ -1,6 +1,7 @@
 # Copyright (c) 2018 Philipp Lucas (philipp.lucas@uni-jena.de), Jonas Gütter (jonas.aaron.guetter@uni-jena.de)
 
 from mb_modelbase.models_core.models import Model
+from mb_modelbase.models_core.models import get_numerical_fields
 from mb_modelbase.models_core import data_operations as data_op
 from mb_modelbase.models_core import data_aggregation as data_aggr
 import pymc3 as pm
@@ -25,13 +26,24 @@ class FixedProbabilisticModel(Model):
         self._update_all_field_derivatives()
         return ()
 
-    def _fit(self,model):
+    def _fit(self, model):
         with model:
             # Draw samples
-            trace = pm.sample(500)
-            self.samples = {}
+            colnames = [str(name) for name in model.observed_RVs] + [str(name) for name in model.unobserved_RVs]
+            self.samples = pd.DataFrame(columns=colnames)
+            nr_of_samples = 500
+            trace = pm.sample(nr_of_samples)
             for varname in trace.varnames:
                 self.samples[varname] = trace[varname]
+            # samples above were drawn for 4 chains by default.
+            # ppc samples are drawn 100 times for each sample by default
+            ppc = pm.sample_ppc(trace, samples=int(nr_of_samples*4/100), model=model)
+            for varname in model.observed_RVs:
+                self.samples[str(varname)] = np.asarray(ppc[str(varname)].flatten())
+            # Add parameters to fields
+            self.fields = self.fields + get_numerical_fields(self.samples, trace.varnames)
+            self._update_all_field_derivatives()
+            self._init_history()
         return ()
 
 # Achtung: _marginalizeout is currently only for parameters possible,
@@ -40,7 +52,8 @@ class FixedProbabilisticModel(Model):
     def _marginalizeout(self, keep, remove):
         # Remove all variables in remove
         for varname in remove:
-            self.samples[varname] = None
+            if varname in list(self.samples.columns):
+                self.samples = self.samples.drop(varname,axis=1)
         return ()
 
     def _conditionout(self, keep, remove):
@@ -49,41 +62,25 @@ class FixedProbabilisticModel(Model):
         cond_domains = [field['domain'] for field in fields]
         return (cond_domains)
 
-    # def _density(self, x):
-    #
-    #     X = np.array([self._joint_samples_alpha,self._joint_samples_beta1,
-    #                   self._joint_samples_beta2, self._joint_samples_sigma,
-    #                   self._joint_samples_X1, self._joint_samples_X2,
-    #                   self._joint_samples_mu]).T
-    #     kde = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(X)
-    #     x = np.reshape(x,(1,len(x)))
-    #     logdensity = kde.score_samples(x)
-    #     return (np.exp(logdensity))
+    def _density(self, x):
+        X = self.samples.values
+        kde = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(X)
+        x = np.reshape(x,(1,len(x)))
+        logdensity = kde.score_samples(x)
+        return (np.exp(logdensity))
 
-    # def _sample(self):
-    #     # Specify model
-    #     basic_model = self._model_structure
-    #     with basic_model:
-    #         trace = pm.sample(1)
-    #         point = trace.point(0)
-    #     return (point)
-    #
-    # def copy(self, name=None):
-    #     mycopy = self._defaultcopy(name)
-    #     mycopy._model_structure = self._model_structure
-    #     mycopy._joint_samples_alpha = self._joint_samples_alpha
-    #     mycopy._joint_samples_beta1 = self._joint_samples_beta1
-    #     mycopy._joint_samples_beta2 = self._joint_samples_beta2
-    #     mycopy._joint_samples_sigma = self._joint_samples_sigma
-    #     mycopy._joint_samples_X1 = self._joint_samples_X1
-    #     mycopy._joint_samples_X2 = self._joint_samples_X2
-    #     mycopy._joint_samples_mu = self._joint_samples_mu
-    #     mycopy.joint_samples_Y = self._joint_samples_Y
-    #
-    #     return (mycopy)
-    #
-    #
-    #
+    def _sample(self,model):
+        with model:
+            trace = pm.sample(1)
+            point = trace.point(0)
+        return (point)
+
+    def copy(self, name=None):
+        mycopy = self._defaultcopy(name)
+        mycopy.samples = self.samples
+        return (mycopy)
+
+
 
 data = pd.read_csv('fixed_PyMC3_example_data.csv')
 
@@ -102,5 +99,10 @@ with basic_model:
 mymodel = FixedProbabilisticModel('mymodel')
 mymodel._set_data(data,1)
 mymodel._fit(basic_model)
-mymodel._marginalizeout(['hurz'],['sigma'])
-mymodel._conditionout(['hurz'],['X1'])
+#mymodel._marginalizeout(['hurz'],['X2'])
+# mymodel._conditionout(['hurz'],['X1'])
+# x = [1,1,1,1,1]
+# print(mymodel._density(x))
+# mymodel._sample(basic_model)
+
+#print(mymodel.samples.columns)
