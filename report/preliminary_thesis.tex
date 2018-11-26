@@ -326,6 +326,11 @@ stochastic data types (--> probability distributions) make it easier to perform 
 Modelle spezifizieren/beschreiben 
 
 Random Variables can be represented as objects
+\\
+Posterior probability for parameters comes from the Bayes formula: $P(\theta|data) = p(data|\theta) * p(\theta) / p(data)$. The marginalized probability of the data $p(data)$ is given as follows:
+$p(data) = \int p(\theta,data) d \theta$. This integral can't be calculated (TODO: UNDERSTAND THAT BETTER), so PPLs instead sample from this distribution and get their inference from the samples.
+
+
 
 \cite{wiki:Probabilisticprogramminglanguage}
 
@@ -344,6 +349,36 @@ Traditional means for representing models are not always sufficient for probabil
 	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
 	\label{fig:example_prs}
 \end{figure}
+
+\subsection{Inference through sampling}
+
+Using the Bayes formula, we get the posterior distribution the following way:
+
+\begin{equation}
+	p(\theta|x) = p(x|\theta) * p(\theta) / p(x)
+\end{equation}
+We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data, however, is more complicated. To compute it analytically, we would have to compute the following integral:
+
+\begin{equation}
+\begin{split}
+	p(x) = \int p(\theta,x) d \theta \\
+		 =  \int p(x|\theta) * p(\theta) d \theta
+\end{split}
+\end{equation}
+Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. The easiest of them is called Simple Monte Carlo. There
+we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
+\begin{equation}
+	\int p(x|\theta) * p(\theta) d \theta \approx 1/m * \sum^m p(x|\theta_i),\quad \theta_i \sim p(\theta)
+\end{equation}
+Simple Monte Carlo has a number of disadvantages, so more sophistically methods are genrally used, like Gibbs sampling or NUTS.
+
+Markov Chain simulation: 
+
+Parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain.
+
+So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$.
+
+The chain has the property of becoming more similar to the real posterior distribution of the parameters in each iteration.
 
 \subsection{Difference to conventional Programming Languages}
 
@@ -478,8 +513,6 @@ based on graphical models
 \textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL. Too achieve this is goal it is necessary to understand how Lumen works, so the functionality of Lumen is also explained here.} 
 \\
 The overall goal of the thesis is to build an API, that makes it possible to a PyMC3 (or other PPL) user to get his model visualized in lumen with minimal effort. For example it would be good if one just has to call one function with a PyMC3 model as parameter to transport the model into the lumen frontend.
-
-
 \\
 uses modelbase as backend: modelbase is a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization.
 \\
@@ -549,7 +582,7 @@ First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginali
 Second Bug in the model: The marginalization method needs to access all variables of the data. However, it gets only the data passed for those variables to keep. So it cannot access the other variables. 
 Problem: Model data is reduced to variables in keep. Lösungsidee: Setze zu Beginn der Methode die Daten auf den vollständigen Datensatz, und setze am Ende der Methode die Daten wieder auf die Dimensionen in keep zurück.
 \\
-Problem: Es ist nicht gut, dass bei jedem Aufruf der _density-Methode gesampelt wird, da das viel Zeit und Speicher braucht. Lösung: Führe das Sampling nur einmal durch und speichere die samples in einer Klassenvariable.
+Problem: Es ist nicht gut, dass bei jedem Aufruf der \_density-Methode gesampelt wird, da das viel Zeit und Speicher braucht. Lösung: Führe das Sampling nur einmal durch und speichere die samples in einer Klassenvariable.
 \subsection{Choose the PPL for the task at hand}
 
 \section{Case examples}
