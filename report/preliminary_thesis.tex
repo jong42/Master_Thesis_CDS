@@ -312,6 +312,16 @@ Difficult with discrete data, since residuals can only take certain discrete val
 %\label{eq:posterior_predictive}
 %\end{equation}
 
+\subsection{Gibbs Sampling}
+
+Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_j, j \neq i)$ for each quantity.
+Algorithm works as follows:
+\begin{itemize}
+\item Select arbitrary starting points for $\theta_0,...,\theta_n$
+\item Update each $\theta$ by drawing from its conditional distribution given the values of the other quantities. Repeat this step until terminate condition is fulfilled.
+\end{itemize}
+\cite{Martz1994}
+
 \section{Probabilistic Programming}
 
 \textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language is, and a number of PPLs are introduced. A focus is laid on the abilities of the PPLs for graphical model checking}
