@@ -15,4 +15,6 @@
 *.gls
 *.glsdefs
 *.ist
+*.pdf
 .ipynb_checkpoints
+
