@@ -1,0 +1,15 @@
+    # Generate data
+    np.random.seed(1)
+    mu = 0
+    sigma = 1
+    size = 100
+    data = pd.DataFrame(np.random.normal(mu,sigma,size),columns=['X'])
+
+    # Build model
+    basic_model = pm.Model()
+    with basic_model:
+        # describe prior distributions of model parameters
+        mu = pm.Normal('mu', mu=0, sd=1)
+        sigma = pm.HalfNormal('sigma', sd=1)
+        # observed variable
+        X = pm.Normal('X', mu=mu, sd=sigma, observed=data['X'])
