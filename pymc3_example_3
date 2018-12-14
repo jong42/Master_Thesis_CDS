@@ -1,0 +1,30 @@
+import pymc3 as pm
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Generate data
+size = 100
+X = np.random.uniform(low=-5,high=5,size=size)
+sigma = 1
+Y = X + np.random.normal(0,sigma,size=size)
+
+data = pd.DataFrame({'X': X, 'Y': Y})
+
+# Create probabilistic model
+basic_model = pm.Model()
+with basic_model:
+    X = pm.Uniform('X',lower=-5,upper=5, observed = data['X'])
+    sigma = pm.HalfNormal('sigma', sd=1)
+    Y = pm.Normal('Y', mu=X, sd=sigma, observed = data['Y'])
+    
+# Create posterior samples of unobserved RVs
+with basic_model:
+    nr_of_samples = 100
+    trace = pm.sample(nr_of_samples,chains=4)
+ppc = pm.sample_ppc(trace, samples=int(nr_of_samples*4/100), model=basic_model)
+
+# Create posterior samples of observed RVs
+size_ppc = len(trace['sigma'])
+X_ppc = np.random.uniform(low=-5,high=5,size=size_ppc)
+Y_ppc = X_ppc + np.random.normal(0,trace['sigma'],size=size_ppc)
