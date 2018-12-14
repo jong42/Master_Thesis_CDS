@@ -568,6 +568,112 @@ p(x,\theta|X) = p(x|\theta) * p(\theta|X)
 
 The posterior distribution of the parameters, $p(\theta|X)$, can be approximated by PPLs through sampling, as stated above. (--> Make sure that this is true!!). To get density values from samples, we have to perform density estimation methods \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity.score_samples}
 
+\subsection{Complete example of a simple Bayesian model}
+
+To get a sort of ground truth, a Bayesian model is fitted first without the use of a PPL. To check if a PPL is deployed correctly, the same model can be fitted by a PPL. The results of the PPl approach and the ground truth should then look the same.
+\\
+Assume we want to fit a model with the two dimensions $x$ and $mu$, one of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore we assume the following priors:
+\begin{equation}
+\begin{split}
+mu &\sim N(0,1)\\
+x &\sim N(mu,1)
+\end{split}
+\end{equation}
+Assume again, that we observe some data $X$ of the observable dimension $x$.
+We now want to compute the joint posterior distribution of both dimensions $mu$ and $x$, conditioned on the observed data $X$.
+This distribution is computed as follows:
+\begin{equation}
+\begin{split}
+&P(x,mu|X) \\
+= &P(x|mu,X) * P(mu|X) \\
+= &P(x|mu) * P(mu|X) \\
+= &P(x|mu) * P(X|mu) * P(mu) / P(X) \\
+= &P(x|mu) * P(X|mu) * P(mu) / \int P(X,mu) \hspace{1mm} d \hspace{1mm} mu \\
+= &P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
+\end{split}
+\end{equation}
+The data $X$ is generated as follows:\\
+\begin{figure}[h]
+	\begin{lstlisting}
+	import pymc3 as pm
+	import numpy as np
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	from pylab import *
+	from scipy.stats import norm
+	import scipy.integrate as integrate
+	
+	# Generate data
+	np.random.seed(1)
+	size = 100
+	mu = np.random.normal(0,1,size=size)
+	sigma = 1
+	X = np.random.normal(mu,sigma,size=size)
+
+	\end{lstlisting}
+	\label{fig:groundtruth_example_code_data_generation}
+\end{figure}
+\\
+The necessary distributions leading to the actual joint posterior distribution are written as follows:
+\begin{figure}[h]
+	\begin{lstlisting}
+	def prior_mu(mu):
+	density = norm.pdf(mu, loc=0, scale=1)
+	return density
+
+	def likelihood_x(x,mu):
+	density = norm.pdf(x, loc=mu, scale=1)
+	return density
+
+	def likelihood_X(X,mu):
+	res = 1
+	for point in X:
+	res *= likelihood_x(point,mu)
+	return res
+
+	def likelihood_times_prior_mu(X,mu):
+	return likelihood_X(X,mu) * prior_mu(mu)
+
+	def prior_X(X):
+	res = integrate.quad(lambda mu: likelihood_times_prior_mu(X,mu),a=-np.inf,b=np.inf)[0]
+	return res
+
+	def joint_posterior(x,mu,X):
+	res = likelihood_x(x,mu) * likelihood_X(X,mu) * prior_mu(mu) / prior_X(X)
+	return res
+	\end{lstlisting}
+	\label{fig:groundtruth_example_code_distributions}
+\end{figure}
+Finally, the joint posterior distribution is visualized, as shown in \ref{fig:ground_truth_joint_posterior_1}.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_joint_posterior_1.png}
+	\label{fig:ground_truth_joint_posterior_1}
+	\caption[Joint probability density of the example model]{Joint probability density of the example model}
+\end{figure}
+We see, that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
+Let's look again at the formula:
+\begin{equation}
+P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
+\end{equation}
+To evaluate the abovementioned expectations, it is not necessary to keep the normalizing constant, since a constant does not affect the order of the values. So we keep:
+\begin{equation}
+P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
+\end{equation}
+When we consider only the first and the last term of this formula, it behaves exactly as expected: $P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)$
+and $P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)$. What was messing with my expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1. On the other hand, that could just be a visualization issue.
+The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. If we choose only a very small number of data points, we get the distribution that is shown in \ref{fig:ground_truth_joint_posterior_2}.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_joint_posterior_2.png}
+	\label{fig:ground_truth_joint_posterior_2}
+	\caption[Joint probability density of the example model with only two data points]{Joint probability density of the example model with only two data points}
+\end{figure}
+The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore.
+
+
+Hint: For visualization purposes, it should not be necessary to compute the normalizing constant.
+
+
+
 \section{Practical implementation}
 
 \textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated. At first, the choice of the PPL is justified.}
