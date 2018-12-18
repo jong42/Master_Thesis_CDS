@@ -1,7 +1,7 @@
 \documentclass{article}
 
 % packages and configurations
-\usepackage{hyperref}
+\usepackage{hyperref} % reference chapters
 \usepackage{animate} % needed for animations and videos
 \usepackage{bm} % bold font in equation environments
 \usepackage[utf8]{inputenc}	% für Umlaute ect.
@@ -569,6 +569,7 @@ p(x,\theta|X) = p(x|\theta) * p(\theta|X)
 The posterior distribution of the parameters, $p(\theta|X)$, can be approximated by PPLs through sampling, as stated above. (--> Make sure that this is true!!). To get density values from samples, we have to perform density estimation methods \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity.score_samples}
 
 \subsection{Complete example of a simple Bayesian model}
+\label{subsec: Complete example of a simple Bayesian model}
 
 To get a sort of ground truth, a Bayesian model is fitted first without the use of a PPL. To check if a PPL is deployed correctly, the same model can be fitted by a PPL. The results of the PPl approach and the ground truth should then look the same.
 \\
@@ -672,8 +673,46 @@ The dependency between the variables is here clearly visible, since the data poi
 
 Hint: For visualization purposes, it should not be necessary to compute the normalizing constant.
 
+\subsection{PyMC3 example of a simple Bayesian model}
+\label{subsec: PyMC3 example of a simple Bayesian model}
+The model from chapter \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \ref{fig:PyMC3_example_code_simple_model}.
+\begin{figure}[h]
+	\begin{lstlisting}
+	import numpy as np
+	import pandas as pd
+	import pymc3 as pm
+	import matplotlib.pyplot as plt
+	
+	# Generate data
+	np.random.seed(2)
+	size = 100
+	mu = np.random.normal(0,1,size=size)
+	sigma = 1
+	X = np.random.normal(mu,sigma,size=size)
 
+	# Specify model
+	basic_model = pm.Model()
+	with basic_model:
+	sigma = 1
+	mu = pm.Normal('mu',mu=0,sd=sigma)
+	X = pm.Normal('X',mu=mu,sd=sigma,observed=X)
 
+	# Draw samples from posterior
+	nr_of_samples = 100
+	with basic_model:
+	trace = pm.sample(nr_of_samples,chains=1)
+	samples_mu = trace['mu']
+	samples_X = np.random.normal(samples_mu,1,size=nr_of_samples)
+	\end{lstlisting}
+	\label{fig:PyMC3_example_code_simple_model}
+	\caption[Code used to specify the example model in PyMC3]{Code used to specify the example model in PyMC3}
+\end{figure}
+Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows samples from the joint posterior distribution of the fitted model. Similarities in shape to the real joint posterior distribution in \ref{fig:ground_truth_joint_posterior_1} are visible, so it is assumed, that PyMC3 captures the model correctly.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model.png}
+	\label{fig:PyMC3_joint_posterior_samples_simple_model}
+	\caption[Samples from the posterior joint distribution of the example model in PyMC3]{Samples from the posterior joint distribution of the example model in PyMC3}
+\end{figure}
 \section{Practical implementation}
 
 \textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated. At first, the choice of the PPL is justified.}
