@@ -651,6 +651,33 @@ Finally, the joint posterior distribution is visualized, as shown in \ref{fig:gr
 	\label{fig:ground_truth_posterior_1}
 	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
 \end{figure}
+
+% Parameters for ground_truth_posterior_1.png:
+%# data parameters
+%size = 100
+%mean_mu = 0
+%sigma_mu = 1
+%sigma_x = 1
+%
+%# model parameters
+%prior_mean_mu = 0
+%prior_sigma_mu = 1
+%prior_sigma_x = 1
+%
+%# plot parameters
+%resolution_joint_mu = 200
+%resolution_joint_x = 200
+%range_joint_mu_upper = 3
+%range_joint_mu_lower = -3
+%range_joint_x_upper = 3
+%range_joint_x_lower = -3
+%resolution_marginal_mu = 100
+%resolution_marginal_x = 100
+%range_marginal_mu_upper = 4
+%range_marginal_mu_lower = -4
+%range_marginal_x_upper = 4
+%range_marginal_x_lower = -4
+
 We see, that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
 Let's look again at the formula:
 \begin{equation}
@@ -686,6 +713,16 @@ mu is also observed
 
 
 What do I expect? 
+
+When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
+So when increasing the variance, I expect the whole distribution to get wider, especially in the $mu$-direction.
+
+
+
+
+
+
+
 
 
 Hint: For visualization purposes, it should not be necessary to compute the normalizing constant.
