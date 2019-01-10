@@ -645,11 +645,11 @@ The necessary distributions leading to the actual joint posterior distribution a
 	\end{lstlisting}
 	\label{fig:groundtruth_example_code_distributions}
 \end{figure}
-Finally, the joint posterior distribution is visualized, as shown in \ref{fig:ground_truth_joint_posterior_1}.
+Finally, the joint posterior distribution is visualized, as shown in \ref{fig:ground_truth_posterior_1}.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_joint_posterior_1.png}
-	\label{fig:ground_truth_joint_posterior_1}
-	\caption[Joint probability density of the example model]{Joint probability density of the example model}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1.png}
+	\label{fig:ground_truth_posterior_1}
+	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
 \end{figure}
 We see, that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
 Let's look again at the formula:
@@ -669,6 +669,23 @@ The dependance between $mu$ and $x$ is in fact still there in the joint posterio
 	\caption[Joint probability density of the example model with only two data points]{Joint probability density of the example model with only two data points}
 \end{figure}
 The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore.
+
+To understand this example better, I make changes in the model and or in the data generation and look how those changes affect the posterior distributions. 
+
+Which possibilities are there to change the model? 
+
+number of training points
+mean of mu
+sigma of mu
+sigma of x
+prior mean mu
+prior sigma mu
+prior sigma x
+
+mu is also observed
+
+
+What do I expect? 
 
 
 Hint: For visualization purposes, it should not be necessary to compute the normalizing constant.
