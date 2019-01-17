@@ -652,32 +652,6 @@ Finally, the joint posterior distribution is visualized, as shown in \ref{fig:gr
 	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
 \end{figure}
 
-% Parameters for ground_truth_posterior_1.png:
-%# data parameters
-%size = 100
-%mean_mu = 0
-%sigma_mu = 1
-%sigma_x = 1
-%
-%# model parameters
-%prior_mean_mu = 0
-%prior_sigma_mu = 1
-%prior_sigma_x = 1
-%
-%# plot parameters
-%resolution_joint_mu = 200
-%resolution_joint_x = 200
-%range_joint_mu_upper = 3
-%range_joint_mu_lower = -3
-%range_joint_x_upper = 3
-%range_joint_x_lower = -3
-%resolution_marginal_mu = 100
-%resolution_marginal_x = 100
-%range_marginal_mu_upper = 4
-%range_marginal_mu_lower = -4
-%range_marginal_x_upper = 4
-%range_marginal_x_lower = -4
-
 We see, that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
 Let's look again at the formula:
 \begin{equation}
@@ -688,43 +662,68 @@ To evaluate the abovementioned expectations, it is not necessary to keep the nor
 P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
 \end{equation}
 When we consider only the first and the last term of this formula, it behaves exactly as expected: $P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)$
-and $P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)$. What was messing with my expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1. On the other hand, that could just be a visualization issue.
-The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. If we choose only a very small number of data points, we get the distribution that is shown in \ref{fig:ground_truth_joint_posterior_2}.
+and $P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)$. What was messing with my expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
+The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. If we don't  provide any data points, we get the distribution that is shown in \ref{fig:ground_truth_posterior_5}.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_joint_posterior_2.png}
-	\label{fig:ground_truth_joint_posterior_2}
-	\caption[Joint probability density of the example model with only two data points]{Joint probability density of the example model with only two data points}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5.png}
+	\label{fig:ground_truth_posterior_5}
+	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
 \end{figure}
-The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore.
+The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in \ref{fig:posterior_different_data_sizes}.
+
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/posterior_different_data_sizes.png}
+	\label{fig:posterior_different_data_sizes}
+	\caption[Posterior distributions for different numbers of datapoints]{Posterior distributions for different numbers of datapoints}
+\end{figure}
 
 To understand this example better, I make changes in the model and or in the data generation and look how those changes affect the posterior distributions. 
 
-Which possibilities are there to change the model? 
+%Which possibilities are there to change the model? 
+%
+%number of training points
+%mean of mu
+%sigma of mu
+%sigma of x
+%prior mean mu
+%prior sigma mu
+%prior sigma x
 
-number of training points
-mean of mu
-sigma of mu
-sigma of x
-prior mean mu
-prior sigma mu
-prior sigma x
-
-mu is also observed
+%mu is also observed
 
 
 What do I expect? 
-
+\\
 When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
 So when increasing the variance, I expect the whole distribution to get wider, especially in the $mu$-direction.
+\\
+What happens: when choosing a standard deviation of 5, the density is always zero. This is likely due to numerical difficulties, since the values computed here are very small.
+I can set the number of data points down, then we get densities different from 0.
+\\
+Figures  X and Y show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases, whereas the mean of the variables in the latter distribution is at around -1.5. I don't know why this happens. It could be a coding error.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3.png}
+	\label{fig:ground_truth_posterior_3}
+	\caption[Posterior probability densities of the example model with standard deviation of 1]{Posterior probability densities of the example model with standard deviation of 1}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_4.png}
+	\label{fig:ground_truth_posterior_4}
+	\caption[Posterior probability densities of the example model with standard deviation of 5]{Posterior probability densities of the example model with standard deviation of 5}
+\end{figure}
+%When the number of actual data points becomes small, I expect %the joint distribution to show the linear relationship between %$x$ and $mu$ better, since the influence of the data points, %which 'compresses' the whole plot to the middle, diminishes.
 
+%This is also what actually happens. Without any datapoints, we %see clearly the linear relationship.
 
-
-
-
-
-
-
-
+When we change the data generating mechanism to a non-hierarchic process, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parametrization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in figure \ref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6.png}
+	\label{fig:ground_truth_posterior_6}
+	\caption[Posterior probability densities of the example model with altered data generation]{Posterior probability densities of the example model with altered data generation}
+\end{figure}
+\\
+If it is possible to generate the same data by different parameterizations, it means that a model cannot be able to always return the true parameters in the posterior. This is also called Nonidentifiability
+\\
 Hint: For visualization purposes, it should not be necessary to compute the normalizing constant.
 
 \subsection{PyMC3 example of a simple Bayesian model}
