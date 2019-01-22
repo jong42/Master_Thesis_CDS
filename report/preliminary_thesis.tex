@@ -782,8 +782,8 @@ Another method is the one that marginalizes a random variable out. In a Bayesian
 In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
 \\
 Another method is the one that returns the probability density for a given point.
-
-
+We only have the samples from the joint posterior distribution, that were drawn during he fitting method, to get the density. The density estimation method used here is the kernel density estimation using gaussian kernels, where each data point is assigned a gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the gaussians.
+\\
 conditioning: posterior distribution given the values for the variables in remove. (Bad) Idea in PyMC3: Set the parameters in remove to a fixed value during the model specification, then sample as normal.
 \\
 First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginalisierungsmethode mit den Datendimensionen als Parameter angewendet. Meine erste Implementierung lässt aber nur Marginalisierungen auf Parameter zu, dadurch gibt es einen Fehler.
