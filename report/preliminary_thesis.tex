@@ -784,6 +784,8 @@ In PyMC3, marginalizing means sampling over a subset of the variables. Samples w
 Another method is the one that returns the probability density for a given point.
 We only have the samples from the joint posterior distribution, that were drawn during he fitting method, to get the density. The density estimation method used here is the kernel density estimation using gaussian kernels, where each data point is assigned a gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the gaussians.
 \\
+The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
+\\
 conditioning: posterior distribution given the values for the variables in remove. (Bad) Idea in PyMC3: Set the parameters in remove to a fixed value during the model specification, then sample as normal.
 \\
 First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginalisierungsmethode mit den Datendimensionen als Parameter angewendet. Meine erste Implementierung lässt aber nur Marginalisierungen auf Parameter zu, dadurch gibt es einen Fehler.
