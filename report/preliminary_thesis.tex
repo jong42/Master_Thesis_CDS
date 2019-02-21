@@ -133,160 +133,177 @@ The thesis will be divided into two main parts, the first part being an overview
 \section{Concepts of Bayesian Statistics}
 
 \textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.}
-\\
-\\
-%In the field of statistics, one deals usually with the following questions:
-%
-%\begin{itemize}
-%	\item What kind of model should I choose?
-%	\item Which features should I include in my model?
-%	\item What are the most likely values for my model parameters?
-%	\item What is the most likely outcome for additional observations under certain conditions?
-%	\item How certain am I that my estimated parameter values are correct?
-%\end{itemize}
-%The latter three of these questions can be answered by using a Bayesian approach to statistics. Given a model, Bayesian statistics is about computing a joint probability distribution over all parameters and outcomes, so that a probability density for each possible value of parameters and outcomes can be obtained. Prior knowledge of the problem as well as observed data affect the form of the joint probability distribution. Using marginalization, conditional probability distributions can then be calculated for the desired outcomes. These conditional probability distributions are also called posteriors and can be used for parameter estimation, prediction and assessing the uncertainty of estimates. This chapter will outline how Bayesian statistics are applied to answer the abovementioned questions.
-\subsection{Rules of Probabilistic Inference}
-
-When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
-
-\subsubsection{Chain rule}
-
-The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
-
-\begin{equation}
-P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
-\end{equation}
-
-\subsubsection{Total probability rule}
-
-The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
-
-\begin{equation}
-P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
-\end{equation} 
-
-\subsubsection{Bayes' rule}
-
-Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. 
-
-\begin{equation}
-P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
-\end{equation}
-
 \subsection{General principle}
-Goal of Bayesian Statistics: Setting up a probability model over model parameters and observed data
-
-When doing Bayesian data analysis, we have observed data $Y$ and a prior belief $P(\theta)$ about the mechanism that generated the data, and we use those to set up a full probability model $P(y,\theta|Y)$ over all model parameters $\theta$ and all possible data $y$. The conceptual difference to conventional Statistics is two-fold: First, we don't use prior beliefs in conventional Statistics (at least not for parameter estimation), second, in conventional Statistics we only set up a probability model over the data, not over the model parameters. The model parameters in conventional Statistics are fixed after the parameter estimation.
+Bayesian data analysis is commonly used for parameter estimation and prediction of new data points. So before doing Bayesian data analysis, one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model, it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach, where model parameters are just single points. In Bayesian data analysis, parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these prior distributions. Finding a good prior can be a complex task. It should represent the knowledge that the researcher has about the parameter previous to seeing any data.
 \\
-\\
-The principle of setting up the full probability model of Bayesian Statistics (also called the joint probability distribution) is as follows:
-\\
-According to the chain rule, we can compute the full probability model with the following formula:
+Once the model as well as the priors are specified, parameter estimation can be performed by applying the Bayes rule to calculate posterior distributions on the parameters, that is, probability distributions on the parameters given the observed data. The Bayes rule allows it to invert the order of a conditional probability and goes as follows:
 \begin{equation}
-p(y,\theta|Y) = p(y|\theta,Y) * p(\theta|Y)
+p(A|B) = p(B|A) * p(A)/p(B)
 \end{equation}
-Since the probability for a specific value of $y$ does not depend on the observed data $Y$, if we already know $\theta$, we can write equivalently:
+Transferring that to a model with data $X$ and parameters $\theta$, we get:
 \begin{equation}
-p(y,\theta|Y) = p(y|\theta) * p(\theta|Y)
+p(\theta|X) = p(X|\theta) * p(\theta)/p(X)
 \end{equation}
-$p(y|\theta)$ is usually easy to compute since it is given by the chosen model class. For computing the second term, $P(\theta|Y)$, we use the Bayes rule:
-\begin{equation}
-p(\theta|Y) = p(Y|\theta) * p(\theta) / p(Y)
-\end{equation}
-This is where the prior belief comes into play.  $p(\theta)$ represents the prior belief, the distribution over the model parameters $\theta$, that we assume from prior knowledge. $p(Y|\theta)$ is the likelihood: The probability that the observed data occur at a given parameter. The problems of choosing a suitable likelihood and prior are treated in sections \ref{Choosing an appropriate prior distribution} and \ref{Sampling distribution}. $p(Y)$, the overall probability of the observed data, does not have to be computed since it can be treated as a constant. (TODO: UNDERSTAND THIS BETTER, HOW p(Y) CAN BE IGNORED)
-
-\subsection{Choosing an appropriate prior distribution}
-\label{Choosing an appropriate prior distribution}
-There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
-\\
-When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common noninformative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
-Besides informative and noninformative prior distributions there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter. A normal distribution with high variance is often used as weakly informative prior.
-\\
-The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
-\\
-A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
-
-\subsection{Sampling distribution}
-\label{Sampling distribution}
-
-The sampling distribution, also called the likelihood of the data.
-\\
-Often it is about which distribution class should be chosen for the prior and the likelihood. Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sampling distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
-\\
-distributions can be chosen for mathematical convenience. One could estimate hyperparameters of the likelihood distribution from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
-
-\subsection{Evaluating models}
-
-Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
-
-Different models can lead to different posterior inferences, even if both models have a good fit.
-
-model checking: How good does the model fit the data?
-Sensitivitiy analysis: Comparison of different models with good fit
-
-This is necessary after a joint probability density and a posterior density are calculated. How good are the prior and the likelihood model?
-\textit{Sensitivity analysis} deals with the question, how much the posterior is changed when one chooses a different (but also reasonable) model for the likelihood or the prior, or other assumptions affecting the posterior.
-
-In theory: Setting up a 'super-model' as joint-distribution which includes all possible realities. Posterior of this super-model then automatically incorporates the sensitivity analysis. In practice this is conceptually and computationally infeasible and also is still dependent on the assumptions made when creating the super-model being correct.
-
-One way is just to compare model predictions with the actual outcomes (this is referred to as external validation). If for some reason it is not possible to get the acutal outcomes (for example if they lie in the future), one needs to approximate external validation with the available data.
-
-\textit{Posterior predictive checking}: Use global summaries of the data distribution and the predictive distribution to evaluate the model: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
-
-model checking by calculating \textit{test quantities}. \textit{test quantities} are scalar summaries of parameters that are used to compare data to simulations. \textit{test quantities} are similar to test statistics in the classical approach. Besides on the data, \textit{test quantities} can also depend on the parameters.
-
-Graphical comparison of simulated and data histograms (!! maybe here point out usefulness of Lumen)
-
-tail-area-probability: p-value. p-value in classical statistics: Probability, that, given a parameter $\theta$, a test statistic for replicated data is greater or equal the test statistic for the observed data,as shown in equation \ref{eq:classical_p}:
-
-\begin{equation}
-p_C = Pr(T(y^{rep}) >= T(y) | \theta)
-\label{eq:classical_p}
-\end{equation}
-
-\cite{1439840954}
-
-The Bayesian p-value, on the other hand, is not conditional on a fixed $\theta$, since in Bayesian statistics parameters are drawn from a distribution the same way as outcome variables. Instead, the observed data $y$ is the fixed quantity for the Bayesian p-value, as shown in equation \ref{eq:bayesian_p}
-
-\begin{equation}
-p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
-\label{eq:bayesian_p}
-\end{equation}
-
-p-value depends on the chosen test quantity.
+$p(\theta|X)$ is the posterior distribution of the parameters. Getting this distribution is equivalent to getting the parameter estimates in the classical frequentist approach. $p(X|\theta)$ is the distribution of the data, given the parameters. This is what is specified in the model structure that has to be found before doing any Bayesian analysis. $p(\theta)$ is the distribution of the parameters without seeing any data. It is the prior distribution of the parameters, that has already been set up. $p(X)$ is the distribution over the data without seeing any parameters. It can be calculated by integrating over the joint distribution of the data and the parameters, but it can become difficult to solve with increasing model complexity. However, it is a constant, since the observed data does not change, and therefore it can be ignored for many applications.
 
 
-Bayesian predictive checking: choose and compute test quantites for the data and for simulations, then compute the p-value for the test quantity (probability that the test quantity of the data could have arisen under the model)
+Following that, the posterior joint distribution of all random variables in the model, including parameters, can be calculated.
 
-Test quantities give information about a specific aspect of the observed/simulated data. A model can predict values that are in some aspects similar to the data, in other aspects different. Therefore it can make sense to compute p-values fur several different test quantities.
-If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) pointwise, eg. in a scatterplot or in a histogram of the differences. The scatterplot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
-Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
-Graphical visualization can be used to identify useful test quantities.
-If a test quantity has a p-value close to 0 or 1, the aspect that is analysed by the test quantity is not well captured in the model.
-\\
-Model checking depends on the data-collection model (how the data was collected), since data has to be replicated for computing a p-value. Posterior Inference however does not depend on the data collection model, as long as the likelihood model stays the same. Because of this, the same posterior results(what are the parameters) can get different model checking results (how well does the model fit) when the data-collection model is changed.
-\\
-Marginal predictive checks: Instead of replicating data from the joint posterior distribution, one can also compute the probability for a certain outcome, and compare this probability with the data....(p.153).
-\\
-Graphical posterior predictive checks: Basic Idea: Visualize the data alongside simulated data and so find discrepancies --> perfect in Lumen 
-Possibilities:
-\begin{itemize}
-	\item Direct display of all the data
-	\item Display of data summaries (e.g. if the data is so large that it is not helpful to display all the data)
-	\item Display a measure of discrepancy betweem model and data
-\end{itemize}
+The prediction of new data points can then be done by integrating over the joint posterior distribution, and sampling from the resulting distribution.
 
-MAYBE BUILD EXAMPLES WITH LUMEN TO ILLUSTRATE USEFULNESS OF LUMEN
-\paragraph{Direct data display}
+The model can then be validated by predicting new data points and compare this new data to a test dataset.
 
-Show the complete data and its correspondent simulations. It's best to show several replications.
+%When doing Bayesian data analysis, we have observed data $Y$ and a prior belief $P(\theta)$ about the mechanism that generated the data, and we use those to set up a full probability model $P(y,\theta|Y)$ over all model parameters $\theta$ and all possible data $y$. The conceptual difference to conventional Statistics is two-fold: First, we don't use prior beliefs in conventional Statistics (at least not for parameter estimation), second, in conventional Statistics we only set up a probability model over the data, not over the model parameters. The model parameters in conventional Statistics are fixed after the parameter estimation.
+%\\
+%\\
+%The principle of setting up the full probability model of Bayesian Statistics (also called the joint probability distribution) is as follows:
+%\\
+%According to the chain rule, we can compute the full probability model with the following formula:
+%\begin{equation}
+%p(y,\theta|Y) = p(y|\theta,Y) * p(\theta|Y)
+%\end{equation}
+%Since the probability for a specific value of $y$ does not depend on the observed data $Y$, if we already know $\theta$, we can write equivalently:
+%\begin{equation}
+%p(y,\theta|Y) = p(y|\theta) * p(\theta|Y)
+%\end{equation}
+%$p(y|\theta)$ is usually easy to compute since it is given by the chosen model class. For computing the second term, $P(\theta|Y)$, we use the Bayes rule:
+%\begin{equation}
+%p(\theta|Y) = p(Y|\theta) * p(\theta) / p(Y)
+%\end{equation}
+%This is where the prior belief comes into play.  $p(\theta)$ represents the prior belief, the distribution over the model parameters $\theta$, that we assume from prior knowledge. $p(Y|\theta)$ is the likelihood: The probability that the observed data occur at a given parameter. The problems of choosing a suitable likelihood and prior are treated in sections \ref{Choosing an appropriate prior distribution} and \ref{Sampling distribution}. $p(Y)$, the overall probability of the observed data, does not have to be computed since it can be treated as a constant. (TODO: UNDERSTAND THIS BETTER, HOW p(Y) CAN BE IGNORED)
+%
+%\\
+%%In the field of statistics, one deals usually with the following questions:
+%%
+%%\begin{itemize}
+%%	\item What kind of model should I choose?
+%%	\item Which features should I include in my model?
+%%	\item What are the most likely values for my model parameters?
+%%	\item What is the most likely outcome for additional observations under certain conditions?
+%%	\item How certain am I that my estimated parameter values are correct?
+%%\end{itemize}
+%%The latter three of these questions can be answered by using a Bayesian approach to statistics. Given a model, Bayesian statistics is about computing a joint probability distribution over all parameters and outcomes, so that a probability density for each possible value of parameters and outcomes can be obtained. Prior knowledge of the problem as well as observed data affect the form of the joint probability distribution. Using marginalization, conditional probability distributions can then be calculated for the desired outcomes. These conditional probability distributions are also called posteriors and can be used for parameter estimation, prediction and assessing the uncertainty of estimates. This chapter will outline how Bayesian statistics are applied to answer the abovementioned questions.
+%\subsection{Rules of Probabilistic Inference}
+%
+%When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
+%
+%\subsubsection{Chain rule}
+%
+%The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
+%
+%\begin{equation}
+%P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
+%\end{equation}
+%
+%\subsubsection{Total probability rule}
+%
+%The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
+%
+%\begin{equation}
+%P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
+%\end{equation} 
+%
+%\subsubsection{Bayes' rule}
+%
+%Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. 
+%
+%\begin{equation}
+%P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
+%\end{equation}
+%
 
-\paragraph{Display data summaries}
-
-\paragraph{Display discrepancy measures}
-Bayesian residuals are defined by $y_i - g(x,\theta)$, where, in contrast to classical residuals, $\theta$ is not a point estimate of parameters, but a single draw from the posterior distribution of the parameters.
-
-Difficult with discrete data, since residuals can only take certain discrete values. Graphical visualization can then be misleading since the discrete values can suggest patterns. To avoid this, one can use \textit{binned residuals}, that is plotting the averages over a number of residuals and their corresponding outcomes. 
+%\subsection{Choosing an appropriate prior distribution}
+%\label{Choosing an appropriate prior distribution}
+%There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
+%\\
+%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common noninformative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
+%Besides informative and noninformative prior distributions there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter. A normal distribution with high variance is often used as weakly informative prior.
+%\\
+%The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
+%\\
+%A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
+%
+%\subsection{Sampling distribution}
+%\label{Sampling distribution}
+%
+%The sampling distribution, also called the likelihood of the data.
+%\\
+%Often it is about which distribution class should be chosen for the prior and the likelihood. Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sampling distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
+%\\
+%distributions can be chosen for mathematical convenience. One could estimate hyperparameters of the likelihood distribution from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
+%
+%\subsection{Evaluating models}
+%
+%Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
+%
+%Different models can lead to different posterior inferences, even if both models have a good fit.
+%
+%model checking: How good does the model fit the data?
+%Sensitivitiy analysis: Comparison of different models with good fit
+%
+%This is necessary after a joint probability density and a posterior density are calculated. How good are the prior and the likelihood model?
+%\textit{Sensitivity analysis} deals with the question, how much the posterior is changed when one chooses a different (but also reasonable) model for the likelihood or the prior, or other assumptions affecting the posterior.
+%
+%In theory: Setting up a 'super-model' as joint-distribution which includes all possible realities. Posterior of this super-model then automatically incorporates the sensitivity analysis. In practice this is conceptually and computationally infeasible and also is still dependent on the assumptions made when creating the super-model being correct.
+%
+%One way is just to compare model predictions with the actual outcomes (this is referred to as external validation). If for some reason it is not possible to get the acutal outcomes (for example if they lie in the future), one needs to approximate external validation with the available data.
+%
+%\textit{Posterior predictive checking}: Use global summaries of the data distribution and the predictive distribution to evaluate the model: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
+%
+%model checking by calculating \textit{test quantities}. \textit{test quantities} are scalar summaries of parameters that are used to compare data to simulations. \textit{test quantities} are similar to test statistics in the classical approach. Besides on the data, \textit{test quantities} can also depend on the parameters.
+%
+%Graphical comparison of simulated and data histograms (!! maybe here point out usefulness of Lumen)
+%
+%tail-area-probability: p-value. p-value in classical statistics: Probability, that, given a parameter $\theta$, a test statistic for replicated data is greater or equal the test statistic for the observed data,as shown in equation \ref{eq:classical_p}:
+%
+%\begin{equation}
+%p_C = Pr(T(y^{rep}) >= T(y) | \theta)
+%\label{eq:classical_p}
+%\end{equation}
+%
+%\cite{1439840954}
+%
+%The Bayesian p-value, on the other hand, is not conditional on a fixed $\theta$, since in Bayesian statistics parameters are drawn from a distribution the same way as outcome variables. Instead, the observed data $y$ is the fixed quantity for the Bayesian p-value, as shown in equation \ref{eq:bayesian_p}
+%
+%\begin{equation}
+%p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
+%\label{eq:bayesian_p}
+%\end{equation}
+%
+%p-value depends on the chosen test quantity.
+%
+%
+%Bayesian predictive checking: choose and compute test quantites for the data and for simulations, then compute the p-value for the test quantity (probability that the test quantity of the data could have arisen under the model)
+%
+%Test quantities give information about a specific aspect of the observed/simulated data. A model can predict values that are in some aspects similar to the data, in other aspects different. Therefore it can make sense to compute p-values fur several different test quantities.
+%If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) pointwise, eg. in a scatterplot or in a histogram of the differences. The scatterplot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
+%Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
+%Graphical visualization can be used to identify useful test quantities.
+%If a test quantity has a p-value close to 0 or 1, the aspect that is analysed by the test quantity is not well captured in the model.
+%\\
+%Model checking depends on the data-collection model (how the data was collected), since data has to be replicated for computing a p-value. Posterior Inference however does not depend on the data collection model, as long as the likelihood model stays the same. Because of this, the same posterior results(what are the parameters) can get different model checking results (how well does the model fit) when the data-collection model is changed.
+%\\
+%Marginal predictive checks: Instead of replicating data from the joint posterior distribution, one can also compute the probability for a certain outcome, and compare this probability with the data....(p.153).
+%\\
+%Graphical posterior predictive checks: Basic Idea: Visualize the data alongside simulated data and so find discrepancies --> perfect in Lumen 
+%Possibilities:
+%\begin{itemize}
+%	\item Direct display of all the data
+%	\item Display of data summaries (e.g. if the data is so large that it is not helpful to display all the data)
+%	\item Display a measure of discrepancy betweem model and data
+%\end{itemize}
+%
+%MAYBE BUILD EXAMPLES WITH LUMEN TO ILLUSTRATE USEFULNESS OF LUMEN
+%\paragraph{Direct data display}
+%
+%Show the complete data and its correspondent simulations. It's best to show several replications.
+%
+%\paragraph{Display data summaries}
+%
+%\paragraph{Display discrepancy measures}
+%Bayesian residuals are defined by $y_i - g(x,\theta)$, where, in contrast to classical residuals, $\theta$ is not a point estimate of parameters, but a single draw from the posterior distribution of the parameters.
+%
+%Difficult with discrete data, since residuals can only take certain discrete values. Graphical visualization can then be misleading since the discrete values can suggest patterns. To avoid this, one can use \textit{binned residuals}, that is plotting the averages over a number of residuals and their corresponding outcomes. 
 
 
 
