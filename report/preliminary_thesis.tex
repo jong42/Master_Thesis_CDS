@@ -2,6 +2,7 @@
 
 % packages and configurations
 \usepackage{hyperref} % reference chapters
+\usepackage[toc,page]{appendix} % appendix
 \usepackage{animate} % needed for animations and videos
 \usepackage{bm} % bold font in equation environments
 \usepackage[utf8]{inputenc}	% für Umlaute ect.
@@ -132,107 +133,38 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \section{Concepts of Bayesian Statistics}
 
-\textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.}
+\textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.} 
+This section requires an understanding of basic calculation rules for working with conditional probabilities. These rules are further explained in appendix \ref{appendix:Rules of Probabilistic Inference}.
 \subsection{General principle}
-Bayesian data analysis is commonly used for parameter estimation and prediction of new data points. So before doing Bayesian data analysis, one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model, it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach, where model parameters are just single points. In Bayesian data analysis, parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these prior distributions. Finding a good prior can be a complex task. It should represent the knowledge that the researcher has about the parameter previous to seeing any data.
-\\
+\label{subsec: General principle}
+Bayesian data analysis is commonly used for parameter estimation and prediction of new data points. So before doing Bayesian data analysis, one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model, it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach, where model parameters are just single points. In Bayesian data analysis, model parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these so-called prior distributions. Finding a good prior can be a complex task. It should represent the knowledge that the researcher has about the parameter previous to seeing any data.
+\paragraph{Parameter estimation}
 Once the model as well as the priors are specified, parameter estimation can be performed by applying the Bayes rule to calculate posterior distributions on the parameters, that is, probability distributions on the parameters given the observed data. The Bayes rule allows it to invert the order of a conditional probability and goes as follows:
 \begin{equation}
 p(A|B) = p(B|A) * p(A)/p(B)
 \end{equation}
-Transferring that to a model with data $X$ and parameters $\theta$, we get:
+Transferring that to a model with data $X$ and parameters $\theta$, according to \cite{1439840954}, we get:
 \begin{equation}
+\begin{split}
 p(\theta|X) = p(X|\theta) * p(\theta)/p(X)
+\end{split}
 \end{equation}
-$p(\theta|X)$ is the posterior distribution of the parameters. Getting this distribution is equivalent to getting the parameter estimates in the classical frequentist approach. $p(X|\theta)$ is the distribution of the data, given the parameters. This is what is specified in the model structure that has to be found before doing any Bayesian analysis. $p(\theta)$ is the distribution of the parameters without seeing any data. It is the prior distribution of the parameters, that has already been set up. $p(X)$ is the distribution over the data without seeing any parameters. It can be calculated by integrating over the joint distribution of the data and the parameters, but it can become difficult to solve with increasing model complexity. However, it is a constant, since the observed data does not change, and therefore it can be ignored for many applications.
+Here, $p(\theta|X)$ is the posterior distribution of the parameters. Getting this distribution is equivalent to getting the parameter estimates in the classical frequentist approach. $p(X|\theta)$ is the distribution of the data, given the parameters. This is what is specified in the model structure that has to be found before doing any Bayesian analysis. $p(\theta)$ is the distribution of the parameters without seeing any data. It is the prior distribution of the parameters, that has already been set up in the first step. $p(X)$ is the distribution over the data without seeing any parameters. It can be calculated by integrating over the joint distribution of the data and the parameters, but that integral can become difficult to solve with increasing model complexity. However, it is a constant, since the observed data does not change, and therefore it can be ignored for many applications.
+\paragraph{Prediction}
+For the prediction of new data points it is necessary to get the posterior distribution of the data, that is, the probability distribution over the data variables $x$ given the observed data $X$: $P(x|X)$. New data points can then be generated by sampling from this distribution. Calculating it requires the joint posterior distribution to be known: the probability distribution over the data as well as the parameters given the observed data $p(x,\theta|X)$. The joint posterior can be computed as follows:
+\begin{equation}
+\begin{aligned}
+p(x,\theta|X) &	= p(x|\theta,X) * p(\theta|X) \\
+ 			& = p(x|\theta) * p(\theta|X)
+\end{aligned}
+\end{equation}
+The prediction of new data points can then be done by integrating over the joint posterior distribution, and sampling from the resulting distribution \cite{1439840954}:
+\begin{equation}
+P(x|X) = \int P(x,\theta|X) d\theta
+\end{equation}
 
-
-Following that, the posterior joint distribution of all random variables in the model, including parameters, can be calculated.
-
-The prediction of new data points can then be done by integrating over the joint posterior distribution, and sampling from the resulting distribution.
-
-The model can then be validated by predicting new data points and compare this new data to a test dataset.
-
-%When doing Bayesian data analysis, we have observed data $Y$ and a prior belief $P(\theta)$ about the mechanism that generated the data, and we use those to set up a full probability model $P(y,\theta|Y)$ over all model parameters $\theta$ and all possible data $y$. The conceptual difference to conventional Statistics is two-fold: First, we don't use prior beliefs in conventional Statistics (at least not for parameter estimation), second, in conventional Statistics we only set up a probability model over the data, not over the model parameters. The model parameters in conventional Statistics are fixed after the parameter estimation.
-%\\
-%\\
-%The principle of setting up the full probability model of Bayesian Statistics (also called the joint probability distribution) is as follows:
-%\\
-%According to the chain rule, we can compute the full probability model with the following formula:
-%\begin{equation}
-%p(y,\theta|Y) = p(y|\theta,Y) * p(\theta|Y)
-%\end{equation}
-%Since the probability for a specific value of $y$ does not depend on the observed data $Y$, if we already know $\theta$, we can write equivalently:
-%\begin{equation}
-%p(y,\theta|Y) = p(y|\theta) * p(\theta|Y)
-%\end{equation}
-%$p(y|\theta)$ is usually easy to compute since it is given by the chosen model class. For computing the second term, $P(\theta|Y)$, we use the Bayes rule:
-%\begin{equation}
-%p(\theta|Y) = p(Y|\theta) * p(\theta) / p(Y)
-%\end{equation}
-%This is where the prior belief comes into play.  $p(\theta)$ represents the prior belief, the distribution over the model parameters $\theta$, that we assume from prior knowledge. $p(Y|\theta)$ is the likelihood: The probability that the observed data occur at a given parameter. The problems of choosing a suitable likelihood and prior are treated in sections \ref{Choosing an appropriate prior distribution} and \ref{Sampling distribution}. $p(Y)$, the overall probability of the observed data, does not have to be computed since it can be treated as a constant. (TODO: UNDERSTAND THIS BETTER, HOW p(Y) CAN BE IGNORED)
-%
-%\\
-%%In the field of statistics, one deals usually with the following questions:
-%%
-%%\begin{itemize}
-%%	\item What kind of model should I choose?
-%%	\item Which features should I include in my model?
-%%	\item What are the most likely values for my model parameters?
-%%	\item What is the most likely outcome for additional observations under certain conditions?
-%%	\item How certain am I that my estimated parameter values are correct?
-%%\end{itemize}
-%%The latter three of these questions can be answered by using a Bayesian approach to statistics. Given a model, Bayesian statistics is about computing a joint probability distribution over all parameters and outcomes, so that a probability density for each possible value of parameters and outcomes can be obtained. Prior knowledge of the problem as well as observed data affect the form of the joint probability distribution. Using marginalization, conditional probability distributions can then be calculated for the desired outcomes. These conditional probability distributions are also called posteriors and can be used for parameter estimation, prediction and assessing the uncertainty of estimates. This chapter will outline how Bayesian statistics are applied to answer the abovementioned questions.
-%\subsection{Rules of Probabilistic Inference}
-%
-%When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
-%
-%\subsubsection{Chain rule}
-%
-%The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
-%
-%\begin{equation}
-%P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
-%\end{equation}
-%
-%\subsubsection{Total probability rule}
-%
-%The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
-%
-%\begin{equation}
-%P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
-%\end{equation} 
-%
-%\subsubsection{Bayes' rule}
-%
-%Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. 
-%
-%\begin{equation}
-%P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
-%\end{equation}
-%
-
-%\subsection{Choosing an appropriate prior distribution}
-%\label{Choosing an appropriate prior distribution}
-%There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
-%\\
-%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common noninformative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
-%Besides informative and noninformative prior distributions there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter. A normal distribution with high variance is often used as weakly informative prior.
-%\\
-%The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
-%\\
-%A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
-%
-%\subsection{Sampling distribution}
-%\label{Sampling distribution}
-%
-%The sampling distribution, also called the likelihood of the data.
-%\\
-%Often it is about which distribution class should be chosen for the prior and the likelihood. Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sampling distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
-%\\
-%distributions can be chosen for mathematical convenience. One could estimate hyperparameters of the likelihood distribution from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
-%
-%\subsection{Evaluating models}
+\subsection{Evaluating models}
+The model can then be validated by predicting new data points and compare this new data to a test dataset \cite{1439840954}.
 %
 %Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
 %
@@ -307,6 +239,26 @@ The model can then be validated by predicting new data points and compare this n
 
 
 
+%\subsection{Choosing an appropriate prior distribution}
+%\label{Choosing an appropriate prior distribution}
+%There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
+%\\
+%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common noninformative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
+%Besides informative and noninformative prior distributions there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter. A normal distribution with high variance is often used as weakly informative prior.
+%\\
+%The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
+%\\
+%A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
+%
+%\subsection{Sampling distribution}
+%\label{Sampling distribution}
+%
+%The sampling distribution, also called the likelihood of the data.
+%\\
+%Often it is about which distribution class should be chosen for the prior and the likelihood. Standard, convenient distributions for single-parameter models: normal, binomial, Poisson, exponential. Those can also be combined to represent more complex distributions. For different classes of sampling distributions there are corresponding conjugate prior distributions which lead in turn to posterior distributions of the same form. \cite{1439840954}
+%\\
+%distributions can be chosen for mathematical convenience. One could estimate hyperparameters of the likelihood distribution from the data in some cases. This is a bit of a circular reasoning, but apparently  it is appropriate for \cite{1439840954}.
+
 %\subsection{Stuff that has to be/could be placed somewhere}
 %
 %
@@ -320,24 +272,12 @@ The model can then be validated by predicting new data points and compare this n
 %\subsubsection{Drawing inference}
 %According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
 %\\
-%Making predictions for a new data points requires both the probability distribution of the new data point, given a parameter value, as well as the probability distribution of the parameter, given the old data points.
-%\\
 %If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
 %
 %\begin{equation}
 %p(x_{new}|\boldsymbol x, \alpha) = \int p(x_{new}|\beta) * p(\beta | \boldsymbol x,\alpha) d \beta
 %\label{eq:posterior_predictive}
 %\end{equation}
-
-\subsection{Gibbs Sampling}
-
-Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_j, j \neq i)$ for each quantity.
-Algorithm works as follows:
-\begin{itemize}
-\item Select arbitrary starting points for $\theta_0,...,\theta_n$
-\item Update each $\theta$ by drawing from its conditional distribution given the values of the other quantities. Repeat this step until terminate condition is fulfilled.
-\end{itemize}
-\cite{Martz1994}
 
 \section{Probabilistic Programming}
 
@@ -379,12 +319,12 @@ Traditional means for representing models are not always sufficient for probabil
 
 \subsection{Inference through sampling}
 
-Using the Bayes formula, we get the posterior distribution the following way:
+As stated in \ref{subsec: General principle}, using the Bayes formula, we get the posterior distribution the following way:
 
 \begin{equation}
 	p(\theta|x) = p(x|\theta) * p(\theta) / p(x)
 \end{equation}
-We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data, however, is more complicated. To compute it analytically, we would have to compute the following integral:
+We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data,$p(x)$, however, is more complicated. To compute it analytically, we would have to compute the following integral:
 
 \begin{equation}
 \begin{split}
@@ -392,24 +332,45 @@ We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the mode
 		 =  \int p(x|\theta) * p(\theta) d \theta
 \end{split}
 \end{equation}
-Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. The easiest of them is called Simple Monte Carlo. There
-we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
+Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not always possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. 
+
+\paragraph{Simple Monte Carlo}
+The easiest of them is called Simple Monte Carlo. 
+There we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
 \begin{equation}
 	\int p(x|\theta) * p(\theta) d \theta \approx 1/m * \sum^m p(x|\theta_i),\quad \theta_i \sim p(\theta)
 \end{equation}
 Simple Monte Carlo has a number of disadvantages, so more sophistically methods are genrally used, like Gibbs sampling or NUTS.
+\paragraph{Markov Chain Monte Carlo}
+Markov chain simulations, also called Markov Chain Monte Carlo, or MCMC, summarize a set of methods where the parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain. So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Draws from the second half of the chain can then be used as samples. The Gibbs and the Metropolis sampler, which are explained below, both belong to the MCMC methods \cite{1439840954}.
+\paragraph{Gibbs Sampling}
+Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_j, j \neq i)$ for each quantity.
+The algorithm works as follows:
+\begin{itemize}
+	\item Select arbitrary starting points for $\theta_0,...,\theta_n$
+	\item Update each $\theta_i$ by drawing from its conditional distribution given the latest values of the other quantities. Repeat this step until convergence is achieved.
+\end{itemize}
+\cite{Martz1994}
+\paragraph{Metropolis}
+\begin{enumerate}
+	\item Draw a starting point $\theta^0$ from a starting distribution $p_0(\theta)$
+	\item proposal distribution, also called jumping distribution
 
-Markov Chain simulation: 
+Metropolis requires the ability to compute a (not necessarily normalized) probability density for a given point.
 
-Parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain.
+generalization of the Gibbs sampler
+\cite{1439840954}
 
-So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$.
+In short: Do a random walk. If the probability density of the proposed point is higher than the probability density of the current point, go to the proposed point. Otherwise, only go to the proposed point with a certain probability and stay at the current point otherwise.
+The distribution of the points (at least after convergence) have the property that they resemble the actual probability distribution one wants to find.
 
-The chain has the property of becoming more similar to the real posterior distribution of the parameters in each iteration.
+\end{enumerate}
+\paragraph{Metropolis-Hastings}
 
-\subsection{Difference to conventional Programming Languages}
+Difference between Metropolis and Metropolis-Hastings: Calculation of the treshold at which the proposed point is accepted. Metropolis hastings additionally has the ratio between the proposal distributions in it. Metropolis is chosen in a way that these cancel out.
 
-When estimating parameters, not only the most likely value for the parameters is given, but also their uncertainty.
+\paragraph{NUTS}
+
 
 \subsection{Comparing Different Probabilistic Programming Languages}
 
@@ -845,5 +806,35 @@ We choose the following priors:
 \bibliography{Literatur.bib}
 \bibliographystyle{ieeetr}
 
+\begin{appendices}
+\section{Rules of Probabilistic Inference}
+\label{appendix:Rules of Probabilistic Inference}
 
+When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
+
+\paragraph{Chain rule}
+
+The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
+
+\begin{equation}
+P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
+\end{equation}
+
+\paragraph{Total probability rule}
+
+The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
+
+\begin{equation}
+P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
+\end{equation} 
+
+\paragraph{Bayes' rule}
+
+Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. 
+
+\begin{equation}
+P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
+\end{equation}
+\end{appendices}
+	
 \end{document}
