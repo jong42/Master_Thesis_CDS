@@ -368,9 +368,36 @@ The distribution of the points (at least after convergence) have the property th
 \paragraph{Metropolis-Hastings}
 
 Difference between Metropolis and Metropolis-Hastings: Calculation of the treshold at which the proposed point is accepted. Metropolis hastings additionally has the ratio between the proposal distributions in it. Metropolis is chosen in a way that these cancel out.
+\paragraph{Hamiltonian Monte-Carlo}
+less random walkbehaviour thanother MCMC algorithms
+needs model parameters to be continuous
+can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^(5/4)$.
+The algorithmhas parameters: a stepsize and a desired number of steps
 
+auxiliary momentum variable $r_d$ for each modelvariable $\theta_d$.
+The momentum variables aredrawn independently from the standard normal distribution.
+
+This extended model can be interpreted as a Hamiltonian system, that is,a physical model of particles, where $\theta$ represents a position of a particle in a $d$-dimensional space and $r_d$ represents the momentum of the particle in the $d$th dimension, $p(\theta,r)$.
+
+Behaviour of $\theta$ and $r$ over time can be simulated through integration.
+
+We have a momentum that leads to a new position of the parameters by applying the leapfrog integrator. This new position is then either accepted or rejected according to the metropolis algorithm.
+
+$L$ is the number of integration steps to get to the next sample. $\epsilon$ is the stepsize  of one integration step.
+
+If $L$ is too small, the samples will be close to each other. If $L$ is too large, the steps can loop back and retrace their steps.
+
+\ref{hoffman2014no}
 \paragraph{NUTS}
+a self-tuning variant of Hamiltonian Monte Carlo \ref{Salvatier2016}.Uses gradient information about log-posterior density.
+automatic differentiation of the log posterior density
+less random walkbehaviour thanother MCMC algorithms
+needs model parameters to be continuous
+can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^(5/4)$.
+The algorithmhas parameters: a stepsize and a desired number of steps
+\ref{hoffman2014no}
 
+PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer_guide.html)
 
 \subsection{Comparing Different Probabilistic Programming Languages}
 
@@ -457,6 +484,8 @@ PyMC3 is an open-source probabilistic programming framework for Python. The foll
 PyMC3 mainly uses simulation techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm, that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
 \\
 The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
+\\
+PyMC3 uses Theanoto improve performance
 
 \begin{figure}
 	\begin{lstlisting}
