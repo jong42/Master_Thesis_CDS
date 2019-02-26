@@ -332,15 +332,14 @@ We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the mode
 		 =  \int p(x|\theta) * p(\theta) d \theta
 \end{split}
 \end{equation}
-Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not always possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. 
+Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not always possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. Some of the more popular of these methods are explained below.
 
 \paragraph{Simple Monte Carlo}
-The easiest of them is called Simple Monte Carlo. 
-There we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
+One of the most basic methods is called Simple Monte Carlo. There we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
 \begin{equation}
 	\int p(x|\theta) * p(\theta) d \theta \approx 1/m * \sum^m p(x|\theta_i),\quad \theta_i \sim p(\theta)
 \end{equation}
-Simple Monte Carlo has a number of disadvantages, so more sophistically methods are genrally used, like Gibbs sampling or NUTS.
+Simple Monte Carlo has a number of disadvantages, so more sophistically methods are generally used, like Gibbs sampling or NUTS.
 \paragraph{Markov Chain Monte Carlo}
 Markov chain simulations, also called Markov Chain Monte Carlo, or MCMC, summarize a set of methods where the parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain. So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Draws from the second half of the chain can then be used as samples. The Gibbs and the Metropolis sampler, which are explained below, both belong to the MCMC methods \cite{1439840954}.
 \paragraph{Gibbs Sampling}
@@ -352,19 +351,14 @@ The algorithm works as follows:
 \end{itemize}
 \cite{Martz1994}
 \paragraph{Metropolis}
+The metropolis algorithm can be seen as a generalization of the Gibbs sampler \cite{1439840954} and was originally developed to calculate the behaviour of interacting molecules without having to compute the multidimensional integrals previously needed for that computation\cite{Metropolis1953}. The algorithm goes as follows : 
 \begin{enumerate}
-	\item Draw a starting point $\theta^0$ from a starting distribution $p_0(\theta)$
-	\item proposal distribution, also called jumping distribution
-
-Metropolis requires the ability to compute a (not necessarily normalized) probability density for a given point.
-
-generalization of the Gibbs sampler
-\cite{1439840954}
-
-In short: Do a random walk. If the probability density of the proposed point is higher than the probability density of the current point, go to the proposed point. Otherwise, only go to the proposed point with a certain probability and stay at the current point otherwise.
-The distribution of the points (at least after convergence) have the property that they resemble the actual probability distribution one wants to find.
-
+\item An arbitrary starting location is chosen for each of the molecules. 
+\item For each molecule, a new possible location is proposed. How this new location is calculated is itself a complex task and can be crucial for the performance of the algorithm. For the sake of simplicity we assume here that the proposed location is just randomly chosen in the near vicinity of the old location.
+\item The change of energy in the system introduced by the position change is calculated.
+\item If the proposed location has a lower energy level than the current one, the proposed location is accepted. If it has a higher energy level, it is accepted with a probability antiproportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
 \end{enumerate}
+This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
 \paragraph{Metropolis-Hastings}
 
 Difference between Metropolis and Metropolis-Hastings: Calculation of the treshold at which the proposed point is accepted. Metropolis hastings additionally has the ratio between the proposal distributions in it. Metropolis is chosen in a way that these cancel out.
@@ -387,17 +381,17 @@ $L$ is the number of integration steps to get to the next sample. $\epsilon$ is 
 
 If $L$ is too small, the samples will be close to each other. If $L$ is too large, the steps can loop back and retrace their steps.
 
-\ref{hoffman2014no}
+\cite{hoffman2014no}
 \paragraph{NUTS}
-a self-tuning variant of Hamiltonian Monte Carlo \ref{Salvatier2016}.Uses gradient information about log-posterior density.
+a self-tuning variant of Hamiltonian Monte Carlo \cite{Salvatier2016}.Uses gradient information about log-posterior density.
 automatic differentiation of the log posterior density
 less random walkbehaviour thanother MCMC algorithms
 needs model parameters to be continuous
 can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^(5/4)$.
 The algorithmhas parameters: a stepsize and a desired number of steps
-\ref{hoffman2014no}
+\cite{hoffman2014no}
 
-PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer_guide.html)
+PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
 
 \subsection{Comparing Different Probabilistic Programming Languages}
 
