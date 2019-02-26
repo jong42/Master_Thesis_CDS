@@ -361,6 +361,9 @@ The metropolis algorithm can be seen as a generalization of the Gibbs sampler \c
 This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
 \paragraph{Metropolis-Hastings}
 
+\cite{chib1995understanding}
+
+
 Difference between Metropolis and Metropolis-Hastings: Calculation of the treshold at which the proposed point is accepted. Metropolis hastings additionally has the ratio between the proposal distributions in it. Metropolis is chosen in a way that these cancel out.
 \paragraph{Hamiltonian Monte-Carlo}
 less random walkbehaviour thanother MCMC algorithms
