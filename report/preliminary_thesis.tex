@@ -384,18 +384,19 @@ As one can see, the update process requires gradient information on the log prob
 %This extended model can be interpreted as a Hamiltonian system, that is,a physical model of particles, where $\theta$ represents a position of a particle in a $d$-dimensional space and $r_d$ represents the momentum of the particle in the $d$th dimension, $p(\theta,r)$.
 %If $L$ is too small, the samples will be close to each other. If $L$ is too large, %the steps can loop back and retrace their steps.
 \paragraph{NUTS}
-The No-U-Turn-Sampler (NUTS) is a self-tuning variant of Hamiltonian Monte Carlo \cite{Salvatier2016}. The number of steps per sample $L$ does not need to be specified at a fixed value anymore.
+The No-U-Turn-Sampler (NUTS) is a self-tuning variant of Hamiltonian Monte Carlo \cite{Salvatier2016}. The number of steps per sample $L$ does not need to be specified at a fixed value anymore. Instead, $L$ is automatically found by going forward and backward from the initial position, until the change of location does not increase the distance between initial and proposed location anymore \cite{hoffman2014no}.
 
-goal is to maximize distance between previous and proposed sample. Avoid behaviour where additional steps lead back to previous sample.
-
-
-product of the distance (between initial and proposed sample) and the momentum $r$, that is a measure of how much the distance increases with additional steps. If this measure becomes zero, there is no need to do further steps and the optimal number of steps is reached.
-
-%reversibility is preserved
-
-\cite{hoffman2014no}
+%goal is to maximize distance between previous and proposed sample. Avoid behaviour where additional steps lead back to previous sample.
 
 
+%product of the distance (between initial and proposed sample) and the momentum $r$, that is a measure of how much the distance increases with additional steps. If this measure becomes zero, there is no need to do further steps and the optimal number of steps is reached.
+
+
+%reversibility has to be preserved. That's why the algorithm searches forward and backward.
+
+%a slice variable $u$ is introduced
+
+%reversibility has to be preserved
 PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
 
 \subsection{Comparing Different Probabilistic Programming Languages}
