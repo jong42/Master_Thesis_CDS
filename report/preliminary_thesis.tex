@@ -2,6 +2,7 @@
 
 % packages and configurations
 \usepackage{hyperref} % reference chapters
+\usepackage{algorithm}
 \usepackage[toc,page]{appendix} % appendix
 \usepackage{animate} % needed for animations and videos
 \usepackage{bm} % bold font in equation environments
@@ -356,43 +357,44 @@ The metropolis algorithm can be seen as a generalization of the Gibbs sampler \c
 \item An arbitrary starting location is chosen for each of the molecules. 
 \item For each molecule, a new possible location is proposed. How this new location is calculated is itself a complex task and can be crucial for the performance of the algorithm. For the sake of simplicity we assume here that the proposed location is just randomly chosen in the near vicinity of the old location.
 \item The change of energy in the system introduced by the position change is calculated.
-\item If the proposed location has a lower energy level than the current one, the proposed location is accepted. If it has a higher energy level, it is accepted with a probability antiproportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
+\item If the proposed location has a lower energy level than the current one, the proposed location is accepted. If it has a higher energy level, it is accepted with
+a probability antiproportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
 \end{enumerate}
 This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
 \paragraph{Metropolis-Hastings}
-
-\cite{chib1995understanding}
-
-
-Difference between Metropolis and Metropolis-Hastings: Calculation of the treshold at which the proposed point is accepted. Metropolis hastings additionally has the ratio between the proposal distributions in it. Metropolis is chosen in a way that these cancel out.
+%\cite{chib1995understanding}
+The Metropolis-Hastings sampler is a generalization of the metropolis sampler, where the probability of accepting the proposed point is calculated differently.
+Metropolis hastings additionally has the ratio between the proposal distributions in it \cite{chib1995understanding}. Metropolis is chosen in a way that these cancel out.
 \paragraph{Hamiltonian Monte-Carlo}
-less random walkbehaviour thanother MCMC algorithms
-needs model parameters to be continuous
-can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^(5/4)$.
-The algorithmhas parameters: a stepsize and a desired number of steps
+The base approach of Hamiltonian Monte Carlo (HMC) is that we have a particle in a multidimensional space where each dimension represents a variable of the target distribution and thus the location $\theta$ of the particle represents a specific point on the target distribution. As in the metropolis algorithm, a starting location is arbitrarily chosen. The difference to the metropolis algorithm now lies in the generation of the new locations. An auxiliary variable $r$ and the parameters $L$ and $\epsilon$ are introduced for this purpose. $r$ represents the momentum of the particle, $L$ is the number of steps to get to one sample, and $\epsilon$ is the step size for one of these steps. For generating one sample point, a change of locations is proposed $L$ times and is accepted or rejected according to the metropolis algorithm. In each of the $L$ steps, $\theta$ and $r$ are updated by using the following algorithm, known as leapfrog integrator: 
+\begin{algorithm}[h]
+$r \leftarrow r + (\epsilon/2)  \, \nabla_\theta \, (log \, p(\theta))$\\
+$\theta \leftarrow \theta + \epsilon r$\\
+$r \leftarrow r + (\epsilon/2) \, \nabla_\theta \, (log \, p(\theta))$
+\end{algorithm}
+\\ 
+As one can see, the update process requires gradient information on the log probability density of the target distribution. So this method cannot be applied if gradient information is unavailable. The generated locations here show less random walk behaviour and therefore better performance than the algorithms above, if the parameters are set properly \cite{hoffman2014no}.
 
-auxiliary momentum variable $r_d$ for each modelvariable $\theta_d$.
-The momentum variables aredrawn independently from the standard normal distribution.
+%can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^{(5/4)}$
 
-This extended model can be interpreted as a Hamiltonian system, that is,a physical model of particles, where $\theta$ represents a position of a particle in a $d$-dimensional space and $r_d$ represents the momentum of the particle in the $d$th dimension, $p(\theta,r)$.
+%auxiliary momentum variable $r_d$ for each modelvariable $\theta_d$.
 
-Behaviour of $\theta$ and $r$ over time can be simulated through integration.
+%The momentum variables are drawn independently from the standard normal distribution.
 
-We have a momentum that leads to a new position of the parameters by applying the leapfrog integrator. This new position is then either accepted or rejected according to the metropolis algorithm.
-
-$L$ is the number of integration steps to get to the next sample. $\epsilon$ is the stepsize  of one integration step.
-
-If $L$ is too small, the samples will be close to each other. If $L$ is too large, the steps can loop back and retrace their steps.
-
-\cite{hoffman2014no}
+%This extended model can be interpreted as a Hamiltonian system, that is,a physical model of particles, where $\theta$ represents a position of a particle in a $d$-dimensional space and $r_d$ represents the momentum of the particle in the $d$th dimension, $p(\theta,r)$.
+%If $L$ is too small, the samples will be close to each other. If $L$ is too large, %the steps can loop back and retrace their steps.
 \paragraph{NUTS}
-a self-tuning variant of Hamiltonian Monte Carlo \cite{Salvatier2016}.Uses gradient information about log-posterior density.
-automatic differentiation of the log posterior density
-less random walkbehaviour thanother MCMC algorithms
-needs model parameters to be continuous
-can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^(5/4)$.
-The algorithmhas parameters: a stepsize and a desired number of steps
+The No-U-Turn-Sampler (NUTS) is a self-tuning variant of Hamiltonian Monte Carlo \cite{Salvatier2016}. The number of steps per sample $L$ does not need to be specified at a fixed value anymore.
+
+goal is to maximize distance between previous and proposed sample. Avoid behaviour where additional steps lead back to previous sample.
+
+
+product of the distance (between initial and proposed sample) and the momentum $r$, that is a measure of how much the distance increases with additional steps. If this measure becomes zero, there is no need to do further steps and the optimal number of steps is reached.
+
+%reversibility is preserved
+
 \cite{hoffman2014no}
+
 
 PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
 
