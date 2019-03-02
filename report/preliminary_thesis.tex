@@ -74,60 +74,6 @@ The thesis will be divided into two main parts, the first part being an overview
 
 \include{glossar}
 \printglossaries
-\section{Road Map}
-
-\begin{enumerate}
-	\item Getting started
-	\begin{itemize}
-		\item set up Master thesis document
-		\item Probabilistic Programming Languages
-		\begin{itemize}
-			\item play at least with: PyMC3, Stan
-			\item read the docs, wiki, ...
-			\item download the libraries
-			\item reproduce the getting started tutorials
-			\item --> understand the ideas and how to use it, get a feeling for it
-		\end{itemize}
-		\item theoretic background: Read Bayesian Data Analysis part I, Chapter 1,2 and part II, chapter 6,7
-		\item Lumen
-		\begin{itemize}
-			\item install locally and play with
-			\item understand main idea of Lumen and what we want to do with it
-		\end{itemize}
-		\item Start filling up your MA thesis document
-		\begin{itemize}
-			\item understand and write down in MA thesis the "why \& what"
-			\item describe the background of the work, e.g. summarize PPLs
-		\end{itemize}
-		\item give a short presentation
-		\begin{itemize}
-			\item what have you done and learned
-			\item what do you plan to do?
-			\item why is it relevant?
-			\item how do you plan to measure the success?
-		\end{itemize}	
-	\end{itemize}
-	\item First connection of PPLs to Lumen
-	\begin{itemize}
-		\item Start from small, very simple and specific example. Generalize later.
-		\item Choose PPL to work with
-		\begin {itemize}
-		\item work out requirements on PPL
-		\item work out preferred features of PPL
-		\item choose a PPL based on these requrements and preferences
-	\end{itemize}
-	\item design wrapper of PPL with Lumen
-	\begin{itemize}
-		\item work out requirement and interface
-		\item identify necessary work on Lumen
-		\item identify necessary work
-	\end{itemize}
-	\item Connect chosen specific example with lumen
-	\item Continue to work on your master thesis document!
-\end{itemize}
-\item Improve, generalize and clean up the connection of your PPL to Lumen
-\end{enumerate}
-
 \section{Introduction}
 
 \textit{In this section, the motivation for the thesis is explained, the task of the thesis is made clear. Furthermore, the structure of the thesis is outlined here. It is possible to get the basic ideas and results of the thesis from reading only this section and the conclusion.}
@@ -164,8 +110,87 @@ The prediction of new data points can then be done by integrating over the joint
 P(x|X) = \int P(x,\theta|X) d\theta
 \end{equation}
 
+\subsection{Inference through sampling}
+
+As stated in \ref{subsec: General principle}, using the Bayes formula, we get the posterior distribution the following way:
+
+\begin{equation}
+p(\theta|x) = p(x|\theta) * p(\theta) / p(x)
+\end{equation}
+We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data,$p(x)$, however, is more complicated. To compute it analytically, we would have to compute the following integral:
+
+\begin{equation}
+\begin{split}
+p(x) = \int p(\theta,x) d \theta \\
+=  \int p(x|\theta) * p(\theta) d \theta
+\end{split}
+\end{equation}
+Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not always possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. Some of the more popular of these methods are explained below.
+
+\paragraph{Simple Monte Carlo}
+One of the most basic methods is called Simple Monte Carlo. There we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
+\begin{equation}
+\int p(x|\theta) * p(\theta) d \theta \approx 1/m * \sum^m p(x|\theta_i),\quad \theta_i \sim p(\theta)
+\end{equation}
+Simple Monte Carlo has a number of disadvantages, so more sophistically methods are generally used, like Gibbs sampling or NUTS.
+\paragraph{Markov Chain Monte Carlo}
+Markov chain simulations, also called Markov Chain Monte Carlo, or MCMC, summarize a set of methods where the parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain. So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Draws from the second half of the chain can then be used as samples. The Gibbs and the Metropolis sampler, which are explained below, both belong to the MCMC methods \cite{1439840954}.
+\paragraph{Gibbs Sampling}
+Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_j, j \neq i)$ for each quantity.
+The algorithm works as follows:
+\begin{itemize}
+	\item Select arbitrary starting points for $\theta_0,...,\theta_n$
+	\item Update each $\theta_i$ by drawing from its conditional distribution given the latest values of the other quantities. Repeat this step until convergence is achieved.
+\end{itemize}
+\cite{Martz1994}
+\paragraph{Metropolis}
+The metropolis algorithm can be seen as a generalization of the Gibbs sampler \cite{1439840954} and was originally developed to calculate the behaviour of interacting molecules without having to compute the multidimensional integrals previously needed for that computation\cite{Metropolis1953}. The algorithm goes as follows : 
+\begin{enumerate}
+	\item An arbitrary starting location is chosen for each of the molecules. 
+	\item For each molecule, a new possible location is proposed. How this new location is calculated is itself a complex task and can be crucial for the performance of the algorithm. For the sake of simplicity we assume here that the proposed location is just randomly chosen in the near vicinity of the old location.
+	\item The change of energy in the system introduced by the position change is calculated.
+	\item If the proposed location has a lower energy level than the current one, the proposed location is accepted. If it has a higher energy level, it is accepted with
+	a probability antiproportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
+\end{enumerate}
+This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
+
+PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
+\paragraph{Metropolis-Hastings}
+%\cite{chib1995understanding}
+The Metropolis-Hastings sampler is a generalization of the metropolis sampler, where the probability of accepting the proposed point is calculated differently.
+Metropolis hastings additionally has the ratio between the proposal distributions in it \cite{chib1995understanding}. Metropolis is chosen in a way that these cancel out.
+\paragraph{Hamiltonian Monte-Carlo}
+The base approach of Hamiltonian Monte Carlo (HMC) is that we have a particle in a multidimensional space where each dimension represents a variable of the target distribution and thus the location $\theta$ of the particle represents a specific point on the target distribution. As in the metropolis algorithm, a starting location is arbitrarily chosen. The difference to the metropolis algorithm now lies in the generation of the new locations. An auxiliary variable $r$ and the parameters $L$ and $\epsilon$ are introduced for this purpose. $r$ represents the momentum of the particle, $L$ is the number of steps to get to one sample, and $\epsilon$ is the step size for one of these steps. For generating one sample point, a change of locations is proposed $L$ times and is accepted or rejected according to the metropolis algorithm. In each of the $L$ steps, $\theta$ and $r$ are updated by using the following algorithm, known as leapfrog integrator: 
+\begin{algorithm}[h]
+	$r \leftarrow r + (\epsilon/2)  \, \nabla_\theta \, (log \, p(\theta))$\\
+	$\theta \leftarrow \theta + \epsilon r$\\
+	$r \leftarrow r + (\epsilon/2) \, \nabla_\theta \, (log \, p(\theta))$
+\end{algorithm}
+\\ 
+As one can see, the update process requires gradient information on the log probability density of the target distribution. So this method cannot be applied if gradient information is unavailable. The generated locations here show less random walk behaviour and therefore better performance than the algorithms above, if the parameters are set properly \cite{hoffman2014no}.
+
+%can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^{(5/4)}$
+
+%auxiliary momentum variable $r_d$ for each modelvariable $\theta_d$.
+
+%The momentum variables are drawn independently from the standard normal distribution.
+
+%This extended model can be interpreted as a Hamiltonian system, that is,a physical model of particles, where $\theta$ represents a position of a particle in a $d$-dimensional space and $r_d$ represents the momentum of the particle in the $d$th dimension, $p(\theta,r)$.
+%If $L$ is too small, the samples will be close to each other. If $L$ is too large, %the steps can loop back and retrace their steps.
+\paragraph{NUTS}
+The No-U-Turn-Sampler (NUTS) is a self-tuning variant of Hamiltonian Monte Carlo, where the number of steps per sample $L$ does not need to be specified at a fixed value anymore. Instead,
+it is attempted to stop the steps once the maximum distance between initial and proposed point is reached. This maximum is reached when the inner product between $r$ and the distance between initial and proposed point becomes negative. The next iteration would then only decrease the distance  \cite{1439840954}.
+\\
+Since this method does not yet guarantee convergence, it is run both forwards and backwards in time, and then stops if it encounters the abovementioned maximum in either direction.
+Once the stop is reached, a sample is drawn from all the points that were visited in the current iteration \cite{hoffman2014no}.
+
+%a slice variable $u$ is introduced
+%reversibility has to be preserved
+
+
 \subsection{Evaluating models}
 The model can then be validated by predicting new data points and compare this new data to a test dataset \cite{1439840954}.
+
 %
 %Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
 %
@@ -284,128 +309,15 @@ The model can then be validated by predicting new data points and compare this n
 
 \textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language is, and a number of PPLs are introduced. A focus is laid on the abilities of the PPLs for graphical model checking}
 \\
-\\
-"Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
-\\
-stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
-
-\subsection{What are Probabilistic Programming Languages}
-
-Modelle spezifizieren/beschreiben 
-
-Random Variables can be represented as objects
-\\
-Posterior probability for parameters comes from the Bayes formula: $P(\theta|data) = p(data|\theta) * p(\theta) / p(data)$. The marginalized probability of the data $p(data)$ is given as follows:
-$p(data) = \int p(\theta,data) d \theta$. This integral can't be calculated (TODO: UNDERSTAND THAT BETTER), so PPLs instead sample from this distribution and get their inference from the samples.
-
-
-
-\cite{wiki:Probabilisticprogramminglanguage}
-
-effizienter in der Beschreibung von Modellen als herkömmliche Programmiersprachen \cite{Hardesty2015}
-
-unifying general purpose programming with probabilistic modeling \cite{probabilistic-programming.org}
-
-
-A \gls{probabilistic reasoning system} uses prior knowledge in the form of a \gls{probabilistic model} to answer a certain query. The particular propertes of the query as well as the prior knowledge are given to an \gls{inference algorithm} which returns an answer in the form of probabilities. Example is shown in figure \ref{fig:example_prs}. Probabilistic Programming is the implementation of a \gls{probabilistic reasoning system} by using a programming language.
-
-Traditional means for representing models are not always sufficient for probabilistic models. Therefore, probabilistic programming languages were introduced to be able to represent models with the full power of a programming language (http://www.probabilistic-programming.org/wiki/Home).
-
-
+According to \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. \cite{9781617292330} uses the example shown in figure \ref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistc reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
 	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
 	\label{fig:example_prs}
 \end{figure}
-
-\subsection{Inference through sampling}
-
-As stated in \ref{subsec: General principle}, using the Bayes formula, we get the posterior distribution the following way:
-
-\begin{equation}
-	p(\theta|x) = p(x|\theta) * p(\theta) / p(x)
-\end{equation}
-We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data,$p(x)$, however, is more complicated. To compute it analytically, we would have to compute the following integral:
-
-\begin{equation}
-\begin{split}
-	p(x) = \int p(\theta,x) d \theta \\
-		 =  \int p(x|\theta) * p(\theta) d \theta
-\end{split}
-\end{equation}
-Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not always possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. Some of the more popular of these methods are explained below.
-
-\paragraph{Simple Monte Carlo}
-One of the most basic methods is called Simple Monte Carlo. There we approximate the integral by sampling over the likelihood and the prior and then taking the mean over the samples:
-\begin{equation}
-	\int p(x|\theta) * p(\theta) d \theta \approx 1/m * \sum^m p(x|\theta_i),\quad \theta_i \sim p(\theta)
-\end{equation}
-Simple Monte Carlo has a number of disadvantages, so more sophistically methods are generally used, like Gibbs sampling or NUTS.
-\paragraph{Markov Chain Monte Carlo}
-Markov chain simulations, also called Markov Chain Monte Carlo, or MCMC, summarize a set of methods where the parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain. So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Draws from the second half of the chain can then be used as samples. The Gibbs and the Metropolis sampler, which are explained below, both belong to the MCMC methods \cite{1439840954}.
-\paragraph{Gibbs Sampling}
-Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_j, j \neq i)$ for each quantity.
-The algorithm works as follows:
-\begin{itemize}
-	\item Select arbitrary starting points for $\theta_0,...,\theta_n$
-	\item Update each $\theta_i$ by drawing from its conditional distribution given the latest values of the other quantities. Repeat this step until convergence is achieved.
-\end{itemize}
-\cite{Martz1994}
-\paragraph{Metropolis}
-The metropolis algorithm can be seen as a generalization of the Gibbs sampler \cite{1439840954} and was originally developed to calculate the behaviour of interacting molecules without having to compute the multidimensional integrals previously needed for that computation\cite{Metropolis1953}. The algorithm goes as follows : 
-\begin{enumerate}
-\item An arbitrary starting location is chosen for each of the molecules. 
-\item For each molecule, a new possible location is proposed. How this new location is calculated is itself a complex task and can be crucial for the performance of the algorithm. For the sake of simplicity we assume here that the proposed location is just randomly chosen in the near vicinity of the old location.
-\item The change of energy in the system introduced by the position change is calculated.
-\item If the proposed location has a lower energy level than the current one, the proposed location is accepted. If it has a higher energy level, it is accepted with
-a probability antiproportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
-\end{enumerate}
-This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
-\paragraph{Metropolis-Hastings}
-%\cite{chib1995understanding}
-The Metropolis-Hastings sampler is a generalization of the metropolis sampler, where the probability of accepting the proposed point is calculated differently.
-Metropolis hastings additionally has the ratio between the proposal distributions in it \cite{chib1995understanding}. Metropolis is chosen in a way that these cancel out.
-\paragraph{Hamiltonian Monte-Carlo}
-The base approach of Hamiltonian Monte Carlo (HMC) is that we have a particle in a multidimensional space where each dimension represents a variable of the target distribution and thus the location $\theta$ of the particle represents a specific point on the target distribution. As in the metropolis algorithm, a starting location is arbitrarily chosen. The difference to the metropolis algorithm now lies in the generation of the new locations. An auxiliary variable $r$ and the parameters $L$ and $\epsilon$ are introduced for this purpose. $r$ represents the momentum of the particle, $L$ is the number of steps to get to one sample, and $\epsilon$ is the step size for one of these steps. For generating one sample point, a change of locations is proposed $L$ times and is accepted or rejected according to the metropolis algorithm. In each of the $L$ steps, $\theta$ and $r$ are updated by using the following algorithm, known as leapfrog integrator: 
-\begin{algorithm}[h]
-$r \leftarrow r + (\epsilon/2)  \, \nabla_\theta \, (log \, p(\theta))$\\
-$\theta \leftarrow \theta + \epsilon r$\\
-$r \leftarrow r + (\epsilon/2) \, \nabla_\theta \, (log \, p(\theta))$
-\end{algorithm}
-\\ 
-As one can see, the update process requires gradient information on the log probability density of the target distribution. So this method cannot be applied if gradient information is unavailable. The generated locations here show less random walk behaviour and therefore better performance than the algorithms above, if the parameters are set properly \cite{hoffman2014no}.
-
-%can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^{(5/4)}$
-
-%auxiliary momentum variable $r_d$ for each modelvariable $\theta_d$.
-
-%The momentum variables are drawn independently from the standard normal distribution.
-
-%This extended model can be interpreted as a Hamiltonian system, that is,a physical model of particles, where $\theta$ represents a position of a particle in a $d$-dimensional space and $r_d$ represents the momentum of the particle in the $d$th dimension, $p(\theta,r)$.
-%If $L$ is too small, the samples will be close to each other. If $L$ is too large, %the steps can loop back and retrace their steps.
-\paragraph{NUTS}
-The No-U-Turn-Sampler (NUTS) is a self-tuning variant of Hamiltonian Monte Carlo, where the number of steps per sample $L$ does not need to be specified at a fixed value anymore. Instead,
-it is attempted to stop the steps once the maximum distance between initial and proposed point is reached. This maximum is reached when the inner product between $r$ and the distance between initial and proposed point becomes negative. The next iteration would then only decrease the distance  \cite{1439840954}.
-\\
-Since this method does not yet guarantee convergence, it is run both forwards and backwards in time, and then stops if it encounters the abovementioned maximum in either direction.
-Once the stop is reached, a sample is drawn from all the points that were visited in the current iteration \cite{hoffman2014no}.
-
-%a slice variable $u$ is introduced
-%reversibility has to be preserved
-PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
-
-\subsection{Comparing Different Probabilistic Programming Languages}
-
-\begin{itemize}
-	\item stan for python: https://pystan.readthedocs.io/en/latest/
-	\item pymc3: https://docs.pymc.io/notebooks/getting\_started.html\#Case-study-2:-Coal-mining-disasters
-	\item edward: http://edwardlib.org/getting-started
-	\item pyro: http://pyro.ai/
-\end{itemize}
-
-\subsubsection{Stan for python}
-
-Stan is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. It consists of the following components:
+From a data science perspective, this means that a Probabilistig Programming Language(PPL) provides ways of describing a probability model and drawing inference from it, which, in the ideal case, are more flexible, more efficient, and better to understand than traditional approaches \cite{Hardesty2015}. Currently, a number of PPLs is publicly available, with the most popular being mentioned below:
+\paragraph{Stan}
+is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. As described in \cite{Gelman_2015}, it consists of the following components:
 \begin{itemize}
 	\item A modeling language that allows users to specify custom models
 	\item An inference engine which uses Hamilton Monte Carlo methods for sampling to get an approximation for the posterior distribution
@@ -413,75 +325,107 @@ Stan is an open-source program written in C++ that is designed for Bayesian infe
 	\item Procedures for automatic differentiation which are able to compute gradients required by the sampler and the optimizer
 	\item Routines to monitor the convergence of parallel chains and compute inferences and effective sample sizes
 	\item Wrappers for Python, R, Julia and other languages
+It also provides basic plotting methods for the posterior distributions of parameters
 \end{itemize}
-The code for describing a model by using the aforementioned modeling language is divided into six blocks: \textit{data}, \textit{transformed data}, \textit{parameters}, \textit{transformed parameters}, \textit{model}, and \textit{generated quantities}: In \textit{data} and \textit{transformed data}, the structure of the input data, along with any constraints, is given. The difference between the former and the latter is that variables in \textit{transformed data} are functions of other data variables, whereas variables in \textit{data} are not. For example if in \textit{data}, a variable $x$ is listed, then in \textit{transformed data} one can specify a variable $y=x^2$. In \textit{parameters} and \textit{transformed parameters}, the parameters of the models are described, whereat, as in the data blocks, the latter contains variables that are functions of other parameters. In \textit{model}, the model structure in the form of prior and likelihood distributions is given. Finally, the block \textit{generated quantities} can be used to perform simulations and make predictions. In \ref{fig:stan_example_code}, an example from \cite{Gelman_2015} is shown, where the model $y=a_1e^{-b_1x} + a_2e^{-b_2x}$ is fit to data, using the PyStan interface of Stan for Python. Since not all of the aforementioned blocks are mandatory, only four of them are used in the example.
-\\
-PyStan also provides basic plotting methods for the posterior distributions of the parameters.
+\paragraph{Edward}
+%http://edwardlib.org/getting-started
+is a python library that allows working with graphical models, neural networks, implicit generative models and bayesian programs. It supports most of the abovementioned sampling methods and relies on TensorFlow \cite{tran2016edward}
+\paragraph{Pyro}
+is a PPL built in Python that focuses on deep learning and artificial intelligence. It uses the deep learning platform PyTorch as a backend \cite{bingham2018pyro}.
+\paragraph{Figaro}
+is available as a Scala library. Models in Figaro are treated as objects, a focus is laid on the possibility that more specialized models are derived from base models and can inherit propoerties from them. Figaro uses the Metropolis-Hastings algorithm for inference \cite{pfeffer2009figaro}.
+\paragraph{BUGS}
+mentioned in \cite{Gelman_2015}
+based on graphical models
+\paragraph{Jags}
+mentioned in \cite{Gelman_2015}
+based on graphical models
+\paragraph{PyMC3}
+is the PPL used in this thesis. It is described in detail in the following chapter.
 
-is not able to perform inference on discrete parameters. Discrete data and discrete-data models, however, are possible
 
-computes the log-posterior density
+%"Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
+%Traditional means for representing models are not always sufficient for probabilistic models. Therefore, probabilistic programming languages were introduced to be able to represent models with the full power of a programming language (http://www.probabilistic-programming.org/wiki/Home).
 
-\cite{Gelman_2015}
 
-\cite{Hoover2016}
+\subsection{PyMC3}
 
-für den Code evtl. https://github.com/stephen-hoover/presentations zitieren
-
-\begin{figure}
-	\begin{lstlisting}
-	# Specify model
-	example_code = """
-	data {
-	// Define input data in this block
-	int N;
-	vector[N] x;
-	vector[N] y;
-	}
-	parameters {
-	// These are random parameters which we want to estimate
-	vector[2] log_a;
-	ordered[2] log_b;
-	real<lower=0> sigma;
-	}
-	transformed parameters {
-	// Create quantities derived from the parameters.
-	vector<lower=0>[2] a;
-	vector<lower=0>[2] b;
-	a <- exp(log_a);
-	b <- exp(log_b);
-	}
-	model {
-	// Define your model here
-	vector[N] ypred;
-	ypred <- a[1]*exp(-b[1]*x) + a[2]*exp(-b[2]*x);
-	y ~ lognormal(log(ypred), sigma);
-	log_a ~ normal(0,1); 
-	log_b ~ normal(0,1);
-	}
-	"""
-	
-	# Pass data to the model. x and y are the observed data
-	example_dat = {'x':x,'y':y,'N':len(x)}
-	# Fit model
-	sm = pystan.StanModel(model_code=example_code)
-	fit = sm.sampling(data=example_dat, iter=1000, chains=4)
-	print(fit)
-	\end{lstlisting}
-	\label{fig:stan_example_code}
-	\caption[Example code of a simple Bayesian model using Stan]{Example code of a simple Bayesian model using Stan}
-\end{figure}
-
-\subsubsection{Pymc3}
+%\subsubsection{Stan for python}
+%
+%Stan is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. It consists of the following components:
+%\begin{itemize}
+%	\item A modeling language that allows users to specify custom models
+%	\item An inference engine which uses Hamilton Monte Carlo methods for sampling to get an approximation for the posterior distribution
+%	\item An L-BFGS optimizer for finding local optima
+%	\item Procedures for automatic differentiation which are able to compute gradients required by the sampler and the optimizer
+%	\item Routines to monitor the convergence of parallel chains and compute inferences and effective sample sizes
+%	\item Wrappers for Python, R, Julia and other languages
+%\end{itemize}
+%The code for describing a model by using the aforementioned modeling language is divided into six blocks: \textit{data}, \textit{transformed data}, \textit{parameters}, \textit{transformed parameters}, \textit{model}, and \textit{generated quantities}: In \textit{data} and \textit{transformed data}, the structure of the input data, along with any constraints, is given. The difference between the former and the latter is that variables in \textit{transformed data} are functions of other data variables, whereas variables in \textit{data} are not. For example if in \textit{data}, a variable $x$ is listed, then in \textit{transformed data} one can specify a variable $y=x^2$. In \textit{parameters} and \textit{transformed parameters}, the parameters of the models are described, whereat, as in the data blocks, the latter contains variables that are functions of other parameters. In \textit{model}, the model structure in the form of prior and likelihood distributions is given. Finally, the block \textit{generated quantities} can be used to perform simulations and make predictions. In \ref{fig:stan_example_code}, an example from \cite{Gelman_2015} is shown, where the model $y=a_1e^{-b_1x} + a_2e^{-b_2x}$ is fit to data, using the PyStan interface of Stan for Python. Since not all of the aforementioned blocks are mandatory, only four of them are used in the example.
+%\\
+%PyStan also provides basic plotting methods for the posterior distributions of the parameters.
+%
+%is not able to perform inference on discrete parameters. Discrete data and discrete-data models, however, are possible
+%
+%computes the log-posterior density
+%
+%\cite{Gelman_2015}
+%
+%\cite{Hoover2016}
+%
+%für den Code evtl. https://github.com/stephen-hoover/presentations zitieren
+%
+% https://pystan.readthedocs.io/en/latest/
+%
+%\begin{figure}
+%	\begin{lstlisting}
+%	# Specify model
+%	example_code = """
+%	data {
+%	// Define input data in this block
+%	int N;
+%	vector[N] x;
+%	vector[N] y;
+%	}
+%	parameters {
+%	// These are random parameters which we want to estimate
+%	vector[2] log_a;
+%	ordered[2] log_b;
+%	real<lower=0> sigma;
+%	}
+%	transformed parameters {
+%	// Create quantities derived from the parameters.
+%	vector<lower=0>[2] a;
+%	vector<lower=0>[2] b;
+%	a <- exp(log_a);
+%	b <- exp(log_b);
+%	}
+%	model {
+%	// Define your model here
+%	vector[N] ypred;
+%	ypred <- a[1]*exp(-b[1]*x) + a[2]*exp(-b[2]*x);
+%	y ~ lognormal(log(ypred), sigma);
+%	log_a ~ normal(0,1); 
+%	log_b ~ normal(0,1);
+%	}
+%	"""
+%	
+%	# Pass data to the model. x and y are the observed data
+%	example_dat = {'x':x,'y':y,'N':len(x)}
+%	# Fit model
+%	sm = pystan.StanModel(model_code=example_code)
+%	fit = sm.sampling(data=example_dat, iter=1000, chains=4)
+%	print(fit)
+%	\end{lstlisting}
+%	\label{fig:stan_example_code}
+%	\caption[Example code of a simple Bayesian model using Stan]{Example code of a simple Bayesian model using Stan}
+%\end{figure}
 
 PyMC3 is an open-source probabilistic programming framework for Python. The following explanations are taken from \cite{Salvatier2016}. Specification of Bayesian models in PyMC3 is done by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they get passed observed data as an argument, that should not be changed by any fitting algorithm.  This kind of random variable can be used to represent sampling distributions.
 \\
 PyMC3 mainly uses simulation techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm, that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
 \\
 The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
-\\
-PyMC3 uses Theanoto improve performance
-
 \begin{figure}
 	\begin{lstlisting}
 	import pymc3 as pm
@@ -504,21 +448,21 @@ PyMC3 uses Theanoto improve performance
 	trace = pm.sample(500)
 	pm.summary(trace)
 	\end{lstlisting}
-	\label{fig:pymc3_example_code}
 	\caption[Example code of a simple Bayesian model using PyMC3]{Example code of a simple Bayesian model using PyMC3}
+	\label{fig:pymc3_example_code}
 \end{figure}
 
-strictly positive priors are transformed with log transformation, so that they are unconstrained, since that is better for sampling
 
-There is the possibility to create own theano functions in python. Gradient based sampling methods don't work for user-defined functions however, except when a gradient is explicitly added.
+%PyMC3 uses Theano to improve performance
 
-Similarily pmc3 allows to define own distributions
-\subsubsection{Edward}
+%strictly positive priors are transformed with log transformation, so that they are unconstrained, since that is better for sampling
 
-\subsubsection{Pyro}
-\subsubsection{BUGS and Jags}
-mentioned in \cite{Gelman_2015}
-based on graphical models
+%There is the possibility to create own theano functions in python. Gradient based sampling methods don't work for user-defined functions however, except when a gradient is explicitly added.
+
+%Similarily pmc3 allows to define own distributions
+
+%stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
+%Random Variables can be represented as objects
 
 \section{Lumen}
 
