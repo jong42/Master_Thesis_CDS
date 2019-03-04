@@ -464,9 +464,207 @@ The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Baye
 %stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
 %Random Variables can be represented as objects
 
-\section{Lumen}
+\subsection{Comparison of a model implemented with PyMC3 and and a model implemented without PyMC3}
+\textit{To get a sort of ground truth, a Bayesian model is fitted first without the use of a PPL. To check if a PPL is deployed correctly, the same model is then fitted by a PPL. The results of the PPL approach and the ground truth are compared.}
+\\
+Assume we want to fit a model with the two dimensions $x$ and $mu$, one of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore we assume the following priors:
+\begin{equation}
+\begin{split}
+mu &\sim N(0,1)\\
+x &\sim N(mu,1)
+\end{split}
+\end{equation}
+Assume again, that we observe some data $X$ of the observable dimension $x$.
+We now want to compute the joint posterior distribution of both dimensions $mu$ and $x$, conditioned on the observed data $X$.
+\\
+The data $X$ is generated as follows:\\
+\begin{figure}[h]
+	\begin{lstlisting}
+	# Generate data
+	numpy.random.seed(1)
+	size = 100
+	mu = numpy.random.normal(0,1,size=size)
+	sigma = 1
+	X = numpy.random.normal(mu,sigma,size=size)
+	
+	\end{lstlisting}
+	\label{fig:groundtruth_example_code_data_generation}
+\end{figure}
+\subsubsection{Creating a simple Bayesian model without PyMC3}
+\label{subsec: Complete example of a simple Bayesian model}
 
-\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL. Too achieve this is goal it is necessary to understand how Lumen works, so the functionality of Lumen is also explained here.} 
+The joint posterior distribution is computed as follows:
+\begin{equation}
+\begin{split}
+&P(x,mu|X) \\
+= &P(x|mu,X) * P(mu|X) \\
+= &P(x|mu) * P(mu|X) \\
+= &P(x|mu) * P(X|mu) * P(mu) / P(X) \\
+= &P(x|mu) * P(X|mu) * P(mu) / \int P(X,mu) \hspace{1mm} d \hspace{1mm} mu \\
+= &P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
+\end{split}
+\end{equation}
+Each element of the last line of this equation can be implemented in python relatively easy: 
+\\
+The likelihood for any new data point given $mu$, $P(x|mu)$, is, according to our model assumptions, the density of $x$ in a normal distribution with mean $mu$. It can be be implemented as:
+\begin{figure}[h]
+	\begin{lstlisting}
+	from scipy.stats import norm
+	def likelihood_x(x,mu):
+	density = norm.pdf(x, loc=mu, scale=1)
+	return density
+	\end{lstlisting}
+	
+\label{fig:likelihood_new_data_point}
+\end{figure}\\
+The likelihood of the observed data $X$ given $mu$, $P(X|mu)$, is the product of the likelihoods for each data point in $X$. It can be implemented as follows: 
+\begin{figure}[H]
+	\begin{lstlisting}
+	def likelihood_X(X,mu):
+	res = 1
+	for point in X:
+	res *= likelihood_x(point,mu)
+	return res
+	\end{lstlisting}
+	%\caption{Implementation of the likelihood for the observed data}
+	\label{fig:likelihood_observed_data}
+\end{figure}
+The prior probability for any $mu$, $P(mu)$, is just the density of the standard normal distribution at the point $mu$:
+\begin{figure}[H]
+	\begin{lstlisting}
+	def prior_mu(mu):
+	density = norm.pdf(mu, loc=0, scale=1)
+	return density
+	\end{lstlisting}
+	%\caption{Implementation of the prior for mu}
+	\label{fig:prior_mu}
+\end{figure}
+The last part of the equation, the integral of the product between likelihood and prior, is computationally more intensive, but is nevertheless easy to implement as well:
+\begin{figure}[H]
+	\begin{lstlisting}
+	def likelihood_times_prior_mu(X,mu):
+	return likelihood_X(X,mu) * prior_mu(mu)
+	
+	def prior_X(X):
+	res = integrate.quad(
+		lambda mu: likelihood_times_prior_mu(X,mu),a=-np.inf,b=np.inf)[0]
+	return res
+	\end{lstlisting}
+	%\caption{Implementation of the prior for X}
+	\label{fig:prior_X}
+\end{figure}
+At last, we only have to multiply all those pieces to get to a posterior joint density for any combination of $X$ and $mu$:
+\begin{figure}[H]
+	\begin{lstlisting}
+	def joint_posterior(x,mu,X):
+	res = likelihood_x(x,mu) * likelihood_X(X,mu) * prior_mu(mu) / prior_X(X)
+	return res
+	\end{lstlisting}
+	%\caption{Implementation of the joint posterior distribution}
+	\label{fig:joint_posterior}
+\end{figure}
+The joint posterior distribution can now be visualized, as it is done in \ref{fig:ground_truth_posterior_1}.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1.png}
+	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
+	\label{fig:ground_truth_posterior_1}
+\end{figure}
+The upper left figures show histograms of the data points of $x$ and $mu$. The upper right figures show the marginalized posterior distributions for both variables. The bottom figure shows the density of the joint posterior distribution as a contour plot, as well as the data points. We see that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
+Let's look again at the formula:
+\begin{equation}
+P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
+\end{equation}
+To evaluate the abovementioned expectations, it is not necessary to keep the normalizing constant, since a constant does not affect the order of the values. So we keep:
+\begin{equation}
+P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
+\end{equation}
+When we consider only the first and the last term of this formula, it behaves exactly as expected: $P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)$
+and $P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)$. What was messing with my expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
+The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. I delivers the distribution that is shown in \ref{fig:ground_truth_posterior_5}.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5.png}
+	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
+	\label{fig:ground_truth_posterior_5}
+\end{figure}
+The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in \ref{fig:posterior_different_data_sizes}.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/posterior_different_data_sizes.png}
+	\caption[Posterior distributions for different numbers of datapoints]{Posterior distributions for different numbers of datapoints}
+	\label{fig:posterior_different_data_sizes}
+\end{figure}
+When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
+So when increasing the variance, I expect the whole distribution to get wider, especially in the $mu$-direction.
+\\
+What happens: when choosing a standard deviation of 5, the density is always zero. This is likely due to numerical difficulties, since the values computed here are very small.
+I can set the number of data points down, then we get densities different from 0.
+\\
+Figures  \ref{fig:ground_truth_posterior_3} and \ref{fig:ground_truth_posterior_4} show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases, whereas the mean of the variables in the latter distribution is at around -1.5. I don't know yet why this happens. 
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3.png}
+	\caption[Posterior probability densities of the example model with standard deviation of 1]{Posterior probability densities of the example model with standard deviation of 1}
+	\label{fig:ground_truth_posterior_3}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_4.png}
+	\caption[Posterior probability densities of the example model with standard deviation of 5]{Posterior probability densities of the example model with standard deviation of 5}
+	\label{fig:ground_truth_posterior_4}
+\end{figure}
+%When the number of actual data points becomes small, I expect %the joint distribution to show the linear relationship between %$x$ and $mu$ better, since the influence of the data points, %which 'compresses' the whole plot to the middle, diminishes.
+
+%This is also what actually happens. Without any datapoints, we %see clearly the linear relationship.
+
+When we change the data generating mechanism to a non-hierarchic process, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parametrization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in figure \ref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6.png}
+	\caption[Posterior probability densities of the example model with altered data generation]{Posterior probability densities of the example model with altered data generation}
+	\label{fig:ground_truth_posterior_6}
+\end{figure}
+If it is possible to generate the same data by different parameterizations, it means that a model cannot be able to always return the true parameters in the posterior. This is also called Nonidentifiability.
+\subsubsection{PyMC3 example of a simple Bayesian model}
+\label{subsec: PyMC3 example of a simple Bayesian model}
+The model from chapter \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \ref{fig:PyMC3_example_code_simple_model}.
+\begin{figure}[h]
+	\begin{lstlisting}
+	import numpy as np
+	import pandas as pd
+	import pymc3 as pm
+	import matplotlib.pyplot as plt
+	
+	# Generate data
+	np.random.seed(2)
+	size = 100
+	mu = np.random.normal(0,1,size=size)
+	sigma = 1
+	X = np.random.normal(mu,sigma,size=size)
+	
+	# Specify model
+	basic_model = pm.Model()
+	with basic_model:
+	sigma = 1
+	mu = pm.Normal('mu',mu=0,sd=sigma)
+	X = pm.Normal('X',mu=mu,sd=sigma,observed=X)
+	
+	# Draw samples from posterior
+	nr_of_samples = 100
+	with basic_model:
+	trace = pm.sample(nr_of_samples,chains=1)
+	samples_mu = trace['mu']
+	samples_X = np.random.normal(samples_mu,1,size=nr_of_samples)
+	\end{lstlisting}
+	\caption[Code used to specify the example model in PyMC3]{Code used to specify the example model in PyMC3}
+	\label{fig:PyMC3_example_code_simple_model}
+\end{figure}
+First, the same data is generated as in \autoref{subsec: Complete example of a simple Bayesian model}. Then, $mu$ and $X$ are specified, $mu$ as a stochastic random variable and $X$ as an observed stochastic random variable. Finally, samples from the posterior distribution are drawn using the sample-method. TODO: use a PyMC3-method to draw samples from $X$.
+Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples. Similarities in shape to the real joint posterior distribution in \ref{fig:ground_truth_posterior_1} are visible, so it is assumed, that PyMC3 captures the model correctly.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model.png}
+	\caption[Samples from the posterior joint distribution of the example model in PyMC3]{Samples from the posterior joint distribution of the example model in PyMC3}
+	\label{fig:PyMC3_joint_posterior_samples_simple_model}
+\end{figure}
+
+\section{Visualization with Lumen}
+
+\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL} 
 \\
 The overall goal of the thesis is to build an API, that makes it possible to a PyMC3 (or other PPL) user to get his model visualized in lumen with minimal effort. For example it would be good if one just has to call one function with a PyMC3 model as parameter to transport the model into the lumen frontend.
 \\
@@ -477,7 +675,8 @@ data is in \url{mb_data}. model fitting is done in the script fit\_models.py, wh
 
  Fitted models that can be accessed by lumen are then stored in \url{data_models}.
 
-\subsection{Functionality}
+\subsection{Graphical model checking}
+\subsection{Lumen}
 
 In the modelbase repository, a model class is described by a python file that includes a class with several prescribed methods \url{https://ci.inf-i2.uni-jena.de/gemod/modelbase/blob/master/mb_modelbase/models_core/models.py} is a template for such a model class file, where all important methods are explained.
 \\
@@ -486,17 +685,8 @@ In the mb\_data repository, data that can be used for model fitting is contained
 The first step would be to implement a model there that is built by using a PPL. Then make sure that all necessary methods are correctly implemented and the visualization works as expected. One of the advantages of PPLs is the flexibility of the models specified, which is nullified by describing one fixed model. Therefore, the next steop is about thinking about a possibility to pass more flexible models. Maybe a function where you just give a model object as input that then automatically generates the necessary methods for the use in lumen??  Other possibilities? (would be good to ask that at the presentation)
 
 
-
-
-compare to the plotting methods of PyMC3 / Stan
-
-\subsection{Requirements for a PPL}
-
-possible criterium: variety of distributions that can be described?
-
-
-
-\section{Konzept/Planung}
+\subsection{Integration of PyMC3 in Lumen}
+\textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated.}
 
 In Bayesian data analysis we have a prior distribution for the parameters, $p(\theta)$, which represents our knowledge about them without seeing any data. We have also the likelihood of our data, $p(X|\theta)$, which represents the probability of obtaining the data $X$ given the parameter $\theta$. Using the Bayes' rule, we can then compute the posterior distribution for $\theta$, $p(X|\theta)$:
 
@@ -514,207 +704,6 @@ p(x,\theta|X) = p(x|\theta) * p(\theta|X)
 
 The posterior distribution of the parameters, $p(\theta|X)$, can be approximated by PPLs through sampling, as stated above. (--> Make sure that this is true!!). To get density values from samples, we have to perform density estimation methods \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity.score_samples}
 
-\subsection{Complete example of a simple Bayesian model}
-\label{subsec: Complete example of a simple Bayesian model}
-
-To get a sort of ground truth, a Bayesian model is fitted first without the use of a PPL. To check if a PPL is deployed correctly, the same model can be fitted by a PPL. The results of the PPl approach and the ground truth should then look the same.
-\\
-Assume we want to fit a model with the two dimensions $x$ and $mu$, one of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore we assume the following priors:
-\begin{equation}
-\begin{split}
-mu &\sim N(0,1)\\
-x &\sim N(mu,1)
-\end{split}
-\end{equation}
-Assume again, that we observe some data $X$ of the observable dimension $x$.
-We now want to compute the joint posterior distribution of both dimensions $mu$ and $x$, conditioned on the observed data $X$.
-This distribution is computed as follows:
-\begin{equation}
-\begin{split}
-&P(x,mu|X) \\
-= &P(x|mu,X) * P(mu|X) \\
-= &P(x|mu) * P(mu|X) \\
-= &P(x|mu) * P(X|mu) * P(mu) / P(X) \\
-= &P(x|mu) * P(X|mu) * P(mu) / \int P(X,mu) \hspace{1mm} d \hspace{1mm} mu \\
-= &P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
-\end{split}
-\end{equation}
-The data $X$ is generated as follows:\\
-\begin{figure}[h]
-	\begin{lstlisting}
-	import pymc3 as pm
-	import numpy as np
-	import pandas as pd
-	import matplotlib.pyplot as plt
-	from pylab import *
-	from scipy.stats import norm
-	import scipy.integrate as integrate
-	
-	# Generate data
-	np.random.seed(1)
-	size = 100
-	mu = np.random.normal(0,1,size=size)
-	sigma = 1
-	X = np.random.normal(mu,sigma,size=size)
-
-	\end{lstlisting}
-	\label{fig:groundtruth_example_code_data_generation}
-\end{figure}
-\\
-The necessary distributions leading to the actual joint posterior distribution are written as follows:
-\begin{figure}[h]
-	\begin{lstlisting}
-	def prior_mu(mu):
-	density = norm.pdf(mu, loc=0, scale=1)
-	return density
-
-	def likelihood_x(x,mu):
-	density = norm.pdf(x, loc=mu, scale=1)
-	return density
-
-	def likelihood_X(X,mu):
-	res = 1
-	for point in X:
-	res *= likelihood_x(point,mu)
-	return res
-
-	def likelihood_times_prior_mu(X,mu):
-	return likelihood_X(X,mu) * prior_mu(mu)
-
-	def prior_X(X):
-	res = integrate.quad(lambda mu: likelihood_times_prior_mu(X,mu),a=-np.inf,b=np.inf)[0]
-	return res
-
-	def joint_posterior(x,mu,X):
-	res = likelihood_x(x,mu) * likelihood_X(X,mu) * prior_mu(mu) / prior_X(X)
-	return res
-	\end{lstlisting}
-	\label{fig:groundtruth_example_code_distributions}
-\end{figure}
-Finally, the joint posterior distribution is visualized, as shown in \ref{fig:ground_truth_posterior_1}.
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1.png}
-	\label{fig:ground_truth_posterior_1}
-	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
-\end{figure}
-
-We see, that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
-Let's look again at the formula:
-\begin{equation}
-P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
-\end{equation}
-To evaluate the abovementioned expectations, it is not necessary to keep the normalizing constant, since a constant does not affect the order of the values. So we keep:
-\begin{equation}
-P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
-\end{equation}
-When we consider only the first and the last term of this formula, it behaves exactly as expected: $P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)$
-and $P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)$. What was messing with my expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
-The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. If we don't  provide any data points, we get the distribution that is shown in \ref{fig:ground_truth_posterior_5}.
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5.png}
-	\label{fig:ground_truth_posterior_5}
-	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
-\end{figure}
-The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in \ref{fig:posterior_different_data_sizes}.
-
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/posterior_different_data_sizes.png}
-	\label{fig:posterior_different_data_sizes}
-	\caption[Posterior distributions for different numbers of datapoints]{Posterior distributions for different numbers of datapoints}
-\end{figure}
-
-To understand this example better, I make changes in the model and or in the data generation and look how those changes affect the posterior distributions. 
-
-%Which possibilities are there to change the model? 
-%
-%number of training points
-%mean of mu
-%sigma of mu
-%sigma of x
-%prior mean mu
-%prior sigma mu
-%prior sigma x
-
-%mu is also observed
-
-
-What do I expect? 
-\\
-When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
-So when increasing the variance, I expect the whole distribution to get wider, especially in the $mu$-direction.
-\\
-What happens: when choosing a standard deviation of 5, the density is always zero. This is likely due to numerical difficulties, since the values computed here are very small.
-I can set the number of data points down, then we get densities different from 0.
-\\
-Figures  X and Y show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases, whereas the mean of the variables in the latter distribution is at around -1.5. I don't know why this happens. It could be a coding error.
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3.png}
-	\label{fig:ground_truth_posterior_3}
-	\caption[Posterior probability densities of the example model with standard deviation of 1]{Posterior probability densities of the example model with standard deviation of 1}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_4.png}
-	\label{fig:ground_truth_posterior_4}
-	\caption[Posterior probability densities of the example model with standard deviation of 5]{Posterior probability densities of the example model with standard deviation of 5}
-\end{figure}
-%When the number of actual data points becomes small, I expect %the joint distribution to show the linear relationship between %$x$ and $mu$ better, since the influence of the data points, %which 'compresses' the whole plot to the middle, diminishes.
-
-%This is also what actually happens. Without any datapoints, we %see clearly the linear relationship.
-
-When we change the data generating mechanism to a non-hierarchic process, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parametrization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in figure \ref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6.png}
-	\label{fig:ground_truth_posterior_6}
-	\caption[Posterior probability densities of the example model with altered data generation]{Posterior probability densities of the example model with altered data generation}
-\end{figure}
-\\
-If it is possible to generate the same data by different parameterizations, it means that a model cannot be able to always return the true parameters in the posterior. This is also called Nonidentifiability
-\\
-Hint: For visualization purposes, it should not be necessary to compute the normalizing constant.
-
-\subsection{PyMC3 example of a simple Bayesian model}
-\label{subsec: PyMC3 example of a simple Bayesian model}
-The model from chapter \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \ref{fig:PyMC3_example_code_simple_model}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	import numpy as np
-	import pandas as pd
-	import pymc3 as pm
-	import matplotlib.pyplot as plt
-	
-	# Generate data
-	np.random.seed(2)
-	size = 100
-	mu = np.random.normal(0,1,size=size)
-	sigma = 1
-	X = np.random.normal(mu,sigma,size=size)
-
-	# Specify model
-	basic_model = pm.Model()
-	with basic_model:
-	sigma = 1
-	mu = pm.Normal('mu',mu=0,sd=sigma)
-	X = pm.Normal('X',mu=mu,sd=sigma,observed=X)
-
-	# Draw samples from posterior
-	nr_of_samples = 100
-	with basic_model:
-	trace = pm.sample(nr_of_samples,chains=1)
-	samples_mu = trace['mu']
-	samples_X = np.random.normal(samples_mu,1,size=nr_of_samples)
-	\end{lstlisting}
-	\label{fig:PyMC3_example_code_simple_model}
-	\caption[Code used to specify the example model in PyMC3]{Code used to specify the example model in PyMC3}
-\end{figure}
-Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows samples from the joint posterior distribution of the fitted model. Similarities in shape to the real joint posterior distribution in \ref{fig:ground_truth_joint_posterior_1} are visible, so it is assumed, that PyMC3 captures the model correctly.
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model.png}
-	\label{fig:PyMC3_joint_posterior_samples_simple_model}
-	\caption[Samples from the posterior joint distribution of the example model in PyMC3]{Samples from the posterior joint distribution of the example model in PyMC3}
-\end{figure}
-\section{Practical implementation}
-
-\textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated. At first, the choice of the PPL is justified.}
 
 My first approach will be to write a fixed probabilistic models as a model class, that fits one specific model to a specific set of data. (linear regression)
 
@@ -739,13 +728,18 @@ Second Bug in the model: The marginalization method needs to access all variable
 Problem: Model data is reduced to variables in keep. Lösungsidee: Setze zu Beginn der Methode die Daten auf den vollständigen Datensatz, und setze am Ende der Methode die Daten wieder auf die Dimensionen in keep zurück.
 \\
 Problem: Es ist nicht gut, dass bei jedem Aufruf der \_density-Methode gesampelt wird, da das viel Zeit und Speicher braucht. Lösung: Führe das Sampling nur einmal durch und speichere die samples in einer Klassenvariable.
+
+\section{Case examples}
+
+\textit{Here, case examples are presented to show how the finished interface performs in practice.}
+
 \subsection{First simple example}
 As a basic example to implement im PyMC3 we choose data that was generated by the following normal distribution:
 \begin{equation}
 \begin{split}
-	X &\sim N(\mu,\sigma^2), \\
-	\mu &= 0, \\
-	\sigma &= 0
+X &\sim N(\mu,\sigma^2), \\
+\mu &= 0, \\
+\sigma &= 0
 \end{split}
 \end{equation}
 
@@ -756,12 +750,6 @@ We choose the following priors:
 \sigma &\sim |N(0,1)|
 \end{split}
 \end{equation}
-
-\subsection{Choose the PPL for the task at hand}
-
-\section{Case examples}
-
-\textit{Here, case examples are presented to show how the finished interface performs in practice.}
 
 \section {Conclusion}
 
