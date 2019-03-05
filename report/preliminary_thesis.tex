@@ -77,6 +77,8 @@ The thesis will be divided into two main parts, the first part being an overview
 \section{Introduction}
 
 \textit{In this section, the motivation for the thesis is explained, the task of the thesis is made clear. Furthermore, the structure of the thesis is outlined here. It is possible to get the basic ideas and results of the thesis from reading only this section and the conclusion.}
+\\
+The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
 
 \section{Concepts of Bayesian Statistics}
 
@@ -663,71 +665,137 @@ Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples.
 \end{figure}
 
 \section{Visualization with Lumen}
-
 \textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL} 
-\\
-The overall goal of the thesis is to build an API, that makes it possible to a PyMC3 (or other PPL) user to get his model visualized in lumen with minimal effort. For example it would be good if one just has to call one function with a PyMC3 model as parameter to transport the model into the lumen frontend.
-\\
-uses modelbase as backend: modelbase is a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization.
-\\
-model classes are in \url{modelbase/mb_modelbase/models_core}
-data is in \url{mb_data}. model fitting is done in the script fit\_models.py, which is also in \url{mb_data}. The corresponding model class has to be imported, the models have to be 'registered' in the known\_models variable and then the models to be fit have to be listed in the variable debugincl.
 
- Fitted models that can be accessed by lumen are then stored in \url{data_models}.
+%model classes are in \url{modelbase/mb_modelbase/models_core}
+%data is in \url{mb_data}. model fitting is done in the script fit\_models.py, which is also in \url{mb_data}. The corresponding model class has to be imported, the models have to be 'registered' in the known\_models variable and then the models to be fit have to be listed in the variable debugincl.
+
+%Fitted models that can be accessed by lumen are then stored in \url{data_models}.
 
 \subsection{Graphical model checking}
 \subsection{Lumen}
-
-In the modelbase repository, a model class is described by a python file that includes a class with several prescribed methods \url{https://ci.inf-i2.uni-jena.de/gemod/modelbase/blob/master/mb_modelbase/models_core/models.py} is a template for such a model class file, where all important methods are explained.
+Lumen is an interactive web-frontend designed for graphical visualization of models and data \cite{Lucas2016a}. It uses modelbase as backend, a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization \cite{Lucas2016b}. Figure \ref{fig:lumen_screenshot} shows an exemplary view of the frontend.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/lumen_screenshot.png}
+	\caption{View on the lumen frontend}
+	\label{fig:lumen_screenshot}
+\end{figure}
+After a model is loaded, all random variables of the model are shown in the 'Schema'-panel on the left. A user then has to select the variables that should be displayed by dragging the according names into the 'Specification'-panel in the middle. There, a choice has to be made on which channel the information of a variable should be displayed. The available channels are:
+\begin{itemize}
+	\item X-Axis
+	\item Y-Axis
+	\item Color
+	\item Shape
+	\item Size
+\end{itemize}
+Additionally, a filter can be set to only consider a specified interval within the range of a variable, and an option called 'Details' can be changed to set the number of intervals a continuous variable should be split into. TODO: Confirm, that 'Details' really has that meaning. After that, the user selects which elements of the model should be displayed. The following elements can be chosen:
+\begin{itemize}
+	\item prediction
+	\item data
+	\item test data
+	\item marginals
+	\item density
+\end{itemize}
+For the prediction, it is possible to specify any of the selected variables as dependent or independent. Finally, after all these settings have been made, the visualization of the model is shown in the right panel.
 \\
-In the mb\_data repository, data that can be used for model fitting is contained. It has a file named fit\_models.py that contains specifications of data and corresponding models. It can be called with one of these specifications to create a mdl file. In the directory data\_models all mmdl files are currently stored that can be displayed by the lumen frontend.
-\\
-The first step would be to implement a model there that is built by using a PPL. Then make sure that all necessary methods are correctly implemented and the visualization works as expected. One of the advantages of PPLs is the flexibility of the models specified, which is nullified by describing one fixed model. Therefore, the next steop is about thinking about a possibility to pass more flexible models. Maybe a function where you just give a model object as input that then automatically generates the necessary methods for the use in lumen??  Other possibilities? (would be good to ask that at the presentation)
+Visualizing a model as described above can require marginalizing and conditioning it multiple times. The necessary operations are performed by the modelbase backend.
+%A model class is described by a python file that includes a class with several prescribed methods.
+In it, each model type is represented by a class. This class is required to provide certain methods that allow to manipulate the model in a way that proper data can be generated for the frontend. These methods include marginalizing, conditioning, and fitting of the model.
 
 
+%In the mb\_data repository, data that can be used for model fitting is contained. It has a file named fit\_models.py that contains specifications of data and corresponding models. It can be called with one of these specifications to create a mdl file. In the directory data\_models all mdl files are currently stored that can be displayed by the lumen frontend.
 \subsection{Integration of PyMC3 in Lumen}
-\textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated.}
+\textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated.}\\
+As explained above, a model in the modelbase backend has to provide several prespecified methods. The most important operations that are embedded in these methods are:
+\begin{itemize}
+	\item fitting a model
+	\item marginalization
+	\item conditioning
+	\item computing the probability density for a given data point
+\end{itemize}
+Successfully implementing these operations for arbitrary models created with PyMC3 is equivalent to successfully visualizing these models in Lumen.
+\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables, so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables, which only have to be applied here. \ref{fig:code_fitting_a_model} shows the implementation. There, the variable $self.model_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen (albeit to some extent incorrectly labeled as test data).
+\begin{figure}[h]
+	\begin{lstlisting}
+	import pymc3 as pm
+    def _fit(self):
+		with self.model_structure:
+			# Draw samples
+			nr_of_samples = 500
+			trace = pm.sample(nr_of_samples,chains=1,cores=1)
+			for varname in trace.varnames:
+				self.samples[varname] = trace[varname]
+			ppc = pm.sample_ppc(trace)
+			for varname in self.model_structure.observed_RVs:
+				# each sample has 100 draws in the ppc, so take only the first one for each sample
+				self.samples[str(varname)] = [samples[0] for samples in np.asarray(ppc[str(varname)])]			
+			# Change order of sample columns so that it matches order of fields
+			self.samples = self.samples[self.names]
+			self.test_data = self.samples
+		return ()
 
-In Bayesian data analysis we have a prior distribution for the parameters, $p(\theta)$, which represents our knowledge about them without seeing any data. We have also the likelihood of our data, $p(X|\theta)$, which represents the probability of obtaining the data $X$ given the parameter $\theta$. Using the Bayes' rule, we can then compute the posterior distribution for $\theta$, $p(X|\theta)$:
+	\end{lstlisting}
+	\caption[Implementation of fitting a model]{Implementation of fitting a model}
+	\label{fig:code_fitting_a_model}
+\end{figure}
 
-\begin{equation}
-p(\theta|X) = p(X|\theta) * p(\theta) / p(X)
-\end{equation}
+\paragraph{Marginalizing a model} normally means that one has to integrate over the variables that should be removed. In the case of Probabilistic Programming, where we have only samples instead of analytical functions, it is far easier: The samples of the variables one wants to marginalize out are just removed and that's it. The corresponding code is shown in \ref{fig:code_marginalizing_a_model}.
+\begin{figure}[h]
+	\begin{lstlisting}
+    def _marginalizeout(self, keep, remove):
+		# Remove all variables in remove
+		for varname in remove:
+			if varname in list(self.samples.columns):
+				self.samples = self.samples.drop(varname,axis=1)
+		return ()
+	
+	\end{lstlisting}
+	\caption[Implementation of marginalizing a model]{Implementation of marginalizing a model}
+	\label{fig:code_marginalizing_a_model}
+\end{figure}
 
-Since the posterior distribution for $\theta$ can often not be computed analytically, Probabilistic Programming Languages use sampling methods to approximate the posterior distribution for $\theta$.
+\paragraph{Conditioning a model} follows the same principle as marginalizing: Samples that do not fall inside the intervall dictated by the condition are just removed. This operation is implemented as shown in \ref{fig:code_conditioning_a_model}.
+\begin{figure}[h]
+	\begin{lstlisting}
+    def _conditionout(self, keep, remove):
+		names = remove
+		fields = self.fields if names is None else self.byname(names)
+		# Here: Konditioniere auf die Domaene der Variablen in remove
+		for field in fields:
+			# filter out values smaller than domain minimum
+			filter = self.samples.loc[:,str(field['name'])] > field['domain'].value()[0]
+			self.samples.where(filter, inplace = True)
+			# filter out values bigger than domain maximum
+			filter = self.samples.loc[:,str(field['name'])] < field['domain'].value()[1]
+			self.samples.where(filter, inplace = True)
+		self.samples.dropna(inplace=True)
+		return ()
+	\end{lstlisting}
+	\caption[Implementation of conditioning a model]{Implementation of conditioning a model}
+	\label{fig:code_conditioning_a_model}
+\end{figure}
 
-When we want to visualize parameters and data, and also want to condition and marginalize arbitrarily, we need the joint distribution $p(x,\theta|X)$. The joint distribution can be computed by:
+\paragraph{Getting a probability density} in the context of Probabilistic Programming is not as straightforward as in classical statistics, since we do not have probability density function. This function instead can be approximated by the samples drawn from the posterior. In the implementation at hand, the chosen approximation method is the kernel density estimation using gaussian kernels, provided by the scikit-learn package \cite{scikit-learn}. In this method, each data point is assigned a gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the gaussians. It is implemented as shown in \ref{fig:code_probability_density}.
+\begin{figure}[h]
+	\begin{lstlisting}
+    def _density(self, x):
+		X = self.samples.values
+		kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(X)
+		x = np.reshape(x,(1,len(x)))
+		logdensity = kde.score_samples(x)[0]
+		return np.exp(logdensity).item()
+	\end{lstlisting}
+	\caption[Implementation of computing the probability density for a given point]{Implementation of computing the probability density for a given point}
+	\label{fig:code_probability_density}
+\end{figure}
 
-\begin{equation}
-p(x,\theta|X) = p(x|\theta) * p(\theta|X)
-\end{equation}
-
-The posterior distribution of the parameters, $p(\theta|X)$, can be approximated by PPLs through sampling, as stated above. (--> Make sure that this is true!!). To get density values from samples, we have to perform density estimation methods \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity.score_samples}
-
-
-My first approach will be to write a fixed probabilistic models as a model class, that fits one specific model to a specific set of data. (linear regression)
-
-
-simple, fixed example:
-In Lumen, several methods have to be specified for a model class to work. The first, which will always be called first, is the method that assigns data to the model.
-\\
-The second is the method that fits the model to the data. It will always be called second, after the data setting method. In Bayesian statistics, fitting means finding the joint posterior distribution. In the context of PPL, it means drawing samples from all variables, so that the joint posterior distribution can be approximated. The whole model should probably be specified in this method? Or before?
-\\
-Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
-In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
-\\
-Another method is the one that returns the probability density for a given point.
-We only have the samples from the joint posterior distribution, that were drawn during he fitting method, to get the density. The density estimation method used here is the kernel density estimation using gaussian kernels, where each data point is assigned a gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the gaussians.
-\\
-The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
-\\
-conditioning: posterior distribution given the values for the variables in remove. (Bad) Idea in PyMC3: Set the parameters in remove to a fixed value during the model specification, then sample as normal.
-\\
-First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginalisierungsmethode mit den Datendimensionen als Parameter angewendet. Meine erste Implementierung lässt aber nur Marginalisierungen auf Parameter zu, dadurch gibt es einen Fehler.
-Second Bug in the model: The marginalization method needs to access all variables of the data. However, it gets only the data passed for those variables to keep. So it cannot access the other variables. 
-Problem: Model data is reduced to variables in keep. Lösungsidee: Setze zu Beginn der Methode die Daten auf den vollständigen Datensatz, und setze am Ende der Methode die Daten wieder auf die Dimensionen in keep zurück.
-\\
-Problem: Es ist nicht gut, dass bei jedem Aufruf der \_density-Methode gesampelt wird, da das viel Zeit und Speicher braucht. Lösung: Führe das Sampling nur einmal durch und speichere die samples in einer Klassenvariable.
+%Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
+%In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
+%The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
+%First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginalisierungsmethode mit den Datendimensionen als Parameter angewendet. Meine erste Implementierung lässt aber nur Marginalisierungen auf Parameter zu, dadurch gibt es einen Fehler.
+%Second Bug in the model: The marginalization method needs to access all variables of the data. However, it gets only the data passed for those variables to keep. So it cannot access the other variables. 
+%Problem: Model data is reduced to variables in keep. Lösungsidee: Setze zu Beginn der Methode die Daten auf den vollständigen Datensatz, und setze am Ende der Methode die Daten wieder auf die Dimensionen in keep zurück.
+%Problem: Es ist nicht gut, dass bei jedem Aufruf der \_density-Methode gesampelt wird, da das viel Zeit und Speicher braucht. Lösung: Führe das Sampling nur einmal durch und speichere die samples in einer Klassenvariable.
 
 \section{Case examples}
 
