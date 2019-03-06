@@ -75,11 +75,9 @@ The thesis will be divided into two main parts, the first part being an overview
 \include{glossar}
 \printglossaries
 \section{Introduction}
-
-\textit{In this section, the motivation for the thesis is explained, the task of the thesis is made clear. Furthermore, the structure of the thesis is outlined here. It is possible to get the basic ideas and results of the thesis from reading only this section and the conclusion.}
-\\
-The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
-
+%The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
+A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber \cite{bingham2018pyro}, Microsoft \cite{gordon2014probabilistic} and DARPA \cite{Hardesty2015} focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
+However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application. To illustrate the functionality of PyMC3, the same Bayesian model is built once without and once with PyMC3, and the results are compared. Having covered the statistical und programming principles, the focus is laid then on visualization. The Lumen software is presented and it is explained how the integration of PyMC3 into Lumen is done. Finally, a number of examples are shown to illustrate the usefulness of the visualization and the thesis is concluded.
 \section{Concepts of Bayesian Statistics}
 
 \textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.} 
