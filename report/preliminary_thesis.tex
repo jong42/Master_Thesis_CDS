@@ -80,7 +80,7 @@ A probabilistic programming language (PPL) provides methods to represent a proba
 However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application. To illustrate the functionality of PyMC3, the same Bayesian model is built once without and once with PyMC3, and the results are compared. Having covered the statistical und programming principles, the focus is laid then on visualization. The Lumen software is presented and it is explained how the integration of PyMC3 into Lumen is done. Finally, a number of examples are shown to illustrate the usefulness of the visualization and the thesis is concluded.
 \section{Concepts of Bayesian Statistics}
 
-\textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section. Also graphical model checking is treated here, as that will be the common use case for the Lumen interface created in this thesis.} 
+\textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section.} 
 This section requires an understanding of basic calculation rules for working with conditional probabilities. These rules are further explained in appendix \ref{appendix:Rules of Probabilistic Inference}.
 \subsection{General principle}
 \label{subsec: General principle}
@@ -788,6 +788,9 @@ Successfully implementing these operations for arbitrary models created with PyM
 	\label{fig:code_probability_density}
 \end{figure}
 
+\paragraph{Treating independent variables}
+ Independent variables currently are not supposed to be displayed in Lumen.
+ 
 %Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
 %In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
 %The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
@@ -886,7 +889,8 @@ TODO: The model does not at all match the data. Either change the model so that 
 \section {Conclusion}
 In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen it has to be possible to marginalize and condition the model, as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the abovementioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of gaussians and then take the density from there.\\
 In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behaviour of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check arbitrary PyMC3 models in Lumen, making it very easy to spot any major discrepancies between the model and the intention/expectation of the researcher.\\
-TODO: Either mention drawback of nonrandom variables or remove that drawback in the implementation.
+TODO: Either mention drawback of nonrandom variables or remove that drawback in the implementation.\\
+TODO
 
 
 \listoffigures
