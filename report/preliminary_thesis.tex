@@ -65,9 +65,7 @@
 
 \begin{abstract}
 A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber, Microsoft and DARPA focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
-However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. PPLs are not yet supported by Lumen, and the goal of the master thesis at hand is to change that by implementing an interface between Lumen and a chosen PPL, so that exploring PPL models by visual analytics becomes possible.
-The thesis will be divided into two main parts, the first part being an overview about how PPLs work and what existing PPLs there are available. Out of these, the most appropriate one will be chosen for the task. The second, more practical part will then document the actual implementation of the interface.
-
+However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. The thesis at hand aims to improve this situation by providing an interface between a popular PPL named PyMC3 and the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. It becomes clear that even for very simple cases, visualization can contribute an important part in understanding the model, since Bayesian models often behave unexpectedly. The thesis shows how arbitrary models built in PyMC3 can be visualized with Lumen. 
 \end{abstract}
 
 \tableofcontents
