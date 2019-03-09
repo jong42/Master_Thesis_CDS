@@ -75,14 +75,12 @@ However in most cases, models built by PPLs lack appropriate ways to be properly
 \section{Introduction}
 %The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
 A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber \cite{bingham2018pyro}, Microsoft \cite{gordon2014probabilistic} and DARPA \cite{Hardesty2015} focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
-However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application. To illustrate the functionality of PyMC3, the same Bayesian model is built once without and once with PyMC3, and the results are compared. Having covered the statistical und programming principles, the focus is laid then on visualization. The Lumen software is presented and it is explained how the integration of PyMC3 into Lumen is done. Finally, a number of examples are shown to illustrate the usefulness of the visualization and the thesis is concluded.
+However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application. To illustrate the functionality of PyMC3, the same Bayesian model is built once with and once without PyMC3, and the results are compared. Having covered the statistical und programming principles, the focus is laid then on visualization. The Lumen software is presented and it is explained how the integration of PyMC3 into Lumen is done. Finally, a number of examples are shown to illustrate the usefulness of the visualization, and the thesis is concluded.
 \section{Concepts of Bayesian Statistics}
-
-\textit{Theoretical concepts of building statistical models using a Bayesian approach are explained in this section.} 
-This section requires an understanding of basic calculation rules for working with conditional probabilities. These rules are further explained in appendix \ref{appendix:Rules of Probabilistic Inference}.
+\textit{In this chapter, the theoretical concepts of building statistical models using a Bayesian approach are explained, as well as the methods to draw inference from a model by sampling. The former requires an understanding of basic calculation rules for working with conditional probabilities. These rules are further explained in appendix \ref{appendix:Rules of Probabilistic Inference}.}
 \subsection{General principle}
 \label{subsec: General principle}
-Bayesian data analysis is commonly used for parameter estimation and prediction of new data points. So before doing Bayesian data analysis, one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model, it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach, where model parameters are just single points. In Bayesian data analysis, model parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these so-called prior distributions. Finding a good prior can be a complex task. It should represent the knowledge that the researcher has about the parameter previous to seeing any data.
+Bayesian data analysis is commonly used for parameter estimation and prediction of new data points. So before doing Bayesian data analysis, one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model, it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach, where model parameters are just single points. In Bayesian data analysis, model parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these so-called prior distributions. Finding a good prior can be a complex task. A prior should represent the knowledge that the researcher has about the parameter previous to seeing any data.
 \paragraph{Parameter estimation}
 Once the model as well as the priors are specified, parameter estimation can be performed by applying the Bayes rule to calculate posterior distributions on the parameters, that is, probability distributions on the parameters given the observed data. The Bayes rule allows it to invert the order of a conditional probability and goes as follows:
 \begin{equation}
@@ -94,7 +92,7 @@ Transferring that to a model with data $X$ and parameters $\theta$, according to
 p(\theta|X) = p(X|\theta) * p(\theta)/p(X)
 \end{split}
 \end{equation}
-Here, $p(\theta|X)$ is the posterior distribution of the parameters. Getting this distribution is equivalent to getting the parameter estimates in the classical frequentist approach. $p(X|\theta)$ is the distribution of the data, given the parameters. This is what is specified in the model structure that has to be found before doing any Bayesian analysis. $p(\theta)$ is the distribution of the parameters without seeing any data. It is the prior distribution of the parameters, that has already been set up in the first step. $p(X)$ is the distribution over the data without seeing any parameters. It can be calculated by integrating over the joint distribution of the data and the parameters, but that integral can become difficult to solve with increasing model complexity. However, it is a constant, since the observed data does not change, and therefore it can be ignored for many applications.
+Here, $p(\theta|X)$ is the posterior distribution of the parameters. Getting this distribution is equivalent to getting the parameter estimates in the classical frequentist approach. $p(X|\theta)$ is the distribution of the data, given the parameters. This is what is specified in the model structure that has to be generated before doing any Bayesian analysis. $p(\theta)$ is the distribution of the parameters without seeing any data. It is the prior distribution of the parameters, that has already been set up in the first step. $p(X)$ is the distribution over the data without seeing any parameters. It can be calculated by integrating over the joint distribution of the data and the parameters, but that integral can become difficult to solve with increasing model complexity. However, it is a constant, since the observed data does not change, and therefore it can be ignored for many applications.
 \paragraph{Prediction}
 For the prediction of new data points it is necessary to get the posterior distribution of the data, that is, the probability distribution over the data variables $x$ given the observed data $X$: $P(x|X)$. New data points can then be generated by sampling from this distribution. Calculating it requires the joint posterior distribution to be known: the probability distribution over the data as well as the parameters given the observed data $p(x,\theta|X)$. The joint posterior can be computed as follows:
 \begin{equation}
@@ -109,7 +107,7 @@ P(x|X) = \int P(x,\theta|X) d\theta
 \end{equation}
 
 \subsection{Inference through sampling}
-
+\label{subsec:sampling}
 As stated in \ref{subsec: General principle}, using the Bayes formula, we get the posterior distribution the following way:
 
 \begin{equation}
@@ -119,8 +117,8 @@ We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the mode
 
 \begin{equation}
 \begin{split}
-p(x) = \int p(\theta,x) d \theta \\
-=  \int p(x|\theta) * p(\theta) d \theta
+p(x) &= \int p(\theta,x) d \theta \\
+&=  \int p(x|\theta) * p(\theta) d \theta
 \end{split}
 \end{equation}
 Calculating this integral can be very difficult or impossible, since the integral can be multidimensional. So, it is not always possible to get the posterior distribution of the parameters analytically. However, there are methods to sample exactly from the posterior distribution of the parameters. Some of the more popular of these methods are explained below.
@@ -152,7 +150,7 @@ The metropolis algorithm can be seen as a generalization of the Gibbs sampler \c
 \end{enumerate}
 This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
 
-PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
+%PYMC3 uses a Metropolis within-Gibbs-sampler (https://docs.pymc.io/developer\_guide.html)
 \paragraph{Metropolis-Hastings}
 %\cite{chib1995understanding}
 The Metropolis-Hastings sampler is a generalization of the metropolis sampler, where the probability of accepting the proposed point is calculated differently.
@@ -305,9 +303,9 @@ The model can then be validated by predicting new data points and compare this n
 
 \section{Probabilistic Programming}
 
-\textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language is, and a number of PPLs are introduced. A focus is laid on the abilities of the PPLs for graphical model checking}
+\textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is, and a number of PPLs are introduced. A Bayesian model is created once with and once without a PPL, and the results are compared.}
 \\
-According to \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. \cite{9781617292330} uses the example shown in figure \ref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistc reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
+According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in figure \ref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistc reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
 	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
@@ -332,12 +330,12 @@ is a python library that allows working with graphical models, neural networks, 
 is a PPL built in Python that focuses on deep learning and artificial intelligence. It uses the deep learning platform PyTorch as a backend \cite{bingham2018pyro}.
 \paragraph{Figaro}
 is available as a Scala library. Models in Figaro are treated as objects, a focus is laid on the possibility that more specialized models are derived from base models and can inherit propoerties from them. Figaro uses the Metropolis-Hastings algorithm for inference \cite{pfeffer2009figaro}.
-\paragraph{BUGS}
-mentioned in \cite{Gelman_2015}
-based on graphical models
-\paragraph{Jags}
-mentioned in \cite{Gelman_2015}
-based on graphical models
+%\paragraph{BUGS}
+%mentioned in \cite{Gelman_2015}
+%based on graphical models
+%\paragraph{Jags}
+%mentioned in \cite{Gelman_2015}
+%based on graphical models
 \paragraph{PyMC3}
 is the PPL used in this thesis. It is described in detail in the following chapter.
 
@@ -419,11 +417,12 @@ is the PPL used in this thesis. It is described in detail in the following chapt
 %	\caption[Example code of a simple Bayesian model using Stan]{Example code of a simple Bayesian model using Stan}
 %\end{figure}
 
-PyMC3 is an open-source probabilistic programming framework for Python. The following explanations are taken from \cite{Salvatier2016}. Specification of Bayesian models in PyMC3 is done by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they get passed observed data as an argument, that should not be changed by any fitting algorithm.  This kind of random variable can be used to represent sampling distributions.
+PyMC3 is an open-source probabilistic programming framework for Python. The following explanations are taken from Salvatier et al. \cite{Salvatier2016}. Bayesian models in PyMC3 are described by encoding the prior, the sampling and the posterior distributions through three types of random variables: Stochastic, deterministic and observed stochastic ones. Stochastic random variables have values which are in part determined randomly, according to a chosen distribution. Commonly used probability distributions like Normal, Binomial etc. are available for this. Deterministic random variables, on the other hand, are not drawn from a distribution, but are calculated by fixed rules from other variables, for example by taking the sum of two variables. Lastly, there are the observed stochastic random variables which are similar to stochastic random variables, except that they are treated as observed variables and therefore get passed observed data as an argument. This kind of random variable is used to represent distributions of data, whereas stochastic variables are used to represent distributions of parameters.
 \\
-PyMC3 mainly uses simulation techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm, that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
+PyMC3 mainly uses sampling techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm that relies on gradient information to generate samples from posterior distributions, as explained in chapter \ref{subsec:sampling}. PyMC3 also provides basic methods for plotting posterior distributions.
+%that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
 \\
-The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
+The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Bayesian model, taken from Salvatier et al. \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
 \begin{figure}
 	\begin{lstlisting}
 	import pymc3 as pm
@@ -464,7 +463,7 @@ The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Baye
 
 \subsection{Comparison of a model implemented with PyMC3 and and a model implemented without PyMC3}
 \label{subsec:Comparison}
-\textit{To get a sort of ground truth, a Bayesian model is fitted first without the use of a PPL. To check if a PPL is deployed correctly, the same model is then fitted by a PPL. The results of the PPL approach and the ground truth are compared.}
+To check if PyMC3 is applied correctly, a Bayesian model is fitted first without the use of a PPL. The same model is then fitted by PyMC3. The results of both approaches are compared.
 \\
 Assume we want to fit a model with the two dimensions $x$ and $mu$, one of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore we assume the following priors:
 \begin{equation}
@@ -562,13 +561,13 @@ At last, we only have to multiply all those pieces to get to a posterior joint d
 	%\caption{Implementation of the joint posterior distribution}
 	\label{fig:joint_posterior}
 \end{figure}
-The joint posterior distribution can now be visualized, as it is done in \ref{fig:ground_truth_posterior_1}.
+The joint posterior distribution can now be visualized, as it is done in figure \ref{fig:ground_truth_posterior_1}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1.png}
 	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
 	\label{fig:ground_truth_posterior_1}
 \end{figure}
-The upper left figures show histograms of the data points of $x$ and $mu$. The upper right figures show the marginalized posterior distributions for both variables. The bottom figure shows the density of the joint posterior distribution as a contour plot, as well as the data points. We see that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing for me at first: Since I know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
+The upper left figures show histograms of the data points of $x$ and $mu$. The upper right figures show the marginalized posterior distributions for both variables. The bottom figure shows the density of the joint posterior distribution as a contour plot, along with the data points. We see that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing at first: Since we know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
 Let's look again at the formula:
 \begin{equation}
 P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
@@ -577,15 +576,21 @@ To evaluate the abovementioned expectations, it is not necessary to keep the nor
 \begin{equation}
 P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
 \end{equation}
-When we consider only the first and the last term of this formula, it behaves exactly as expected: $P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)$
-and $P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)$. What was messing with my expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
-The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. I delivers the distribution that is shown in \ref{fig:ground_truth_posterior_5}.
+When we consider only the first and the last term of from the right of this formula, it behaves exactly as expected: \begin{equation}
+P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)
+\end{equation}
+and 
+\begin{equation}
+P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)
+\end{equation} What was messing with the expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. 
+%I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
+The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. I delivers the distribution that is shown in figure \ref{fig:ground_truth_posterior_5}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5.png}
 	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
 	\label{fig:ground_truth_posterior_5}
 \end{figure}
-The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in \ref{fig:posterior_different_data_sizes}.
+The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in figure \ref{fig:posterior_different_data_sizes}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/posterior_different_data_sizes.png}
 	\caption[Posterior distributions for different numbers of datapoints]{Posterior distributions for different numbers of datapoints}
@@ -621,7 +626,7 @@ When we change the data generating mechanism to a non-hierarchic process, so tha
 If it is possible to generate the same data by different parameterizations, it means that a model cannot be able to always return the true parameters in the posterior. This is also called Nonidentifiability.
 \subsubsection{PyMC3 example of a simple Bayesian model}
 \label{subsec: PyMC3 example of a simple Bayesian model}
-The model from chapter \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \ref{fig:PyMC3_example_code_simple_model}.
+The model from chapter \ref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \ref{fig:PyMC3_example_code_simple_model}.
 \begin{figure}[h]
 	\begin{lstlisting}
 	import numpy as np
@@ -653,7 +658,7 @@ The model from chapter \autoref{subsec: Complete example of a simple Bayesian mo
 	\caption[Code used to specify the example model in PyMC3]{Code used to specify the example model in PyMC3}
 	\label{fig:PyMC3_example_code_simple_model}
 \end{figure}
-First, the same data is generated as in \autoref{subsec: Complete example of a simple Bayesian model}. Then, $mu$ and $X$ are specified, $mu$ as a stochastic random variable and $X$ as an observed stochastic random variable. Finally, samples from the posterior distribution are drawn using the sample-method. TODO: use a PyMC3-method to draw samples from $X$.
+First, the same data is generated as in chapter \ref{subsec: Complete example of a simple Bayesian model}. Then, $mu$ and $X$ are specified, $mu$ as a stochastic random variable and $X$ as an observed stochastic random variable. Finally, samples from the posterior distribution are drawn using the sample-method. TODO: use a PyMC3-method to draw samples from $X$.
 Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples. Similarities in shape to the real joint posterior distribution in \ref{fig:ground_truth_posterior_1} are visible, so it is assumed, that PyMC3 captures the model correctly.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model.png}
@@ -662,7 +667,7 @@ Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples.
 \end{figure}
 
 \section{Visualization with Lumen}
-\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. This covers also the theoretical aspect: Which distribution do we want to visualize with Lumen and how do we get it (using the formula $P(y,\theta|Y) = P(y|\theta) * P(\theta|Y)$)? It is outlined, what the goal of the thesis is precisely, in other words what possibilities should the interface ideally give to a user who has written a model with a PPL} 
+\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. It is outlined, how the different operations necessary for a lumen interface are implemented for a PyMC3 model.} 
 
 %model classes are in \url{modelbase/mb_modelbase/models_core}
 %data is in \url{mb_data}. model fitting is done in the script fit\_models.py, which is also in \url{mb_data}. The corresponding model class has to be imported, the models have to be 'registered' in the known\_models variable and then the models to be fit have to be listed in the variable debugincl.
@@ -702,7 +707,6 @@ In it, each model type is represented by a class. This class is required to prov
 
 %In the mb\_data repository, data that can be used for model fitting is contained. It has a file named fit\_models.py that contains specifications of data and corresponding models. It can be called with one of these specifications to create a mdl file. In the directory data\_models all mdl files are currently stored that can be displayed by the lumen frontend.
 \subsection{Integration of PyMC3 in Lumen}
-\textit{In this section, the choices and attempts made during the practical implementation of the interface are elucidated.}\\
 As explained above, a model in the modelbase backend has to provide several prespecified methods. The most important operations that are embedded in these methods are:
 \begin{itemize}
 	\item fitting a model
@@ -710,8 +714,8 @@ As explained above, a model in the modelbase backend has to provide several pres
 	\item conditioning
 	\item computing the probability density for a given data point
 \end{itemize}
-Successfully implementing these operations for arbitrary models created with PyMC3 is equivalent to successfully visualizing these models in Lumen.
-\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables, so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables, which only have to be applied here. \ref{fig:code_fitting_a_model} shows the implementation. There, the variable $self.model_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen (albeit to some extent incorrectly labeled as test data).
+Successfully implementing these operations for arbitrary models created with PyMC3 is equivalent to successfully visualizing these models in Lumen. The implementation of each of these models is explained below.
+\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables, so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables, which only have to be applied here. Figure \ref{fig:code_fitting_a_model} shows the implementation. There, the variable $self.model\_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen, albeit to some extent incorrectly labeled as test data.
 \begin{figure}[h]
 	\begin{lstlisting}
 	import pymc3 as pm
@@ -799,7 +803,7 @@ Successfully implementing these operations for arbitrary models created with PyM
 
 \section{Case examples}
 
-\textit{Here, case examples are presented to show how the finished interface performs in practice.}
+\textit{In this chapter, case examples are presented to show how the finished interface performs in practice.}
 
 \subsection{First simple example}
 As a basic example to implement in PyMC3 we choose the model from chapter \ref{subsec:Comparison}. The expectation here is that the resulting Lumen plot should look much like the visualizations in figure \ref{fig:code_use_case_1}. The model contains the random variables $X$ and $mu$, the data for it was generated by the following  distributions:
@@ -820,7 +824,7 @@ The priors for $X$ and $mu$ match exactly these distributions. The corresponding
 	\caption[PyMC3 model of use case 1]{PyMC3 model of use case 1}
 	\label{fig:code_use_case_1}
 \end{figure}
-Visualizing this model in Lumen results in the plot shown in figure \ref{fig:lumen_use_case_1}. Considering the different ranges in the mu-axis, the plot looks quite similar to the visualizations in figure \ref{fig:ground_truth_posterior_1}, meeting the expectations.
+Visualizing this model in Lumen results in the plot shown in figure \ref{fig:lumen_use_case_1}. Considering the different ranges in the $mu$-axis, the plot looks quite similar to the visualizations in figure \ref{fig:ground_truth_posterior_1}, meeting the expectations.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/lumen_use_case_1.png}
 	\caption{Lumen visualization of use case 1}
@@ -846,7 +850,7 @@ The following priors are assigned to the random variables:
 \sigma &\sim |N(0,1)|
 \end{split}
 \end{equation}
-The code creating this model is shown in \ref{fig:code_use_case_2}. It differs from the implementation of Salvatier et al in that the variables $X_1$ and $X_2$ are also treated as random variables. This change was made since we want to display these variables in Lumen, and Lumen currently can only display random variables.
+The code creating this model is shown in figure \ref{fig:code_use_case_2}. It differs from the implementation of Salvatier et al in that the variables $X_1$ and $X_2$ are also treated as random variables. This change was made since we want to display these variables in Lumen, and Lumen currently can only display random variables.
 \begin{figure}[h]
 	\begin{lstlisting}
 	np.random.seed(123)
@@ -885,12 +889,8 @@ TODO: The model does not at all match the data. Either change the model so that 
 
 
 \section {Conclusion}
-In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen it has to be possible to marginalize and condition the model, as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the abovementioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of gaussians and then take the density from there.\\
-In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behaviour of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check arbitrary PyMC3 models in Lumen, making it very easy to spot any major discrepancies between the model and the intention/expectation of the researcher.\\
-TODO: Either mention drawback of nonrandom variables or remove that drawback in the implementation.\\
-TODO
-
-
+In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen, it has to be possible to marginalize and condition the model, as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the abovementioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of gaussians and then take the density from there.\\
+In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behaviour of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check arbitrary PyMC3 models in Lumen, making it very easy to spot any major discrepancies between the model and the intention/expectation of the researcher.
 \listoffigures
         
 \section{Literatur}
@@ -902,7 +902,7 @@ TODO
 \section{Rules of Probabilistic Inference}
 \label{appendix:Rules of Probabilistic Inference}
 
-When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from \cite{9781617292330}.
+When working with Bayesian models, it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from Pfeffer \cite{9781617292330}.
 
 \paragraph{Chain rule}
 
