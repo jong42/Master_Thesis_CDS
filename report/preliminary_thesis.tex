@@ -675,6 +675,10 @@ Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples.
 %Fitted models that can be accessed by lumen are then stored in \url{data_models}.
 
 \subsection{Graphical model checking}
+One can check the models behaviour, that is, the interaction of pairs of variables.
+Posterior predictive checking is about comparing the training data to simulated data from the posterior distribution \cite{1439840954}. 
+Gelman et al \cite{1439840954} describe drawing data from te posterior distribution and then comparing it to the training data as a means of validating a model. With PyMC3 and Lumen, we can actually do even better and compare the actual posterior distribution to the training data.
+According to Gelman et al.  \cite{1439840954}, it is also useful to compare summaries of the data (such as the mean) to summaries from posterior simulations. This is not possible in Lumen since it only shows the actual data, no summaries.
 \subsection{Lumen}
 Lumen is an interactive web-frontend designed for graphical visualization of models and data \cite{Lucas2016a}. It uses modelbase as backend, a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization \cite{Lucas2016b}. Figure \ref{fig:lumen_screenshot} shows an exemplary view of the frontend.
 \begin{figure}
