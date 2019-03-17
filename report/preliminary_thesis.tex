@@ -75,7 +75,7 @@ However in most cases, models built by PPLs lack appropriate ways to be properly
 \section{Introduction}
 %The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
 A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber \cite{bingham2018pyro}, Microsoft \cite{gordon2014probabilistic} and DARPA \cite{Hardesty2015} focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
-However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application. To illustrate the functionality of PyMC3, the same Bayesian model is built once with and once without PyMC3, and the results are compared. Having covered the statistical und programming principles, the focus is laid then on visualization. The Lumen software is presented and it is explained how the integration of PyMC3 into Lumen is done. Finally, a number of examples are shown to illustrate the usefulness of the visualization, and the thesis is concluded.
+However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application. To illustrate the functionality of PyMC3, the same Bayesian model is built once with and once without PyMC3, and the results are compared. Having covered the statistical and programming principles, the focus is laid then on visualization. The Lumen software is presented and it is explained how the integration of PyMC3 into Lumen is done. Finally, a number of examples are shown to illustrate the usefulness of the visualization, and the thesis is concluded.
 \section{Concepts of Bayesian Statistics}
 \textit{In this chapter, the theoretical concepts of building statistical models using a Bayesian approach are explained, as well as the methods to draw inference from a model by sampling. The former requires an understanding of basic calculation rules for working with conditional probabilities. These rules are further explained in appendix \ref{appendix:Rules of Probabilistic Inference}.}
 \subsection{General principle}
@@ -128,9 +128,9 @@ One of the most basic methods is called Simple Monte Carlo. There we approximate
 \begin{equation}
 \int p(x|\theta) * p(\theta) d \theta \approx 1/m * \sum^m p(x|\theta_i),\quad \theta_i \sim p(\theta)
 \end{equation}
-Simple Monte Carlo has a number of disadvantages, so more sophistically methods are generally used, like Gibbs sampling or NUTS.
+Simple Monte Carlo has a number of disadvantages, so more sophistical methods are generally used, like Gibbs sampling or NUTS.
 \paragraph{Markov Chain Monte Carlo}
-Markov chain simulations, also called Markov Chain Monte Carlo, or MCMC, summarize a set of methods where the parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a markov chain. So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Draws from the second half of the chain can then be used as samples. The Gibbs and the Metropolis sampler, which are explained below, both belong to the MCMC methods \cite{1439840954}.
+Markov chain simulations, also called Markov Chain Monte Carlo, or MCMC, summarize a set of methods where the parameter values are drawn sequentially from an approximate distribution. In each sequence, the values depend only on the values of the preceding sequence (and maybe on the index of the sequence), which makes those draws a Markov chain. So in each step, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Draws from the second half of the chain can then be used as samples. The Gibbs and the Metropolis sampler, which are explained below, both belong to the MCMC methods \cite{1439840954}.
 \paragraph{Gibbs Sampling}
 Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_j, j \neq i)$ for each quantity.
 The algorithm works as follows:
@@ -140,13 +140,13 @@ The algorithm works as follows:
 \end{itemize}
 \cite{Martz1994}
 \paragraph{Metropolis}
-The metropolis algorithm can be seen as a generalization of the Gibbs sampler \cite{1439840954} and was originally developed to calculate the behaviour of interacting molecules without having to compute the multidimensional integrals previously needed for that computation\cite{Metropolis1953}. The algorithm goes as follows : 
+The metropolis algorithm can be seen as a generalization of the Gibbs sampler \cite{1439840954} and was originally developed to calculate the behavior of interacting molecules without having to compute the multidimensional integrals previously needed for that computation\cite{Metropolis1953}. The algorithm goes as follows : 
 \begin{enumerate}
 	\item An arbitrary starting location is chosen for each of the molecules. 
 	\item For each molecule, a new possible location is proposed. How this new location is calculated is itself a complex task and can be crucial for the performance of the algorithm. For the sake of simplicity we assume here that the proposed location is just randomly chosen in the near vicinity of the old location.
 	\item The change of energy in the system introduced by the position change is calculated.
 	\item If the proposed location has a lower energy level than the current one, the proposed location is accepted. If it has a higher energy level, it is accepted with
-	a probability antiproportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
+	a probability anti proportional to the energy increase, that is, the higher the energy increase, the lower the chance of accepting the proposed position. 
 \end{enumerate}
 This algorithm is equivalent to sampling from a probability distribution. The molecules represent variables of the probability distribution, and the negative energy of a configuration of molecules represents the probability density of a point in the distribution. After the algorithm has converged, the distribution of the chosen points resembles the true probability distribution. It is important to note that for this algorithm to work it is necessary that the probability density, apart from a constant factor, can be computed for any given point of the probability distribution, since it is needed for evaluating the acceptance of the proposal \cite{1439840954}.
 
@@ -154,7 +154,7 @@ This algorithm is equivalent to sampling from a probability distribution. The mo
 \paragraph{Metropolis-Hastings}
 %\cite{chib1995understanding}
 The Metropolis-Hastings sampler is a generalization of the metropolis sampler, where the probability of accepting the proposed point is calculated differently.
-Metropolis hastings additionally has the ratio between the proposal distributions in it \cite{chib1995understanding}. Metropolis is chosen in a way that these cancel out.
+Metropolis Hastings additionally has the ratio between the proposal distributions in it \cite{chib1995understanding}. Metropolis is chosen in a way that these cancel out.
 \paragraph{Hamiltonian Monte-Carlo}
 The base approach of Hamiltonian Monte Carlo (HMC) is that we have a particle in a multidimensional space where each dimension represents a variable of the target distribution and thus the location $\theta$ of the particle represents a specific point on the target distribution. As in the metropolis algorithm, a starting location is arbitrarily chosen. The difference to the metropolis algorithm now lies in the generation of the new locations. An auxiliary variable $r$ and the parameters $L$ and $\epsilon$ are introduced for this purpose. $r$ represents the momentum of the particle, $L$ is the number of steps to get to one sample, and $\epsilon$ is the step size for one of these steps. For generating one sample point, a change of locations is proposed $L$ times and is accepted or rejected according to the metropolis algorithm. In each of the $L$ steps, $\theta$ and $r$ are updated by using the following algorithm, known as leapfrog integrator: 
 \begin{algorithm}[h]
@@ -163,11 +163,11 @@ The base approach of Hamiltonian Monte Carlo (HMC) is that we have a particle in
 	$r \leftarrow r + (\epsilon/2) \, \nabla_\theta \, (log \, p(\theta))$
 \end{algorithm}
 \\ 
-As one can see, the update process requires gradient information on the log probability density of the target distribution. So this method cannot be applied if gradient information is unavailable. The generated locations here show less random walk behaviour and therefore better performance than the algorithms above, if the parameters are set properly \cite{hoffman2014no}.
+As one can see, the update process requires gradient information on the log probability density of the target distribution. So this method cannot be applied if gradient information is unavailable. The generated locations here show less random walk behavior and therefore better performance than the algorithms above, if the parameters are set properly \cite{hoffman2014no}.
 
 %can reduce complexity from $O(D^2)$ (Metropolis) to $O(D^{(5/4)}$
 
-%auxiliary momentum variable $r_d$ for each modelvariable $\theta_d$.
+%auxiliary momentum variable $r_d$ for each model variable $\theta_d$.
 
 %The momentum variables are drawn independently from the standard normal distribution.
 
@@ -177,7 +177,7 @@ As one can see, the update process requires gradient information on the log prob
 The No-U-Turn-Sampler (NUTS) is a self-tuning variant of Hamiltonian Monte Carlo, where the number of steps per sample $L$ does not need to be specified at a fixed value anymore. Instead,
 it is attempted to stop the steps once the maximum distance between initial and proposed point is reached. This maximum is reached when the inner product between $r$ and the distance between initial and proposed point becomes negative. The next iteration would then only decrease the distance  \cite{1439840954}.
 \\
-Since this method does not yet guarantee convergence, it is run both forwards and backwards in time, and then stops if it encounters the abovementioned maximum in either direction.
+Since this method does not yet guarantee convergence, it is run both forwards and backwards in time, and then stops if it encounters the above mentioned maximum in either direction.
 Once the stop is reached, a sample is drawn from all the points that were visited in the current iteration \cite{hoffman2014no}.
 
 %a slice variable $u$ is introduced
@@ -185,7 +185,7 @@ Once the stop is reached, a sample is drawn from all the points that were visite
 
 
 \subsection{Evaluating models}
-The model can then be validated by predicting new data points and compare this new data to a test dataset \cite{1439840954}.
+The model can then be validated by predicting new data points and compare this new data to a test data set \cite{1439840954}.
 
 %
 %Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
@@ -193,14 +193,14 @@ The model can then be validated by predicting new data points and compare this n
 %Different models can lead to different posterior inferences, even if both models have a good fit.
 %
 %model checking: How good does the model fit the data?
-%Sensitivitiy analysis: Comparison of different models with good fit
+%Sensitivity analysis: Comparison of different models with good fit
 %
 %This is necessary after a joint probability density and a posterior density are calculated. How good are the prior and the likelihood model?
 %\textit{Sensitivity analysis} deals with the question, how much the posterior is changed when one chooses a different (but also reasonable) model for the likelihood or the prior, or other assumptions affecting the posterior.
 %
 %In theory: Setting up a 'super-model' as joint-distribution which includes all possible realities. Posterior of this super-model then automatically incorporates the sensitivity analysis. In practice this is conceptually and computationally infeasible and also is still dependent on the assumptions made when creating the super-model being correct.
 %
-%One way is just to compare model predictions with the actual outcomes (this is referred to as external validation). If for some reason it is not possible to get the acutal outcomes (for example if they lie in the future), one needs to approximate external validation with the available data.
+%One way is just to compare model predictions with the actual outcomes (this is referred to as external validation). If for some reason it is not possible to get the actual outcomes (for example if they lie in the future), one needs to approximate external validation with the available data.
 %
 %\textit{Posterior predictive checking}: Use global summaries of the data distribution and the predictive distribution to evaluate the model: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
 %
@@ -227,13 +227,13 @@ The model can then be validated by predicting new data points and compare this n
 %p-value depends on the chosen test quantity.
 %
 %
-%Bayesian predictive checking: choose and compute test quantites for the data and for simulations, then compute the p-value for the test quantity (probability that the test quantity of the data could have arisen under the model)
+%Bayesian predictive checking: choose and compute test quantities for the data and for simulations, then compute the p-value for the test quantity (probability that the test quantity of the data could have arisen under the model)
 %
 %Test quantities give information about a specific aspect of the observed/simulated data. A model can predict values that are in some aspects similar to the data, in other aspects different. Therefore it can make sense to compute p-values fur several different test quantities.
-%If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) pointwise, eg. in a scatterplot or in a histogram of the differences. The scatterplot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
+%If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) point wise, eg. in a scatter plot or in a histogram of the differences. The scatter plot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
 %Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
 %Graphical visualization can be used to identify useful test quantities.
-%If a test quantity has a p-value close to 0 or 1, the aspect that is analysed by the test quantity is not well captured in the model.
+%If a test quantity has a p-value close to 0 or 1, the aspect that is analyzed by the test quantity is not well captured in the model.
 %\\
 %Model checking depends on the data-collection model (how the data was collected), since data has to be replicated for computing a p-value. Posterior Inference however does not depend on the data collection model, as long as the likelihood model stays the same. Because of this, the same posterior results(what are the parameters) can get different model checking results (how well does the model fit) when the data-collection model is changed.
 %\\
@@ -244,7 +244,7 @@ The model can then be validated by predicting new data points and compare this n
 %\begin{itemize}
 %	\item Direct display of all the data
 %	\item Display of data summaries (e.g. if the data is so large that it is not helpful to display all the data)
-%	\item Display a measure of discrepancy betweem model and data
+%	\item Display a measure of discrepancy between model and data
 %\end{itemize}
 %
 %MAYBE BUILD EXAMPLES WITH LUMEN TO ILLUSTRATE USEFULNESS OF LUMEN
@@ -265,10 +265,10 @@ The model can then be validated by predicting new data points and compare this n
 %\label{Choosing an appropriate prior distribution}
 %There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
 %\\
-%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit noninformative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common noninformative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
+%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit non informative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common non informative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
 %Besides informative and noninformative prior distributions there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter. A normal distribution with high variance is often used as weakly informative prior.
 %\\
-%The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being intertpretable as additional data.
+%The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being interpretable as additional data.
 %\\
 %A prior distribution is called \textit{proper} if it does not depend on data and sums to 1 \cite{1439840954}. Proper distributions can be normalized. The uniform prior for example is \textit{improper}, since it can't be normalized.
 %
@@ -292,7 +292,7 @@ The model can then be validated by predicting new data points and compare this n
 %For the posterior distribution, a normal distribution is often assumed.
 %
 %\subsubsection{Drawing inference}
-%According to \cite{Wang2018}, the likelihood of a new datapoint can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
+%According to \cite{Wang2018}, the likelihood of a new data point can be calculated by integrating the product of the prior likelihood and conditional probability of $\beta$ over the space of $\beta$, as shown in equation \ref{eq:posterior_predictive}. This formula can also be derived using the chain rule (I think).
 %\\
 %If it is not possible to perform calculations directly from the posterior distribution (e.g. if there is no closed form but only a discrete approximation of the posterior distribution), one can simulate data points from the posterior distribution instead and perform calculations on them \cite{1439840954}.
 %
@@ -305,13 +305,13 @@ The model can then be validated by predicting new data points and compare this n
 
 \textit{In this section,  the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is, and a number of PPLs are introduced. A Bayesian model is created once with and once without a PPL, and the results are compared.}
 \\
-According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in figure \ref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistc reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
+According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in figure \ref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistic reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
 	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
 	\label{fig:example_prs}
 \end{figure}
-From a data science perspective, this means that a Probabilistig Programming Language(PPL) provides ways of describing a probability model and drawing inference from it, which, in the ideal case, are more flexible, more efficient, and better to understand than traditional approaches \cite{Hardesty2015}. Currently, a number of PPLs is publicly available, with the most popular being mentioned below:
+From a data science perspective, this means that a Probabilistic Programming Language(PPL) provides ways of describing a probability model and drawing inference from it, which, in the ideal case, are more flexible, more efficient, and better to understand than traditional approaches \cite{Hardesty2015}. Currently, a number of PPLs is publicly available, with the most popular being mentioned below:
 \paragraph{Stan}
 is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. As described in \cite{Gelman_2015}, it consists of the following components:
 \begin{itemize}
@@ -325,11 +325,11 @@ It also provides basic plotting methods for the posterior distributions of param
 \end{itemize}
 \paragraph{Edward}
 %http://edwardlib.org/getting-started
-is a python library that allows working with graphical models, neural networks, implicit generative models and bayesian programs. It supports most of the abovementioned sampling methods and relies on TensorFlow \cite{tran2016edward}
+is a python library that allows working with graphical models, neural networks, implicit generative models and Bayesian programs. It supports most of the above mentioned sampling methods and relies on TensorFlow \cite{tran2016edward}
 \paragraph{Pyro}
 is a PPL built in Python that focuses on deep learning and artificial intelligence. It uses the deep learning platform PyTorch as a backend \cite{bingham2018pyro}.
 \paragraph{Figaro}
-is available as a Scala library. Models in Figaro are treated as objects, a focus is laid on the possibility that more specialized models are derived from base models and can inherit propoerties from them. Figaro uses the Metropolis-Hastings algorithm for inference \cite{pfeffer2009figaro}.
+is available as a Scala library. Models in Figaro are treated as objects, a focus is laid on the possibility that more specialized models are derived from base models and can inherit properties from them. Figaro uses the Metropolis-Hastings algorithm for inference \cite{pfeffer2009figaro}.
 %\paragraph{BUGS}
 %mentioned in \cite{Gelman_2015}
 %based on graphical models
@@ -456,9 +456,9 @@ The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Baye
 
 %There is the possibility to create own theano functions in python. Gradient based sampling methods don't work for user-defined functions however, except when a gradient is explicitly added.
 
-%Similarily pmc3 allows to define own distributions
+%Similarily PyMC3 allows to define own distributions
 
-%stochastic data types (--> probability distributions) make it easier to perform bayesian data analysis
+%stochastic data types (--> probability distributions) make it easier to perform Bayesian data analysis
 %Random Variables can be represented as objects
 
 \subsection{Comparison of a model implemented with PyMC3 and and a model implemented without PyMC3}
@@ -567,12 +567,12 @@ The joint posterior distribution can now be visualized, as it is done in figure 
 	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
 	\label{fig:ground_truth_posterior_1}
 \end{figure}
-The upper left figures show histograms of the data points of $x$ and $mu$. The upper right figures show the marginalized posterior distributions for both variables. The bottom figure shows the density of the joint posterior distribution as a contour plot, along with the data points. We see that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing at first: Since we know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualisation. In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
+The upper left figures show histograms of the data points of $x$ and $mu$. The upper right figures show the marginalized posterior distributions for both variables. The bottom figure shows the density of the joint posterior distribution as a contour plot, along with the data points. We see that $mu$ is very narrowly contained around zero, whereas $x$ has a much broader distribution. A relationship between $mu$ and $x$ is not visible. This is astonishing at first: Since we know that $x$ is dependent on $mu$, I would expect this dependency to show up in the visualization In other words, I would expect the probability density for a high $mu$ and a high $x$ to be relatively similar to the density of a $mu$ near zero and a high $x$, and to be much higher than the density of a high $mu$ and a low $x$.
 Let's look again at the formula:
 \begin{equation}
 P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu) / \int P(X|mu) * P(mu) \hspace{1mm} d \hspace{1mm} mu
 \end{equation}
-To evaluate the abovementioned expectations, it is not necessary to keep the normalizing constant, since a constant does not affect the order of the values. So we keep:
+To evaluate the above mentioned expectations, it is not necessary to keep the normalizing constant, since a constant does not affect the order of the values. So we keep:
 \begin{equation}
 P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
 \end{equation}
@@ -582,9 +582,9 @@ P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)
 and 
 \begin{equation}
 P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)
-\end{equation} What was messing with the expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremly small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremly low density values by this middle term. 
+\end{equation} What was messing with the expectations is the term in the middle, which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremely small, since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremely low density values by this middle term. 
 %I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
-The dependance between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. I delivers the distribution that is shown in figure \ref{fig:ground_truth_posterior_5}.
+The dependence between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. I delivers the distribution that is shown in figure \ref{fig:ground_truth_posterior_5}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5.png}
 	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
@@ -593,7 +593,7 @@ The dependance between $mu$ and $x$ is in fact still there in the joint posterio
 The dependency between the variables is here clearly visible, since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in figure \ref{fig:posterior_different_data_sizes}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/posterior_different_data_sizes.png}
-	\caption[Posterior distributions for different numbers of datapoints]{Posterior distributions for different numbers of datapoints}
+	\caption[Posterior distributions for different numbers of data points]{Posterior distributions for different numbers of data points}
 	\label{fig:posterior_different_data_sizes}
 \end{figure}
 When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
@@ -615,9 +615,9 @@ Figures  \ref{fig:ground_truth_posterior_3} and \ref{fig:ground_truth_posterior_
 \end{figure}
 %When the number of actual data points becomes small, I expect %the joint distribution to show the linear relationship between %$x$ and $mu$ better, since the influence of the data points, %which 'compresses' the whole plot to the middle, diminishes.
 
-%This is also what actually happens. Without any datapoints, we %see clearly the linear relationship.
+%This is also what actually happens. Without any data points, we %see clearly the linear relationship.
 
-When we change the data generating mechanism to a non-hierarchic process, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parametrization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in figure \ref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
+When we change the data generating mechanism to a non-hierarchic process, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parameterization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in figure \ref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6.png}
 	\caption[Posterior probability densities of the example model with altered data generation]{Posterior probability densities of the example model with altered data generation}
@@ -755,7 +755,7 @@ Successfully implementing these operations for arbitrary models created with PyM
 	\label{fig:code_marginalizing_a_model}
 \end{figure}
 
-\paragraph{Conditioning a model} follows the same principle as marginalizing: Samples that do not fall inside the intervall dictated by the condition are just removed. This operation is implemented as shown in \ref{fig:code_conditioning_a_model}.
+\paragraph{Conditioning a model} follows the same principle as marginalizing: Samples that do not fall inside the interval dictated by the condition are just removed. This operation is implemented as shown in \ref{fig:code_conditioning_a_model}.
 \begin{figure}[h]
 	\begin{lstlisting}
     def _conditionout(self, keep, remove):
@@ -776,7 +776,7 @@ Successfully implementing these operations for arbitrary models created with PyM
 	\label{fig:code_conditioning_a_model}
 \end{figure}
 
-\paragraph{Getting a probability density} in the context of Probabilistic Programming is not as straightforward as in classical statistics, since we do not have probability density function. This function instead can be approximated by the samples drawn from the posterior. In the implementation at hand, the chosen approximation method is the kernel density estimation using gaussian kernels, provided by the scikit-learn package \cite{scikit-learn}. In this method, each data point is assigned a gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the gaussians. It is implemented as shown in \ref{fig:code_probability_density}.
+\paragraph{Getting a probability density} in the context of Probabilistic Programming is not as straightforward as in classical statistics, since we do not have probability density function. This function instead can be approximated by the samples drawn from the posterior. In the implementation at hand, the chosen approximation method is the kernel density estimation using Gaussian kernels, provided by the scikit-learn package \cite{scikit-learn}. In this method, each data point is assigned a Gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the Gaussians. It is implemented as shown in \ref{fig:code_probability_density}.
 \begin{figure}[h]
 	\begin{lstlisting}
     def _density(self, x):
@@ -795,7 +795,7 @@ Successfully implementing these operations for arbitrary models created with PyM
  
 %Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
 %In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
-%The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
+%The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the Gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
 %First Bug in the model run: Beim Laufen der Skripte für Lumen wir die Marginalisierungsmethode mit den Datendimensionen als Parameter angewendet. Meine erste Implementierung lässt aber nur Marginalisierungen auf Parameter zu, dadurch gibt es einen Fehler.
 %Second Bug in the model: The marginalization method needs to access all variables of the data. However, it gets only the data passed for those variables to keep. So it cannot access the other variables. 
 %Problem: Model data is reduced to variables in keep. Lösungsidee: Setze zu Beginn der Methode die Daten auf den vollständigen Datensatz, und setze am Ende der Methode die Daten wieder auf die Dimensionen in keep zurück.
@@ -889,8 +889,8 @@ TODO: The model does not at all match the data. Either change the model so that 
 
 
 \section {Conclusion}
-In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen, it has to be possible to marginalize and condition the model, as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the abovementioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of gaussians and then take the density from there.\\
-In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behaviour of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check arbitrary PyMC3 models in Lumen, making it very easy to spot any major discrepancies between the model and the intention/expectation of the researcher.
+In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen, it has to be possible to marginalize and condition the model, as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the above mentioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of Gaussians and then take the density from there.\\
+In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behavior of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check arbitrary PyMC3 models in Lumen, making it very easy to spot any major discrepancies between the model and the intention/expectation of the researcher.
 \listoffigures
         
 \section{Literatur}
