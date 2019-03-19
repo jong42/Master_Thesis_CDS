@@ -26,7 +26,7 @@
 \usepackage{caption}
 \usepackage{parcolumns}
 \usepackage{enumerate}
-\usepackage[ngerman]{babel} % Umlaute
+\usepackage[ngerman,english]{babel} % Umlaute
 \usepackage[T1]{fontenc}    % this is needed for correct output of umlauts in pd
 \usepackage[section]{placeins} %forces placeins to stay in section
 \usepackage{datetime} % custom dates
@@ -52,7 +52,7 @@
 	Friedrich Schiller Universität Jena  \\
     Matrikelnr 152127 \\
     Prof.Dr. Joachim Giesen \\
-    M. Sc. Phillip Lucas
+    Dipl. Inf. Philipp Lucas
 	}
 
 \makeglossaries
@@ -64,10 +64,10 @@
 \maketitle
 
 \begin{abstract}
-A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber, Microsoft and DARPA focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
-However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. The thesis at hand aims to improve this situation by providing an interface between a popular PPL named PyMC3 and the software Lumen, developed by Philipp Lucas, which provides several visualization methods for statistical models. It becomes clear that even for very simple cases, visualization can contribute an important part in understanding the model, since Bayesian models often behave unexpectedly. The thesis shows how arbitrary models built in PyMC3 can be visualized with Lumen. 
+A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber, Microsoft and DARPA focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future. However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. The thesis at hand aims to improve this situation by providing an interface between a popular PPL named PyMC3 and the software Lumen, which provides several visualization methods for statistical models. The thesis shows how arbitrary models built in PyMC3 can be visualized with Lumen using the interface. It becomes clear that even for very simple cases, visualization can contribute an important part in understanding and validating the model, since Bayesian models often behave unexpectedly. Therefore, visualization in Lumen can be used as a tool for model checking.
 \end{abstract}
 
+\pagebreak
 \tableofcontents
 
 \include{glossar}
@@ -185,10 +185,25 @@ Once the stop is reached, a sample is drawn from all the points that were visite
 
 
 \subsection{Evaluating models}
-The model can then be validated by predicting new data points and compare this new data to a test data set \cite{1439840954}.
+%The model can then be validated by predicting new data points and compare this new data to a test data set \cite{1439840954}.
 
-%
-%Since ``all models are wrong", it is necessary, after a Bayesian model has been found, to capture the extent to which the model fails to describe reality. In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
+
+Since a model almost never catches all aspects of reality, it is necessary, after a Bayesian model has been found, to carry out model checks. Traditionally, model checking has been performed by calculating test quantities or test statistics. A test quantity is usually a scalar summary of data and parameters. A test statistic is also a summary of data, but is conditioned on a fixed set of parameters. It can be used in Bayesian as well as in non-Bayesian contexts. Those summaries are then used to compute a tail-area-probability, also called p-value. In the case of a test statistic, the p-value gives the probability that, given a parameter $\theta$, a test statistic $T$ for replicated data $y^{rep}$ is greater or equal the test statistic  for the observed data $y$, as shown in equation \ref{eq:classical_p}:
+\begin{equation}
+p_C = Pr(T(y^{rep}) >= T(y) | \theta)
+\label{eq:classical_p}
+\end{equation}
+\cite{1439840954}\\
+The p-value for a test quantity, on the other hand, is not conditional on a fixed $\theta$, since in Bayesian statistics parameters are drawn from a distribution the same way as outcome variables. Instead, the observed data $y$ is the fixed quantity for the Bayesian p-value, as shown in equation \ref{eq:bayesian_p}
+\begin{equation}
+p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
+\label{eq:bayesian_p}
+\end{equation}
+\cite{1439840954}\\
+If a test quantity has a p-value close to 0 or 1, the aspect that is analyzed by the test quantity is not well captured in the model.\\
+Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an alternative form of model checking. He even claims that "when more complex models are being used, graphical checks are more necessary than ever to detect areas of model misfit" \cite{gelman2004exploratory}. In graphical model checking, the visualization plays the role of the test quantity. Even though test quantities are usually scalars, one can also compute them as vectors, so that they can be displayed graphically \cite{gelman2004exploratory}. I conclude from this that, when we take this one step further, the data and the parameters can be seen as a vector summary of themselves, so by displaying them, as it is done in this thesis later, we are performing a regular model check according to the proceedings described above.
+
+%In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
 %
 %Different models can lead to different posterior inferences, even if both models have a good fit.
 %
@@ -204,25 +219,10 @@ The model can then be validated by predicting new data points and compare this n
 %
 %\textit{Posterior predictive checking}: Use global summaries of the data distribution and the predictive distribution to evaluate the model: Draw random samples from the predictive distribution, compare e.g. the smallest of these values with the smallest value in the data...
 %
-%model checking by calculating \textit{test quantities}. \textit{test quantities} are scalar summaries of parameters that are used to compare data to simulations. \textit{test quantities} are similar to test statistics in the classical approach. Besides on the data, \textit{test quantities} can also depend on the parameters.
+
 %
 %Graphical comparison of simulated and data histograms (!! maybe here point out usefulness of Lumen)
 %
-%tail-area-probability: p-value. p-value in classical statistics: Probability, that, given a parameter $\theta$, a test statistic for replicated data is greater or equal the test statistic for the observed data,as shown in equation \ref{eq:classical_p}:
-%
-%\begin{equation}
-%p_C = Pr(T(y^{rep}) >= T(y) | \theta)
-%\label{eq:classical_p}
-%\end{equation}
-%
-%\cite{1439840954}
-%
-%The Bayesian p-value, on the other hand, is not conditional on a fixed $\theta$, since in Bayesian statistics parameters are drawn from a distribution the same way as outcome variables. Instead, the observed data $y$ is the fixed quantity for the Bayesian p-value, as shown in equation \ref{eq:bayesian_p}
-%
-%\begin{equation}
-%p_B = Pr(T(y^{rep},\theta) >= T(y,\theta) | y)
-%\label{eq:bayesian_p}
-%\end{equation}
 %
 %p-value depends on the chosen test quantity.
 %
@@ -233,7 +233,7 @@ The model can then be validated by predicting new data points and compare this n
 %If a test quantity is dependent on the model parameters it has to be simulated both for the observed as well as for the predicted data. This makes it possible to compare both test statistics (for observed and for simulated values) point wise, eg. in a scatter plot or in a histogram of the differences. The scatter plot should be symmetric around the 45 degree line, the histogram should include 0 (and be symmetric around 0??).
 %Test quantities are most useful when they measure an aspect that is not directly recognizable in the probability model.
 %Graphical visualization can be used to identify useful test quantities.
-%If a test quantity has a p-value close to 0 or 1, the aspect that is analyzed by the test quantity is not well captured in the model.
+
 %\\
 %Model checking depends on the data-collection model (how the data was collected), since data has to be replicated for computing a p-value. Posterior Inference however does not depend on the data collection model, as long as the likelihood model stays the same. Because of this, the same posterior results(what are the parameters) can get different model checking results (how well does the model fit) when the data-collection model is changed.
 %\\
@@ -259,7 +259,18 @@ The model can then be validated by predicting new data points and compare this n
 %
 %Difficult with discrete data, since residuals can only take certain discrete values. Graphical visualization can then be misleading since the discrete values can suggest patterns. To avoid this, one can use \textit{binned residuals}, that is plotting the averages over a number of residuals and their corresponding outcomes. 
 
+%According to Gelman et al.  \cite{1439840954}, it is also useful to compare summaries of the data (such as the mean) to summaries from posterior simulations. 
+%Gelman et al \cite{1439840954} name three kinds of graphical display, that are suited to validate models:
+%- Direct display of data
+%- Display of data summaries
+%- Displaying measures of discrepancy
 
+%This process of comparing observed to simulated data in a Bayesian context is called posterior predictive checking.
+
+
+% In Lumen: One can check the models behaviour, that is, the interaction of pairs of variables.
+% Gelman et al \cite{1439840954} describe drawing data from the posterior distribution and then comparing it to the training data as a means of validating a model. With PyMC3 and Lumen, we can actually do even better and compare the actual posterior distribution to the training data.
+% Comparison of summaries is not possible in Lumen since it only shows the actual data, no summaries.
 
 %\subsection{Choosing an appropriate prior distribution}
 %\label{Choosing an appropriate prior distribution}
@@ -461,9 +472,49 @@ The code piece  in \ref{fig:pymc3_example_code} shows a simple example of a Baye
 %stochastic data types (--> probability distributions) make it easier to perform Bayesian data analysis
 %Random Variables can be represented as objects
 
-\subsection{Comparison of a model implemented with PyMC3 and and a model implemented without PyMC3}
-\label{subsec:Comparison}
-To check if PyMC3 is applied correctly, a Bayesian model is fitted first without the use of a PPL. The same model is then fitted by PyMC3. The results of both approaches are compared.
+\section{Introduction to Lumen}
+\label{Lumen}
+\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs.} 
+
+%model classes are in \url{modelbase/mb_modelbase/models_core}
+%data is in \url{mb_data}. model fitting is done in the script fit\_models.py, which is also in \url{mb_data}. The corresponding model class has to be imported, the models have to be 'registered' in the known\_models variable and then the models to be fit have to be listed in the variable debugincl.
+
+%Fitted models that can be accessed by lumen are then stored in \url{data_models}.
+\subsection{Lumen}
+Lumen is an interactive web-frontend designed for graphical visualization of models and data \cite{Lucas2016a}. It uses modelbase as backend, a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization \cite{Lucas2016b}. Figure \ref{fig:lumen_screenshot} shows an exemplary view of the frontend.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/lumen_screenshot.png}
+	\caption{View on the lumen frontend}
+	\label{fig:lumen_screenshot}
+\end{figure}
+After a model is loaded, all random variables of the model are shown in the 'Schema'-panel on the left. A user then has to select the variables that should be displayed by dragging the according names into the 'Specification'-panel in the middle. There, a choice has to be made on which channel the information of a variable should be displayed. The available channels are:
+\begin{itemize}
+	\item X-Axis
+	\item Y-Axis
+	\item Color
+	\item Shape
+	\item Size
+\end{itemize}
+Additionally, a filter can be set to only consider a specified interval within the range of a variable, and an option called 'Details' can be changed to set the number of intervals a continuous variable should be split into. TODO: Confirm, that 'Details' really has that meaning. After that, the user selects which elements of the model should be displayed. The following elements can be chosen:
+\begin{itemize}
+	\item prediction
+	\item data
+	\item test data
+	\item marginals
+	\item density
+\end{itemize}
+For the prediction, it is possible to specify any of the selected variables as dependent or independent. Finally, after all these settings have been made, the visualization of the model is shown in the right panel.
+\\
+Visualizing a model as described above can require marginalizing and conditioning it multiple times. The necessary operations are performed by the modelbase backend.
+%A model class is described by a python file that includes a class with several prescribed methods.
+In it, each model type is represented by a class. This class is required to provide certain methods that allow to manipulate the model in a way that proper data can be generated for the frontend. These methods include marginalizing, conditioning, and fitting of the model.
+
+
+%In the mb\_data repository, data that can be used for model fitting is contained. It has a file named fit\_models.py that contains specifications of data and corresponding models. It can be called with one of these specifications to create a mdl file. In the directory data\_models all mdl files are currently stored that can be displayed by the lumen frontend.
+
+\section{Example: Building a probabilistic model}
+\label{sec:Comparison}
+\textit{To check if PyMC3 is applied correctly, a Bayesian model is fitted first without the use of a PPL. The same model is then fitted by PyMC3. The results of both approaches are compared.}
 \\
 Assume we want to fit a model with the two dimensions $x$ and $mu$, one of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore we assume the following priors:
 \begin{equation}
@@ -488,7 +539,7 @@ The data $X$ is generated as follows:\\
 	\end{lstlisting}
 	\label{fig:groundtruth_example_code_data_generation}
 \end{figure}
-\subsubsection{Creating a simple Bayesian model without PyMC3}
+\subsection{Creating a simple Bayesian model without PyMC3}
 \label{subsec: Complete example of a simple Bayesian model}
 
 The joint posterior distribution is computed as follows:
@@ -513,7 +564,7 @@ The likelihood for any new data point given $mu$, $P(x|mu)$, is, according to ou
 	return density
 	\end{lstlisting}
 	
-\label{fig:likelihood_new_data_point}
+	\label{fig:likelihood_new_data_point}
 \end{figure}\\
 The likelihood of the observed data $X$ given $mu$, $P(X|mu)$, is the product of the likelihoods for each data point in $X$. It can be implemented as follows: 
 \begin{figure}[H]
@@ -545,7 +596,7 @@ The last part of the equation, the integral of the product between likelihood an
 	
 	def prior_X(X):
 	res = integrate.quad(
-		lambda mu: likelihood_times_prior_mu(X,mu),a=-np.inf,b=np.inf)[0]
+	lambda mu: likelihood_times_prior_mu(X,mu),a=-np.inf,b=np.inf)[0]
 	return res
 	\end{lstlisting}
 	%\caption{Implementation of the prior for X}
@@ -624,7 +675,7 @@ When we change the data generating mechanism to a non-hierarchic process, so tha
 	\label{fig:ground_truth_posterior_6}
 \end{figure}
 If it is possible to generate the same data by different parameterizations, it means that a model cannot be able to always return the true parameters in the posterior. This is also called Nonidentifiability.
-\subsubsection{PyMC3 example of a simple Bayesian model}
+\subsection{PyMC3 example of a simple Bayesian model}
 \label{subsec: PyMC3 example of a simple Bayesian model}
 The model from chapter \ref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \ref{fig:PyMC3_example_code_simple_model}.
 \begin{figure}[h]
@@ -666,93 +717,35 @@ Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples.
 	\label{fig:PyMC3_joint_posterior_samples_simple_model}
 \end{figure}
 
-\section{Visualization with Lumen}
-\textit{In this section, the Software Lumen is introduced and its abilities and uses are elucidated, especially its potential uses for Bayesian model checking in conjunction with PPLs. It is outlined, how the different operations necessary for a lumen interface are implemented for a PyMC3 model.} 
-
-%model classes are in \url{modelbase/mb_modelbase/models_core}
-%data is in \url{mb_data}. model fitting is done in the script fit\_models.py, which is also in \url{mb_data}. The corresponding model class has to be imported, the models have to be 'registered' in the known\_models variable and then the models to be fit have to be listed in the variable debugincl.
-
-%Fitted models that can be accessed by lumen are then stored in \url{data_models}.
-
-\subsection{Graphical model checking}
-
-%According to Gelman et al.  \cite{1439840954}, it is also useful to compare summaries of the data (such as the mean) to summaries from posterior simulations. 
-%Gelman et al \cite{1439840954} name three kinds of graphical display, that are suited to validate models:
-%- Direct display of data
-%- Display of data summaries
-%- Displaying measures of discrepancy
-
-Traditionally, model checking has been performed by computing p-values, which give the probability that an observed outcome occurs under the model in question. Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an alternative form of model checking. He even claims that "when more complex models are being used, graphical checks are more necessary than ever to detect areas of model misfit" \cite{gelman2004exploratory}.\\
-The idea of any model check is to compare observed data to simulated data generated under the model assumptions. This is done by choosing a summarizing measure of the data, called a test statistic. The test statistics for the observed and the simulated data can then be compared. The p-value is then just the representation of the discrepancy between the two test statistics. Test statistics are usually scalars, but in graphical model checking the visualization plays the role of the test statistic \cite{gelman2004exploratory}.
-
-%Can also the data itself be seen as a test statistic?
-
-%This process of comparing observed to simulated data in a Bayesian context is called posterior predictive checking.
-
-
-% In Lumen: One can check the models behaviour, that is, the interaction of pairs of variables.
-% Gelman et al \cite{1439840954} describe drawing data from the posterior distribution and then comparing it to the training data as a means of validating a model. With PyMC3 and Lumen, we can actually do even better and compare the actual posterior distribution to the training data.
-% Comparison of summaries is not possible in Lumen since it only shows the actual data, no summaries.
-\subsection{Lumen}
-Lumen is an interactive web-frontend designed for graphical visualization of models and data \cite{Lucas2016a}. It uses modelbase as backend, a python package that provides means for fitting models to data and manipulate models by marginalization and conditionalization \cite{Lucas2016b}. Figure \ref{fig:lumen_screenshot} shows an exemplary view of the frontend.
-\begin{figure}
-	\includegraphics[width=\textwidth]{images/lumen_screenshot.png}
-	\caption{View on the lumen frontend}
-	\label{fig:lumen_screenshot}
-\end{figure}
-After a model is loaded, all random variables of the model are shown in the 'Schema'-panel on the left. A user then has to select the variables that should be displayed by dragging the according names into the 'Specification'-panel in the middle. There, a choice has to be made on which channel the information of a variable should be displayed. The available channels are:
-\begin{itemize}
-	\item X-Axis
-	\item Y-Axis
-	\item Color
-	\item Shape
-	\item Size
-\end{itemize}
-Additionally, a filter can be set to only consider a specified interval within the range of a variable, and an option called 'Details' can be changed to set the number of intervals a continuous variable should be split into. TODO: Confirm, that 'Details' really has that meaning. After that, the user selects which elements of the model should be displayed. The following elements can be chosen:
-\begin{itemize}
-	\item prediction
-	\item data
-	\item test data
-	\item marginals
-	\item density
-\end{itemize}
-For the prediction, it is possible to specify any of the selected variables as dependent or independent. Finally, after all these settings have been made, the visualization of the model is shown in the right panel.
-\\
-Visualizing a model as described above can require marginalizing and conditioning it multiple times. The necessary operations are performed by the modelbase backend.
-%A model class is described by a python file that includes a class with several prescribed methods.
-In it, each model type is represented by a class. This class is required to provide certain methods that allow to manipulate the model in a way that proper data can be generated for the frontend. These methods include marginalizing, conditioning, and fitting of the model.
-
-
-%In the mb\_data repository, data that can be used for model fitting is contained. It has a file named fit\_models.py that contains specifications of data and corresponding models. It can be called with one of these specifications to create a mdl file. In the directory data\_models all mdl files are currently stored that can be displayed by the lumen frontend.
-\subsection{Integration of PyMC3 in Lumen}
-As explained above, a model in the modelbase backend has to provide several prespecified methods. The most important operations that are embedded in these methods are:
+\section{Integration of PyMC3 in Lumen}
+As explained in \autoref{Lumen}, a model in the modelbase backend has to provide several prespecified methods. The most important operations that are embedded in these methods are:
 \begin{itemize}
 	\item fitting a model
 	\item marginalization
 	\item conditioning
 	\item computing the probability density for a given data point
 \end{itemize}
-Successfully implementing these operations for arbitrary models created with PyMC3 is equivalent to successfully visualizing these models in Lumen. The implementation of each of these models is explained below.
+Successfully implementing these operations for arbitrary models created with PyMC3 is equivalent to successfully visualizing these models in Lumen. Below is explained how I implemented each of these operations.
 \paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables, so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables, which only have to be applied here. Figure \ref{fig:code_fitting_a_model} shows the implementation. There, the variable $self.model\_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen, albeit to some extent incorrectly labeled as test data.
 \begin{figure}[h]
 	\begin{lstlisting}
 	import pymc3 as pm
-    def _fit(self):
-		with self.model_structure:
-			# Draw samples
-			nr_of_samples = 500
-			trace = pm.sample(nr_of_samples,chains=1,cores=1)
-			for varname in trace.varnames:
-				self.samples[varname] = trace[varname]
-			ppc = pm.sample_ppc(trace)
-			for varname in self.model_structure.observed_RVs:
-				# each sample has 100 draws in the ppc, so take only the first one for each sample
-				self.samples[str(varname)] = [samples[0] for samples in np.asarray(ppc[str(varname)])]			
-			# Change order of sample columns so that it matches order of fields
-			self.samples = self.samples[self.names]
-			self.test_data = self.samples
-		return ()
-
+	def _fit(self):
+	with self.model_structure:
+	# Draw samples
+	nr_of_samples = 500
+	trace = pm.sample(nr_of_samples,chains=1,cores=1)
+	for varname in trace.varnames:
+	self.samples[varname] = trace[varname]
+	ppc = pm.sample_ppc(trace)
+	for varname in self.model_structure.observed_RVs:
+	# each sample has 100 draws in the ppc, so take only the first one for each sample
+	self.samples[str(varname)] = [samples[0] for samples in np.asarray(ppc[str(varname)])]			
+	# Change order of sample columns so that it matches order of fields
+	self.samples = self.samples[self.names]
+	self.test_data = self.samples
+	return ()
+	
 	\end{lstlisting}
 	\caption[Implementation of fitting a model]{Implementation of fitting a model}
 	\label{fig:code_fitting_a_model}
@@ -761,12 +754,12 @@ Successfully implementing these operations for arbitrary models created with PyM
 \paragraph{Marginalizing a model} normally means that one has to integrate over the variables that should be removed. In the case of Probabilistic Programming, where we have only samples instead of analytical functions, it is far easier: The samples of the variables one wants to marginalize out are just removed and that's it. The corresponding code is shown in \ref{fig:code_marginalizing_a_model}.
 \begin{figure}[h]
 	\begin{lstlisting}
-    def _marginalizeout(self, keep, remove):
-		# Remove all variables in remove
-		for varname in remove:
-			if varname in list(self.samples.columns):
-				self.samples = self.samples.drop(varname,axis=1)
-		return ()
+	def _marginalizeout(self, keep, remove):
+	# Remove all variables in remove
+	for varname in remove:
+	if varname in list(self.samples.columns):
+	self.samples = self.samples.drop(varname,axis=1)
+	return ()
 	
 	\end{lstlisting}
 	\caption[Implementation of marginalizing a model]{Implementation of marginalizing a model}
@@ -776,19 +769,19 @@ Successfully implementing these operations for arbitrary models created with PyM
 \paragraph{Conditioning a model} follows the same principle as marginalizing: Samples that do not fall inside the interval dictated by the condition are just removed. This operation is implemented as shown in \ref{fig:code_conditioning_a_model}.
 \begin{figure}[h]
 	\begin{lstlisting}
-    def _conditionout(self, keep, remove):
-		names = remove
-		fields = self.fields if names is None else self.byname(names)
-		# Here: Konditioniere auf die Domaene der Variablen in remove
-		for field in fields:
-			# filter out values smaller than domain minimum
-			filter = self.samples.loc[:,str(field['name'])] > field['domain'].value()[0]
-			self.samples.where(filter, inplace = True)
-			# filter out values bigger than domain maximum
-			filter = self.samples.loc[:,str(field['name'])] < field['domain'].value()[1]
-			self.samples.where(filter, inplace = True)
-		self.samples.dropna(inplace=True)
-		return ()
+	def _conditionout(self, keep, remove):
+	names = remove
+	fields = self.fields if names is None else self.byname(names)
+	# Here: Konditioniere auf die Domaene der Variablen in remove
+	for field in fields:
+	# filter out values smaller than domain minimum
+	filter = self.samples.loc[:,str(field['name'])] > field['domain'].value()[0]
+	self.samples.where(filter, inplace = True)
+	# filter out values bigger than domain maximum
+	filter = self.samples.loc[:,str(field['name'])] < field['domain'].value()[1]
+	self.samples.where(filter, inplace = True)
+	self.samples.dropna(inplace=True)
+	return ()
 	\end{lstlisting}
 	\caption[Implementation of conditioning a model]{Implementation of conditioning a model}
 	\label{fig:code_conditioning_a_model}
@@ -797,20 +790,20 @@ Successfully implementing these operations for arbitrary models created with PyM
 \paragraph{Getting a probability density} in the context of Probabilistic Programming is not as straightforward as in classical statistics, since we do not have probability density function. This function instead can be approximated by the samples drawn from the posterior. In the implementation at hand, the chosen approximation method is the kernel density estimation using Gaussian kernels, provided by the scikit-learn package \cite{scikit-learn}. In this method, each data point is assigned a Gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the Gaussians. It is implemented as shown in \ref{fig:code_probability_density}.
 \begin{figure}[h]
 	\begin{lstlisting}
-    def _density(self, x):
-		X = self.samples.values
-		kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(X)
-		x = np.reshape(x,(1,len(x)))
-		logdensity = kde.score_samples(x)[0]
-		return np.exp(logdensity).item()
+	def _density(self, x):
+	X = self.samples.values
+	kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(X)
+	x = np.reshape(x,(1,len(x)))
+	logdensity = kde.score_samples(x)[0]
+	return np.exp(logdensity).item()
 	\end{lstlisting}
 	\caption[Implementation of computing the probability density for a given point]{Implementation of computing the probability density for a given point}
 	\label{fig:code_probability_density}
 \end{figure}
 
 \paragraph{Treating independent variables}
- Independent variables currently are not supposed to be displayed in Lumen.
- 
+Independent variables currently are not supposed to be displayed in Lumen.
+
 %Another method is the one that marginalizes a random variable out. In a Bayesian model, a random variable can be a parameter as well as a data dimension.  What is wanted here is thus the posterior distribution over all variables listed in keep.
 %In PyMC3, marginalizing means sampling over a subset of the variables. Samples were already drawn in the fitting method, so only the corresponding columns of those samples have to be chosen here.
 %The marginal density plots of mu from the basic manual example looked different than the marginal plots of mu in lumen. Part of the reason for this is the Gaussian kernel density estimation. If the bandwidth parameter is too high, it has a smoothing effect that lets the plot look different than the one in the basic manual example. Setting the bandwidth to 0.1 removed this difference. Although the shape of the marginal plots is now similar, the absolute values are still very different. For a mu of 0, the density of the basic manual example is about 4.0, whereas in lumen it is at about 0.13. Which one is correct??
