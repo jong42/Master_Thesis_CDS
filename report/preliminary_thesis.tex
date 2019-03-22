@@ -490,7 +490,7 @@ After a model is loaded, all random variables of the model are shown in the 'Sch
 	\item Shape
 	\item Size
 \end{itemize}
-Once one or more variables are moved there, the according visualization is shown in the right panel. Additionally, a filter can be set to only consider a specified interval within the range of a variable, and an option called 'Details' can be changed to set the number of intervals a continuous variable should be split into. TODO: Confirm, that 'Details' really has that meaning. The user can also select which elements of the model should be displayed. The following elements can be chosen:
+Once one or more variables are moved there, the according visualization is shown in the right panel. Additionally, a filter can be set to only consider a specified interval within the range of a variable. The user can also select which elements of the model should be displayed. The following elements can be chosen:
 \begin{itemize}
 	\item prediction
 	\item data
@@ -498,7 +498,7 @@ Once one or more variables are moved there, the according visualization is shown
 	\item marginals
 	\item density
 \end{itemize}
-For the prediction, it is possible to specify any of the selected variables as dependent or independent. 
+For the prediction, it is possible to specify any of the selected variables as dependent or independent. It is also possible to specify additional independent variables for the prediction by dragging them into the 'Details' field.
 \\
 Visualizing a model as described above can require marginalizing and conditioning it multiple times. The necessary operations are performed by the modelbase backend \cite{Lucas2016b}. How modelbase was complemented to enable a visualization of models built with PyMC3 is described in \autoref{sec:lumen_pymc3_integration}.
 
@@ -905,11 +905,14 @@ The code creating this model is shown in \autoref{fig:code_use_case_2}. It diffe
 TODO: The model does not at all match the data. Either change the model so that it matches or make the reasoning more consistent, why I want a model that does not fit well.
 \subsection{Coal mining disasters}
 
-
+\section{Discussion}
 
 \section {Conclusion}
 In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen it has to be possible to marginalize and condition the model as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the above mentioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of Gaussians and then take the density from there.\\
 In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behavior of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check arbitrary PyMC3 models in Lumen, making it very easy to spot any major discrepancies between the model and the intention/expectation of the researcher.
+
+\section{Outlook}
+
 \listoffigures
         
 \bibliography{Literatur.bib}
