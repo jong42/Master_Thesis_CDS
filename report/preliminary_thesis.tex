@@ -621,7 +621,7 @@ At last, we only have to multiply all those pieces to get to a posterior joint d
 \\
 The joint posterior distribution can now be visualized as it is done in \autoref{fig:ground_truth_posterior_1}.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1.png}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1_cut.png}
 	\caption[Posterior distributions of the example model]{Posterior distributions of the example model}
 	\label{fig:ground_truth_posterior_1}
 \end{figure}
@@ -644,7 +644,7 @@ P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)
 %I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
 The dependence between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. It delivers the distribution that is shown in \autoref{fig:ground_truth_posterior_5}.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5.png}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_5_cut.png}
 	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
 	\label{fig:ground_truth_posterior_5}
 \end{figure}
@@ -662,12 +662,12 @@ I can set the number of data points down, then we get densities different from 0
 \\
 \autoref{fig:ground_truth_posterior_3} and \autoref{fig:ground_truth_posterior_4} show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases whereas the mean of the variables in the latter distribution is at around -1.5. I don't know yet why this happens. 
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3.png}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3_cut.png}
 	\caption[Posterior probability densities of the example model with standard deviation of 1]{Posterior probability densities of the example model with standard deviation of 1}
 	\label{fig:ground_truth_posterior_3}
 \end{figure}
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_4.png}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_4_cut.png}
 	\caption[Posterior probability densities of the example model with standard deviation of 5]{Posterior probability densities of the example model with standard deviation of 5}
 	\label{fig:ground_truth_posterior_4}
 \end{figure}
@@ -677,7 +677,7 @@ I can set the number of data points down, then we get densities different from 0
 
 When we change the data generating mechanism to a non-hierarchic process so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parameterization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in \autoref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6.png}
+	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6_cut.png}
 	\caption[Posterior probability densities of the example model with altered data generation]{Posterior probability densities of the example model with altered data generation}
 	\label{fig:ground_truth_posterior_6}
 \end{figure}
