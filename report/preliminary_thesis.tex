@@ -314,10 +314,11 @@ Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an 
 %\label{eq:posterior_predictive}
 %\end{equation}
 
-\section{Probabilistic Programming}
+\section{Probabilistic Programming Languages}
 
 \textit{In this section, the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is, and a number of PPLs are introduced. A Bayesian model is created once with and once without a PPL, and the results are compared.}
-\\
+
+\subsection{Probabilistic Programming}
 According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in \autoref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistic reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
