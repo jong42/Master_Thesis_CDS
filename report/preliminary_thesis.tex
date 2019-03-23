@@ -903,9 +903,48 @@ The code creating this model is shown in \autoref{fig:code_use_case_2}. It diffe
 \end{figure}
 \\
 TODO: The model does not at all match the data. Either change the model so that it matches or make the reasoning more consistent, why I want a model that does not fit well.
-\subsection{Coal mining disasters}
+\subsection{Eight schools model}
+The problem shown below is often used in the literature as an example to illustrate Bayesian modeling \cite{1439840954}\cite{sinharay2003posterior}\cite{rubin1981estimation}. It is about eight schools where the impact of a coaching program on test results was estimated. For each school a separate estimate and a standard error was calculated. These estimates are shown in \autoref{fig:eightschools_data} and serve as data for our modeling problem.\\ 
+Sinhara et al now fit a hierarchical model for this process and apply a number of methods to check in which ways their models deviates from the data \cite{sinharay2003posterior}. Below, their methods are recapitulated and it is analyzed if the conclusions they draw can also be deduced from a visualization of the model in Lumen.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/eightschools_data.png}
+	\caption[Observed effects and standard errors of coaching programs on test scores in 8 schools. Source: \cite{sinharay2003posterior}]{Observed effects and standard errors of coaching programs on test scores in 8 schools}
+	\label{fig:eightschools_data}
+\end{figure}
+Sinharay et al use a hierarchical normal-normal model shown in \autoref{eq:eightschools_model} to capture the mechanism: An estimated treatment effect $y_i$ is there seen as an independent draw from a normal distribution that is centered around the real treatment effect $\theta_i$. However, it is assumed that each school potentially has a different treatment effect which, in turn, is independently drawn for every school from the same normal distribution. The mean $\mu$ and the standard deviation $\tau$ of this normal distribution are hyperparameters with uniform priors.
+\begin{equation}
+\label{eq:eightschools_model}
+\begin{split}
+y_i &\sim N(\theta_i,\sigma_i),\\
+\theta_i &\sim N(\mu,\tau), \\
+\mu &\sim 1, \\
+\tau &\sim 1, \\
+&i=1,...,8
+\end{split}
+\end{equation}
+Simulations from posterior distributions were obtained for $\tau$, $\mu$ and $\theta$ by finding the conditional distributions $p(\tau|\textit{y})$, $p(\mu|\tau, \textit{y})$ and $p(\theta|\tau, \mu, \textit{y})$ and then sampling from these distributions, where $\textit{y}$ denotes the observed estimated treatment effects. For each draw from those distributions, eight data points $y^{rep}$ were generated and a number of test statistics was calculated on them: the largest of the eight observed outcomes,  the smallest of the eight observed outcomes,the  average, and the sample  standard deviation. Those test statistics were then displayed graphically and compared to the according test statistic of the observed effects $\textit{y}$.\\
+This is not possible in the Lumen setup: For one, it is not possible to display summary statistics, only actual observed data. Second, samples there are drawn from the joint posterior distribution of all variables. We can't draw hierarchically from the joint posterior of a subset of variables, and then generate a number of samples for the rest of the variables.
+\autoref{fig:eightschools_lumen_vis} shows the visualization of the coaching effects in lumen. It looks not very informative, for one because there is so few data (it only shows four instead of eight data points because it is split in training and testing data in advance, and only displays the training data), and second because the plot is fragmentized into many small peaks.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/eight_schools_lumen_vis.png}
+	\caption[Visualization of the coaching effects for the eight schools model in Lumen]{Visualization of the coaching effects for the eight schools model in Lumen}
+	\label{fig:eightschools_lumen_vis}
+\end{figure}
+TODO: More data points into the plot and see how the lumen visualization looks then.
+%\\
+%Sinharay et al find that their simulated statistics overall fit well to the observed statistics, only the standard deviation is higher in the simulated values than in the observed ones.\\
+%In Lumen, comparing the model to the data for this particular model is difficult since we only have so few data points. A statement how well the data fits to the model, cannot be made.\\
+%Next, Sinharay et al simulate $\theta$ with a fixed $\mu$ and a fixed $\tau$ for different numbers of schools: 8,16,50 and 100. Then $y$ is simulated with different fixed numbers of $\sigma^2$:1,20,168. and then do the same checks as above. They do not display it graphically this time, probably because of the bigger number of combinations, but give the percentiles of the p-values instead. TODO: Understand that part.
+%Sinharay et al then fit a different model with an exponential rather than a uniform prior, do the tests again, and find that only some of them give worse results in the second model, as they should, since the model is false. 
 
-\section{Discussion}
+ \section{Discussion}
+More complex models
+Visualizing models that are used in practice by PPL users.
+How can the Lumen visualization help PPL uses to deal with their models?
+Summaries can't be visualized, e.g. residuals
+
+from Gelman and others recommended approach: Compare observed data to simulated data. Lumen approach: Compare observed data to joint posterior probability density.
+
 
 \section {Conclusion}
 In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen it has to be possible to marginalize and condition the model as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the above mentioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of Gaussians and then take the density from there.\\
