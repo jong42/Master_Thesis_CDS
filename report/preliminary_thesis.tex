@@ -116,7 +116,7 @@ As stated in \autoref{eq:Bayes_formula}, using the Bayes formula, we get the pos
 \begin{equation}
 p(\theta|x) = p(x|\theta) * p(\theta) / p(x)
 \end{equation}
-We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data,$p(x)$, however, is more complicated. To compute it analytically we would have to solve the following integral:
+We get both the likelihood $p(x|\theta)$ and the prior $p(\theta)$ from the model assumptions. The marginalized probability over the data, $p(x)$, however, is more complicated. To compute it analytically we would have to solve the following integral:
 
 \begin{equation}
 \begin{split}
@@ -520,6 +520,7 @@ Visualizing a model as described above can require marginalizing and conditionin
 \\
 Assume we want to fit a model with the two dimensions $x$ and $mu$, one of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore, we assume the following priors:
 \begin{equation}
+\label{eq:data_generating_manual_example}
 \begin{split}
 mu &\sim N(0,1)\\
 x &\sim N(mu,1)
@@ -648,19 +649,19 @@ The dependence between $mu$ and $x$ is in fact still there in the joint posterio
 	\caption[Posterior probability densities of the example model without any data points]{Posterior probability densities of the example model without any data points}
 	\label{fig:ground_truth_posterior_5}
 \end{figure}
-The dependency between the variables is here clearly visible since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in \autoref{fig:posterior_different_data_sizes}.
+The dependency between the variables is here clearly visible since the data points do not influence the plot anymore. The more data points we include, the more the joint posterior distribution is compressed to the center, as shown in \autoref{fig:posterior_different_data_sizes}. There, the density is depicted for different numbers of data points. It is clearly visible how the dependency between the variables diminishes as the number of data points increases.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/posterior_different_data_sizes.png}
 	\caption[Posterior distributions for different numbers of data points]{Posterior distributions for different numbers of data points}
 	\label{fig:posterior_different_data_sizes}
 \end{figure}
-When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
-So when increasing the variance, I expect the whole distribution to get wider, especially in the $mu$-direction.
+%When the variance in both the data generation and the prior for mu increases: the data will be more spread. I expect the $P(X|mu)$-part of the joint posterior to not change, since the data $X$, on the one hand, will be more spread out, which is in favor of smaller density values, but on the other hand, the variance of the prior distribution is also higher, which leads to bigger density values for points far from the mean. The $P(x|mu)$-part will probably contribute to a wider distribution in both dimensions: $P(x|mu)$ for a given $x$ gets assigned a lower probability value in the center and bigger values on the edges, when increasing the variance. The same is true for a given $mu$. The $P(mu)$-part will also contribute to a wider distribution in the $mu$-dimension.
+%So when increasing the variance, I expect the whole distribution to get wider, especially in the $mu$-direction.
+%\\
+%What happens: when choosing a standard deviation of 5, the density is always zero. This is likely due to numerical difficulties, since the values computed here are very small.
+%I can set the number of data points down, then we get densities different from 0.
 \\
-What happens: when choosing a standard deviation of 5, the density is always zero. This is likely due to numerical difficulties, since the values computed here are very small.
-I can set the number of data points down, then we get densities different from 0.
-\\
-\autoref{fig:ground_truth_posterior_3} and \autoref{fig:ground_truth_posterior_4} show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases whereas the mean of the variables in the latter distribution is at around -1.5. I don't know yet why this happens. 
+\autoref{fig:ground_truth_posterior_3} and \autoref{fig:ground_truth_posterior_4} show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases whereas the mean of the variables in the latter distribution is at around -1.5. 
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3_cut.png}
 	\caption[Posterior probability densities of the example model with standard deviation of 1]{Posterior probability densities of the example model with standard deviation of 1}
@@ -671,17 +672,24 @@ I can set the number of data points down, then we get densities different from 0
 	\caption[Posterior probability densities of the example model with standard deviation of 5]{Posterior probability densities of the example model with standard deviation of 5}
 	\label{fig:ground_truth_posterior_4}
 \end{figure}
-%When the number of actual data points becomes small, I expect %the joint distribution to show the linear relationship between %$x$ and $mu$ better, since the influence of the data points, %which 'compresses' the whole plot to the middle, diminishes.
+\\
+We now change the data generating mechanism to a non-hierarchic process shown in \autoref{eq:nonhierarchical}, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables.
+\begin{equation}
+\label{eq:nonhierarchical}
+\begin{split}
+x &\sim N(0,2)
+\end{split}
+\end{equation}
+%I've not found out yet if there is a parameterization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, 
+As one can see in \autoref{fig:ground_truth_posterior_6}, the distribution looks very similar. This is not surprising since the data generated from the mechanisms in \autoref{eq:data_generating_manual_example} and \autoref{eq:nonhierarchical} looks very similar, even if the actual data generating mechanisms are different. TODO: Describe Nonidentfiability
+% The property that different mechanisms can geenrate the same data and are therefore indistinguishible, is called Nonidentifiability.
 
-%This is also what actually happens. Without any data points, we %see clearly the linear relationship.
-
-When we change the data generating mechanism to a non-hierarchic process so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables, I expect a similar posterior distribution as before. I've not found out yet if there is a parameterization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, as one can see in \autoref{fig:ground_truth_posterior_6}, the distribution looks very similar. At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
+%At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_6_cut.png}
 	\caption[Posterior probability densities of the example model with altered data generation]{Posterior probability densities of the example model with altered data generation}
 	\label{fig:ground_truth_posterior_6}
 \end{figure}
-If it is possible to generate the same data by different parametrizations, it means that a model cannot be able to always return the true parameters in the posterior. This is also called Nonidentifiability.
 \subsection{PyMC3 example of a simple Bayesian model}
 \label{subsec: PyMC3 example of a simple Bayesian model}
 The model from \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \autoref{fig:PyMC3_example_code_simple_model}.
@@ -716,7 +724,7 @@ The model from \autoref{subsec: Complete example of a simple Bayesian model} is 
 	\caption[Code used to specify the example model in PyMC3]{Code used to specify the example model in PyMC3}
 	\label{fig:PyMC3_example_code_simple_model}
 \end{figure}
-First, the same data is generated as in \autoref{subsec: Complete example of a simple Bayesian model}. Then, $mu$ and $X$ are specified, $mu$ as a stochastic random variable and $X$ as an observed stochastic random variable. Finally, samples from the posterior distribution are drawn using the sample-method. TODO: use a PyMC3-method to draw samples from $X$.
+First, the same data is generated as in \autoref{subsec: Complete example of a simple Bayesian model}. Then, $mu$ and $X$ are specified, $mu$ as a stochastic random variable and $X$ as an observed stochastic random variable. Finally, samples from the posterior distribution are drawn using the sample-method. 
 Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples. Similarities in shape to the real joint posterior distribution in \autoref{fig:ground_truth_posterior_1} are visible, so it is assumed that PyMC3 captures the model correctly.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model.png}
@@ -825,7 +833,7 @@ Displaying independent variables currently is not supported in Lumen.
 \textit{In this chapter, case examples are presented to show how the finished interface performs in practice.}
 
 \subsection{First simple example}
-As a basic example to implement in PyMC3 we choose the model from \autoref{subsec:Comparison}. The expectation here is that the resulting Lumen plot should look much like the visualizations in \autoref{fig:code_use_case_1}. The model contains the random variables $X$ and $mu$, the data for it was generated by the following  distributions:
+As a basic example to implement in PyMC3 we choose the model from \autoref{sec:Comparison}. The expectation here is that the resulting Lumen plot should look much like the visualizations in \autoref{fig:code_use_case_1}. The model contains the random variables $X$ and $mu$, the data for it was generated by the following  distributions:
 \begin{equation}
 \begin{split}
 X &\sim N(\mu,1), \\
@@ -850,7 +858,7 @@ Visualizing this model in Lumen results in the plot shown in \autoref{fig:lumen_
 	\label{fig:lumen_use_case_1}
 \end{figure}
 \subsection{Linear Regression}
-As another basic use case, a linear regression model used by Salvatier et al to illustrate the PyMC3 functionality \cite{Salvatier2016}, is visualized. 
+As another basic use case, a linear regression model used by Salvatier et al to illustrate the PyMC3 functionality \cite{Salvatier2016} is visualized. 
 The model is explained by Salvatier et al as follows:\\
 "We are interested in predicting outcomes $Y$ as normally-distributed observations with an expected value $mu$ that is a linear function of two predictor variables, $X_1$ and $X_2$:
 \begin{equation}
@@ -898,14 +906,20 @@ The code creating this model is shown in \autoref{fig:code_use_case_2}. It diffe
 	     X1 = pm.Normal('X1', mu=data['X1'], sd=sigma, observed=data['X1'])
 	     X2 = pm.Normal('X2', mu=data['X2'], sd=sigma, observed=data['X2'])
 	\end{lstlisting}
-	\caption[PyMC3 model of use case 2]{PyMC3 model of use case 2}
+	\caption[PyMC3 model of use case 2]{PyMC3 model of a linear regression model}
 	\label{fig:code_use_case_2}
 \end{figure}
+Plotting the two variables $X1$ and $X2$ against each other and comparing this to the posterior probability density for those two variables results in the plot shown in \autoref{fig:linreg_pymc3_plot}. The model clearly does not catch the data, its spread is too high in $X2$ direction and too low in $X1$ direction.
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/linreg_pymc3_plot.png}
+	\caption[Lumen visualization of two observed variables from the linear regression model]{Lumen visualization of two observed variables from the linear regression model}
+	\label{fig:linreg_pymc3_plot}
+\end{figure}
 \\
-TODO: The model does not at all match the data. Either change the model so that it matches or make the reasoning more consistent, why I want a model that does not fit well.
+TODO: Where does that discrepancy come from? Maybe do some classical posterior checks and see if they detect the discrepancy also.
 \subsection{Eight schools model}
 The problem shown below is often used in the literature as an example to illustrate Bayesian modeling \cite{1439840954}\cite{sinharay2003posterior}\cite{rubin1981estimation}. It is about eight schools where the impact of a coaching program on test results was estimated. For each school a separate estimate and a standard error was calculated. These estimates are shown in \autoref{fig:eightschools_data} and serve as data for our modeling problem.\\ 
-Sinhara et al now fit a hierarchical model for this process and apply a number of methods to check in which ways their models deviates from the data \cite{sinharay2003posterior}. Below, their methods are recapitulated and it is analyzed if the conclusions they draw can also be deduced from a visualization of the model in Lumen.
+Sinharay et al now fit a hierarchical model for this process and apply a number of methods to check in which ways their models deviates from the data \cite{sinharay2003posterior}. Below, one of their methods is recapitulated and it is analyzed if the conclusions they draw can also be deduced from a visualization of the model in Lumen.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/eightschools_data.png}
 	\caption[Observed effects and standard errors of coaching programs on test scores in 8 schools. Source: \cite{sinharay2003posterior}]{Observed effects and standard errors of coaching programs on test scores in 8 schools}
@@ -922,15 +936,51 @@ y_i &\sim N(\theta_i,\sigma_i),\\
 &i=1,...,8
 \end{split}
 \end{equation}
-Simulations from posterior distributions were obtained for $\tau$, $\mu$ and $\theta$ by finding the conditional distributions $p(\tau|\textit{y})$, $p(\mu|\tau, \textit{y})$ and $p(\theta|\tau, \mu, \textit{y})$ and then sampling from these distributions, where $\textit{y}$ denotes the observed estimated treatment effects. For each draw from those distributions, eight data points $y^{rep}$ were generated and a number of test statistics was calculated on them: the largest of the eight observed outcomes,  the smallest of the eight observed outcomes,the  average, and the sample  standard deviation. Those test statistics were then displayed graphically and compared to the according test statistic of the observed effects $\textit{y}$.\\
-This is not possible in the Lumen setup: For one, it is not possible to display summary statistics, only actual observed data. Second, samples there are drawn from the joint posterior distribution of all variables. We can't draw hierarchically from the joint posterior of a subset of variables, and then generate a number of samples for the rest of the variables.
-\autoref{fig:eightschools_lumen_vis} shows the visualization of the coaching effects in lumen. It looks not very informative, for one because there is so few data (it only shows four instead of eight data points because it is split in training and testing data in advance, and only displays the training data), and second because the plot is fragmentized into many small peaks.
+Simulations from posterior distributions are obtained for $\tau$, $\mu$ and $\theta$ by finding the conditional distributions $p(\tau|\textit{y})$, $p(\mu|\tau, \textit{y})$ and $p(\theta|\tau, \mu, \textit{y})$ and then sampling from these distributions, where $\textit{y}$ denotes the observed estimated treatment effects. For each draw from those distributions, eight data points $y^{rep}$ are generated and a number of test statistics was calculated on them: the largest of the eight observed outcomes,  the smallest of the eight observed outcomes,the  average, and the sample  standard deviation. Those test statistics were then displayed graphically and compared to the according test statistic of the observed effects $\textit{y}$, resulting in the plots shown in \autoref{fig:eightschools_sinharay_summaries_plot}
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/eight_schools_sinharay_summaries_plot.png}
+	\caption[Histograms of the test statistics of the simulated values generated by Sinharay et al. Source: \cite{sinharay2003posterior}]{Histograms of the test statistics of the simulated values generated by Sinharay et al}
+	\label{fig:eightschools_sinharay_summaries_plot}
+\end{figure}
+\\
+To visualize the model in Lumen, the model is first generated in PyMC3 using the code shown in \autoref{fig:eight_schools_PyMC3_code}. Then, the plots generated by Sinharay et al shown in \autoref{fig:eightschools_sinharay_summaries_plot} are replicated for the PyMC3 model to check if it was correctly carried over to PyMC3. The results are shown in \autoref{fig:eightschools_PyMC3_summaries_plot}. The plots of both models look very similar, leading to the conclusion that both implementations correctly describe the same model.
+\begin{figure}[h]
+	\begin{lstlisting}
+	scores = [28.39,7.94,-2.75,6.82,-0.64,0.63,18.01,12.16]
+	standard_errors = [14.9,10.2,16.3,11.0,9.4,11.4,10.4,17.6]
+	data = pd.DataFrame({'test_scores': scores, 'standard_errors': standard_errors})
+
+	with pm.Model() as normal_normal_model:
+		tau = pm.Uniform('tau',lower=0,upper=10)
+		mu = pm.Uniform('mu',lower=0,upper=10)
+		theta_1 = pm.Normal('theta_1', mu=mu, sd=tau)
+		theta_2 = pm.Normal('theta_2', mu=mu, sd=tau)
+		theta_3 = pm.Normal('theta_3', mu=mu, sd=tau)
+		theta_4 = pm.Normal('theta_4', mu=mu, sd=tau)
+		theta_5 = pm.Normal('theta_5', mu=mu, sd=tau)
+		theta_6 = pm.Normal('theta_6', mu=mu, sd=tau)
+		theta_7 = pm.Normal('theta_7', mu=mu, sd=tau)
+		theta_8 = pm.Normal('theta_8', mu=mu, sd=tau)
+		theta = [theta_1,theta_2,theta_3,theta_4,theta_5,theta_6,theta_7,theta_8]
+
+		test_scores = pm.Normal('test_scores',mu=theta,sd=data['standard_errors'], observed=data['test_scores'])
+	\end{lstlisting}
+	\caption[PyMC3 model of the eight schools example]{PyMC3 model of the eight schools example}
+	\label{fig:eight_schools_PyMC3_code}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\textwidth]{images/eight_schools_PyMC3_summaries_plot.png}
+	\caption[Histograms of the test statistics of the simulated values generated by the PyMC3 model]{Histograms of the test statistics of the simulated values generated by the PyMC3 model}
+	\label{fig:eightschools_PyMC3_summaries_plot}
+\end{figure}
+Generating the same plots in Lumen is not possible since the calculation and display of summary statistics is not supported there. Instead, the observed estimates can be shown and compared to their posterior distribution, as it is done in \autoref{fig:eightschools_lumen_vis}. It looks not very informative, though. One problem is that the data consists of very few points. Also, only half of them are shown in the plot since Lumen splits the data into training and test data in advance and only displays the training data. The test data has no further use for Bayesian models. Another problem is that the visualization is fragmentized into multiple peaks, making it hard to judge the overall fit to the data.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/eight_schools_lumen_vis.png}
 	\caption[Visualization of the coaching effects for the eight schools model in Lumen]{Visualization of the coaching effects for the eight schools model in Lumen}
 	\label{fig:eightschools_lumen_vis}
 \end{figure}
-TODO: More data points into the plot and see how the lumen visualization looks then.
+% Eight peaks can be observed in the visualization in \autoref{fig:eightschools_lumen_vis}, belonging maybe to the eight schools?
+
 %\\
 %Sinharay et al find that their simulated statistics overall fit well to the observed statistics, only the standard deviation is higher in the simulated values than in the observed ones.\\
 %In Lumen, comparing the model to the data for this particular model is difficult since we only have so few data points. A statement how well the data fits to the model, cannot be made.\\
@@ -938,11 +988,20 @@ TODO: More data points into the plot and see how the lumen visualization looks t
 %Sinharay et al then fit a different model with an exponential rather than a uniform prior, do the tests again, and find that only some of them give worse results in the second model, as they should, since the model is false. 
 
  \section{Discussion}
-More complex models
+Korrektheit des Interfaces, shortcomings?
+Kann es für generische Modelle angewendet werden?
+Was wurde noch nicht probiert
+\\
+Nutzen der Visualisierung für user von PyMC3 modellen
+Wer sind user von PyMC3 modellen, welche MOdelle benutzen sie, wie kann visualisierung dafür hilfreich sein?
+\\
+Try More complex models
 Visualizing models that are used in practice by PPL users.
 How can the Lumen visualization help PPL uses to deal with their models?
 Summaries can't be visualized, e.g. residuals
-
+\\
+Discuss conclusions of the examples
+\\
 from Gelman and others recommended approach: Compare observed data to simulated data. Lumen approach: Compare observed data to joint posterior probability density.
 
 
