@@ -69,11 +69,7 @@
     Dipl. Inf. Philipp Lucas
 	}
 
-\makeglossaries
-
-
 \begin{document}
-
 
 \maketitle
 
@@ -81,11 +77,8 @@
 A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber, Microsoft and DARPA focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future. However, in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. The thesis at hand aim to improve this situation by providing an interface between a popular PPL named PyMC3 and the software Lumen, which provides several visualization methods for statistical models. The thesis shows how arbitrary models built in PyMC3 can be visualized with Lumen using the interface. It becomes clear that even for very simple cases, visualization can contribute an important part in understanding and validating the model, since Bayesian models often behave unexpectedly. Lumen can therefore act as a useful tool for model checking.
 \end{abstract}
 
-\pagebreak
 \tableofcontents
 
-\include{glossar}
-\printglossaries
 \section{Introduction}
 %The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
 A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber \cite{bingham2018pyro}, Microsoft \cite{gordon2014probabilistic} and DARPA \cite{Hardesty2015} focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
@@ -366,7 +359,7 @@ is available as a Scala library. Models in Figaro are treated as objects and a f
 %mentioned in \cite{Gelman_2015}
 %based on graphical models
 \paragraph{PyMC3}
-is the PPL used in this thesis. It is described in detail in the following chapter.
+is the PPL used in this thesis. It is described in detail in the following \autoref{subsec: pymc3}.
 
 
 %"Probabilistic programming is an emerging paradigm in statistical learning, of which Bayesian modeling is an important sub-discipline." \cite{Salvatier2016}
@@ -374,7 +367,7 @@ is the PPL used in this thesis. It is described in detail in the following chapt
 
 
 \subsection{PyMC3}
-
+\label{subsec: pymc3}
 %\subsubsection{Stan for python}
 %
 %Stan is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. It consists of the following components:
@@ -602,13 +595,15 @@ def prior_X(X):
     )[0]
     return res
 \end{lstlisting}
-At last, we only have to multiply all those pieces to get to a posterior joint density for any combination of $X$ and $mu$. \autoref{list:joint_posterior} shows the according implementation.
+At last, we only have to multiply all those pieces to get to a posterior joint density for any combination of $X$ and $mu$. \autoref{list:joint_posterior} shows the according implementation.\\
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Implementation of the joint posterior distribution}, label={list:joint_posterior},captionpos=b]
 def joint_posterior(x,mu,X):
     res = likelihood_x(x,mu) * likelihood_X(X,mu) * 
         prior_mu(mu) / prior_X(X)
     return res
 \end{lstlisting}
+\end{minipage}
 The joint posterior distribution can now be visualized as it is done in \autoref{fig:ground_truth_posterior_1}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1_cut.png}
@@ -650,18 +645,17 @@ The dependency between the variables is here clearly visible since the data poin
 %What happens: when choosing a standard deviation of 5, the density is always zero. This is likely due to numerical difficulties, since the values computed here are very small.
 %I can set the number of data points down, then we get densities different from 0.
 \\
-\autoref{fig:ground_truth_posterior_3} and \autoref{fig:ground_truth_posterior_4} show a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases whereas the mean of the variables in the latter distribution is at around -1.5. 
+\autoref{fig:ground_truth_posterior_34} shows a comparison between a posterior distribution where the parameter for the standard deviation in the data generation and in the prior is set to 1, and a posterior distribution where this parameter is set to 5. Astonishingly, the standard deviation of the posterior is nearly the same in both cases whereas the mean of the variables in the latter distribution is at around -1.5.
 \begin{figure}
+	\begin{minipage}{0.5\linewidth}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_3_cut.png}
-	\caption[Posterior probability densities of the example model with standard deviation of 1]{Posterior probability densities of the example model with standard deviation of 1}
-	\label{fig:ground_truth_posterior_3}
-\end{figure}
-\begin{figure}
+	\end{minipage}
+	\begin{minipage}{0.5\linewidth}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_4_cut.png}
-	\caption[Posterior probability densities of the example model with standard deviation of 5]{Posterior probability densities of the example model with standard deviation of 5}
-	\label{fig:ground_truth_posterior_4}
+	\end{minipage}
+\caption[Posterior probability densities of the example model for different standard deviations]{Posterior probability densities of the example model. For the plots on the left, the standard deviation in the data generation and in the prior was set to 1. For the plots on the right, it was set to 5.}
+\label{fig:ground_truth_posterior_34}
 \end{figure}
-\\
 We now change the data generating mechanism to a non-hierarchic process shown in \autoref{eq:nonhierarchical}, so that only a single variable is drawn from a normal distribution with mean 0 and the combined standard deviation from the previous two variables.
 \begin{equation}
 \label{eq:nonhierarchical}
