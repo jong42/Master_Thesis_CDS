@@ -50,7 +50,7 @@
 \title{Bringing together visual analytics and probabilistic programming languages}
 \author{Jonas Aaron Gütter  \\
 	Friedrich Schiller Universität Jena  \\
-    Matrikelnr 152127 \\
+    register number 152127 \\
     Prof.Dr. Joachim Giesen \\
     Dipl. Inf. Philipp Lucas
 	}
@@ -317,7 +317,7 @@ Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an 
 
 \section{Probabilistic Programming Languages}
 
-\textit{In this section, the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is, and a number of PPLs are introduced. A Bayesian model is created once with and once without a PPL, and the results are compared.}
+\textit{In this section, the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is, and a number of PPLs are introduced}
 
 \subsection{Probabilistic Programming}
 According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in \autoref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistic reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
@@ -437,33 +437,29 @@ PyMC3 is an open-source probabilistic programming framework for Python. The foll
 PyMC3 mainly uses sampling techniques to draw inference on posterior distributions. It focuses especially on the No-U-Turn Sampler, a Markov Chain Monte Carlo algorithm that relies on gradient information to generate samples from posterior distributions, as explained in \autoref{subsec:sampling}. PyMC3 also provides basic methods for plotting posterior distributions.
 %that relies on automated differentiation to get gradient information about continuous posterior distributions. PyMC3 also provides basic methods for plotting posterior distributions.
 \\
-The code piece in \autoref{fig:pymc3_example_code} shows a simple example of a Bayesian model taken from Salvatier et al. \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
-\begin{figure}
-	\begin{lstlisting}
-	import pymc3 as pm
+The code piece in \autoref{list:pymc3_example_code} shows a simple example of a Bayesian model taken from Salvatier et al. \cite{Salvatier2016}. There, the data X1, X2 and Y is used to fit a regression model. First, prior distributions for the model parameters are set up as stochastic random variables, then the regression model itself is specified by a deterministic random variable and lastly the sampling distribution is described by an observed stochastic random variable to which the observed outcome Y is given as a parameter. Finally, the posterior distribution is simulated by drawing 500 samples from it.
+\begin{lstlisting}[caption={Example code of a simple Bayesian model using PyMC3}, label={list:pymc3_example_code},captionpos=b]
+    import pymc3 as pm
+    basic_model = pm.Model()
+    with basic_model:
+        # Describe prior distributions of model parameters. 
+        # Stochastic variables
+        alpha = pm.Normal('alpha', mu=0, sd=10)
+        beta = pm.Normal('beta', mu=0, sd=10, shape=2)
+        sigma = pm.HalfNormal('sigma', sd=1)
+        # Specify model for the output parameter. 
+        # Deterministic variable
+        mu = alpha + beta[0]*X1 + beta[1]*X2
+        # Likelihood of the observations. 
+        # Observed stochastic variable
+        Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
 	
-	basic_model = pm.Model()
-	
-	with basic_model:
-		# describe prior distributions of model parameters. Stochastic variables
-		alpha = pm.Normal('alpha', mu=0, sd=10)
-		beta = pm.Normal('beta', mu=0, sd=10, shape=2)
-		sigma = pm.HalfNormal('sigma', sd=1)
-		# specify model for the output parameter. Deterministic variable
-		mu = alpha + beta[0]*X1 + beta[1]*X2
-		# likelihood of the observations. Observed stochastic variable
-		Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
-	
-	# model fitting by using sampling strategies   
-	with basic_model:
-		# draw 500 posterior samples
-		trace = pm.sample(500)
-		pm.summary(trace)
-	\end{lstlisting}
-	\caption[Example code of a simple Bayesian model using PyMC3]{Example code of a simple Bayesian model using PyMC3}
-	\label{fig:pymc3_example_code}
-\end{figure}
-
+    # Model fitting by using sampling strategies   
+    with basic_model:
+        # Draw 500 posterior samples
+        trace = pm.sample(500)
+        pm.summary(trace)
+\end{lstlisting}
 
 %PyMC3 uses Theano to improve performance
 
@@ -531,18 +527,15 @@ Assume again, that we observe some data $X$ of the observable dimension $x$.
 We now want to compute the joint posterior distribution of both dimensions $mu$ and $x$, conditioned on the observed data $X$.
 \\
 The data $X$ is generated as follows:\\
-\begin{figure}[h]
-	\begin{lstlisting}
+\begin{lstlisting}[caption = {Data generation for the example model}, label={list:groundtruth_example_code_data_generation}, captionpos=b]
 	# Generate data
 	numpy.random.seed(1)
 	size = 100
 	mu = numpy.random.normal(0,1,size=size)
 	sigma = 1
 	X = numpy.random.normal(mu,sigma,size=size)
-	
-	\end{lstlisting}
-	\label{fig:groundtruth_example_code_data_generation}
-\end{figure}
+\end{lstlisting}
+
 \subsection{Creating a simple Bayesian model without PyMC3}
 \label{subsec: Complete example of a simple Bayesian model}
 
@@ -560,67 +553,47 @@ The joint posterior distribution is computed as shown in \autoref{eq:jointposter
 \end{equation}
 Each element of the last line of \autoref{eq:jointposterior} can be implemented in Python relatively easy: 
 \\
-The likelihood for any new data point given $mu$, $P(x|mu)$, is, according to our model assumptions, the density of $x$ in a normal distribution with mean $mu$. It can be be implemented as shown in \autoref{fig:likelihood_new_data_point}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	from scipy.stats import norm
-	def likelihood_x(x,mu):
-	density = norm.pdf(x, loc=mu, scale=1)
-	return density
-	\end{lstlisting}
-	\caption{Implementation of the likelihood for one data point}
-	\label{fig:likelihood_new_data_point}
-\end{figure}
-\\
-The likelihood of the observed data $X$ given $mu$, $P(X|mu)$, is the product of the likelihoods for each data point in $X$. It can be implemented as shown in \autoref{fig:likelihood_observed_data}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	def likelihood_X(X,mu):
-	res = 1
-	for point in X:
-	res *= likelihood_x(point,mu)
-	return res
-	\end{lstlisting}
-	\caption{Implementation of the likelihood for the observed data}
-	\label{fig:likelihood_observed_data}
-\end{figure}
-\\
-The prior probability for any $mu$, $P(mu)$, is just the density of the standard normal distribution at the point $mu$, as shown in \autoref{fig:prior_mu}:
-\begin{figure}[h]
-	\begin{lstlisting}
-	def prior_mu(mu):
-	density = norm.pdf(mu, loc=0, scale=1)
-	return density
-	\end{lstlisting}
-	\caption{Implementation of the prior for mu}
-	\label{fig:prior_mu}
-\end{figure}
-The last part of the equation, the integral of the product between likelihood and prior, is computationally more intensive but nevertheless easy to implement as well. \autoref{fig:prior_X} shows the implementation.
-\begin{figure}[h]
-	\begin{lstlisting}
-	def likelihood_times_prior_mu(X,mu):
-	return likelihood_X(X,mu) * prior_mu(mu)
+The likelihood for any new data point given $mu$, $P(x|mu)$, is, according to our model assumptions, the density of $x$ in a normal distribution with mean $mu$. It can be be implemented as shown in \autoref{list:likelihood_new_data_point}.
+\begin{lstlisting}[caption={Implementation of the likelihood for one data point}, label={list:likelihood_new_data_point},captionpos=b]
+    from scipy.stats import norm
+    def likelihood_x(x,mu):
+        density = norm.pdf(x, loc=mu, scale=1)
+        return density
+\end{lstlisting}
+The likelihood of the observed data $X$ given $mu$, $P(X|mu)$, is the product of the likelihoods for each data point in $X$. It can be implemented as shown in \autoref{list:likelihood_observed_data}.
+\begin{lstlisting}[caption={Implementation of the likelihood for the observed data}, label={list:likelihood_observed_data},captionpos=b]
+    def likelihood_X(X,mu):
+        res = 1
+        for point in X:
+            res *= likelihood_x(point,mu)
+        return res
+\end{lstlisting}
+The prior probability for any $mu$, $P(mu)$, is just the density of the standard normal distribution at the point $mu$, as shown in \autoref{list:prior_mu}:
+\begin{lstlisting}[caption={Implementation of the prior for mu}, label={list:prior_mu},captionpos=b]
+    def prior_mu(mu):
+        density = norm.pdf(mu, loc=0, scale=1)
+        return density
+\end{lstlisting}
+The last part of the equation, the integral of the product between likelihood and prior, is computationally more intensive but nevertheless easy to implement as well. \autoref{list:prior_X} shows the implementation.
+\begin{lstlisting}[caption={Implementation of the prior for X}, label={list:prior_X},captionpos=b]
+    def likelihood_times_prior_mu(X,mu):
+        return likelihood_X(X,mu) * prior_mu(mu)
 	
-	def prior_X(X):
-	res = integrate.quad(
-	lambda mu: likelihood_times_prior_mu(X,mu),a=-np.inf,b=np.inf)[0]
-	return res
-	\end{lstlisting}
-	\caption{Implementation of the prior for X}
-	\label{fig:prior_X}
-\end{figure}
-\\
-At last, we only have to multiply all those pieces to get to a posterior joint density for any combination of $X$ and $mu$. \autoref{fig:joint_posterior} shows the according implementation.
-\begin{figure}[h]
-	\begin{lstlisting}
-	def joint_posterior(x,mu,X):
-	res = likelihood_x(x,mu) * likelihood_X(X,mu) * prior_mu(mu) / prior_X(X)
-	return res
-	\end{lstlisting}
-	\caption{Implementation of the joint posterior distribution}
-	\label{fig:joint_posterior}
-\end{figure}
-\\
+    def prior_X(X):
+        res = integrate.quad(
+            lambda mu: likelihood_times_prior_mu(X,mu),
+            a=-np.inf,
+            b=np.inf
+        )[0]
+        return res
+\end{lstlisting}
+At last, we only have to multiply all those pieces to get to a posterior joint density for any combination of $X$ and $mu$. \autoref{list:joint_posterior} shows the according implementation.
+\begin{lstlisting}[caption={Implementation of the joint posterior distribution}, label={list:joint_posterior},captionpos=b]
+    def joint_posterior(x,mu,X):
+        res = likelihood_x(x,mu) * likelihood_X(X,mu) * 
+            prior_mu(mu) / prior_X(X)
+        return res
+\end{lstlisting}
 The joint posterior distribution can now be visualized as it is done in \autoref{fig:ground_truth_posterior_1}.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/ground_truth_posterior_1_cut.png}
@@ -693,45 +666,43 @@ As one can see in \autoref{fig:ground_truth_posterior_6}, the distribution looks
 \end{figure}
 \subsection{PyMC3 example of a simple Bayesian model}
 \label{subsec: PyMC3 example of a simple Bayesian model}
-The model from \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \autoref{fig:PyMC3_example_code_simple_model}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	import numpy as np
-	import pandas as pd
-	import pymc3 as pm
-	import matplotlib.pyplot as plt
+The model from \autoref{subsec: Complete example of a simple Bayesian model} is now created by using PyMC3 with the code shown in \autoref{list:PyMC3_example_code_simple_model}.
+\begin{lstlisting}[caption={Code used to specify the example model in PyMC3}, label={list:PyMC3_example_code_simple_model},captionpos=b]
+    import numpy as np
+    import pandas as pd
+    import pymc3 as pm
+    import matplotlib.pyplot as plt
 	
-	# Generate data
-	np.random.seed(2)
-	size = 100
-	mu = np.random.normal(0,1,size=size)
-	sigma = 1
-	X = np.random.normal(mu,sigma,size=size)
+    # Generate data
+    np.random.seed(2)
+    size = 100
+    mu = np.random.normal(0,1,size=size)
+    sigma = 1
+    X = np.random.normal(mu,sigma,size=size)
 	
-	# Specify model
-	basic_model = pm.Model()
-	with basic_model:
-	sigma = 1
-	mu = pm.Normal('mu',mu=0,sd=sigma)
-	X = pm.Normal('X',mu=mu,sd=sigma,observed=X)
+    # Specify model
+    basic_model = pm.Model()
+    with basic_model:
+        sigma = 1
+        mu = pm.Normal('mu',mu=0,sd=sigma)
+        X = pm.Normal('X',mu=mu,sd=sigma,observed=X)
 	
-	# Draw samples from posterior
-	nr_of_samples = 100
-	with basic_model:
-	trace = pm.sample(nr_of_samples,chains=1)
-	samples_mu = trace['mu']
-	samples_X = np.random.normal(samples_mu,1,size=nr_of_samples)
-	\end{lstlisting}
-	\caption[Code used to specify the example model in PyMC3]{Code used to specify the example model in PyMC3}
-	\label{fig:PyMC3_example_code_simple_model}
-\end{figure}
+    # Draw samples from posterior
+    nr_of_samples = 100
+    with basic_model:
+        trace = pm.sample(nr_of_samples,chains=1)
+        samples_mu = trace['mu']
+        samples_X = np.random.normal(
+            samples_mu,1,size=nr_of_samples)
+\end{lstlisting}
 First, the same data is generated as in \autoref{subsec: Complete example of a simple Bayesian model}. Then, $mu$ and $X$ are specified, $mu$ as a stochastic random variable and $X$ as an observed stochastic random variable. Finally, samples from the posterior distribution are drawn using the sample-method. 
-Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples. Similarities in shape to the real joint posterior distribution in \autoref{fig:ground_truth_posterior_1} are visible, so it is assumed that PyMC3 captures the model correctly.
+Figure \ref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples in comparison to the posterior distribution from \autoref{fig:ground_truth_posterior_1}. The red crosses depict the samples, the background distribution is the same as in \autoref{fig:ground_truth_posterior_1}. It is clearly visible that the two different methods match, so it is assumed that PyMC3 captures the model correctly.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model.png}
-	\caption[Samples from the posterior joint distribution of the example model in PyMC3]{Samples from the posterior joint distribution of the example model in PyMC3}
+	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model_2.png}
+	\caption[Comparison between the posterior samples drawn by PyMC3 and the posterior distribution calculated without PyMC3]{Comparison between the posterior samples drawn by PyMC3 and the posterior distribution calculated without PyMC3}
 	\label{fig:PyMC3_joint_posterior_samples_simple_model}
 \end{figure}
+
 
 \section{Integration of PyMC3 in Lumen}
 \label{sec:lumen_pymc3_integration}
@@ -743,81 +714,64 @@ Visualizing a model as described in \autoref{sec:Lumen} can require marginalizin
 	\item computing the probability density for a given data point
 \end{itemize}
 Visualizing models built with PyMC3 in Lumen requires the abovementioned operations to be carried out for those models. Expanding Lumen by implementing these operations for arbitrary models poses the main task of the thesis at hand. Below is explained how this was done for each of these operations.
-\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables which only have to be applied here. Figure \ref{fig:code_fitting_a_model} shows my implementation of the process. There, the variable $self.model\_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples that were generated during the fitting process are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen, albeit to some extent incorrectly labeled as test data.
-\begin{figure}[h]
-	\begin{lstlisting}
-	import pymc3 as pm
-	def _fit(self):
-	with self.model_structure:
-	# Draw samples
-	nr_of_samples = 500
-	trace = pm.sample(nr_of_samples,chains=1,cores=1)
-	for varname in trace.varnames:
-	self.samples[varname] = trace[varname]
-	ppc = pm.sample_ppc(trace)
-	for varname in self.model_structure.observed_RVs:
-	# each sample has 100 draws in the ppc, so take only the first one for each sample
-	self.samples[str(varname)] = [samples[0] for samples in np.asarray(ppc[str(varname)])]			
-	# Change order of sample columns so that it matches order of fields
-	self.samples = self.samples[self.names]
-	self.test_data = self.samples
-	return ()
-	
-	\end{lstlisting}
-	\caption[Implementation of fitting a model]{Implementation of fitting a model}
-	\label{fig:code_fitting_a_model}
-\end{figure}
-
-\paragraph{Marginalizing a model} normally means that one has to integrate over the variables that should be removed. In the case of Probabilistic Programming where we have only samples instead of analytical functions, it is far easier: The samples of the variables one wants to marginalize out are just removed and that's it. The corresponding code is shown in \autoref{fig:code_marginalizing_a_model}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	def _marginalizeout(self, keep, remove):
-	# Remove all variables in remove
-	for varname in remove:
-	if varname in list(self.samples.columns):
-	self.samples = self.samples.drop(varname,axis=1)
-	return ()
-	
-	\end{lstlisting}
-	\caption[Implementation of marginalizing a model]{Implementation of marginalizing a model}
-	\label{fig:code_marginalizing_a_model}
-\end{figure}
-
-\paragraph{Conditioning a model} follows the same principle as marginalizing: Samples that do not fall inside the interval dictated by the condition are just removed. This operation is implemented as shown in \autoref{fig:code_conditioning_a_model}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	def _conditionout(self, keep, remove):
-	names = remove
-	fields = self.fields if names is None else self.byname(names)
-	# Here: Konditioniere auf die Domaene der Variablen in remove
-	for field in fields:
-	# filter out values smaller than domain minimum
-	filter = self.samples.loc[:,str(field['name'])] > field['domain'].value()[0]
-	self.samples.where(filter, inplace = True)
-	# filter out values bigger than domain maximum
-	filter = self.samples.loc[:,str(field['name'])] < field['domain'].value()[1]
-	self.samples.where(filter, inplace = True)
-	self.samples.dropna(inplace=True)
-	return ()
-	\end{lstlisting}
-	\caption[Implementation of conditioning a model]{Implementation of conditioning a model}
-	\label{fig:code_conditioning_a_model}
-\end{figure}
-
-\paragraph{Getting a probability density} in the context of Probabilistic Programming is not as straightforward as in classical statistics since we do not have probability density function. This function instead can be approximated by the samples drawn from the posterior. In the implementation at hand, the chosen approximation method is the kernel density estimation using Gaussian kernels, provided by the scikit-learn package \cite{scikit-learn}. In this method, each data point is assigned a Gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the Gaussians. It is implemented as shown in \autoref{fig:code_probability_density}.
-\begin{figure}[h]
-	\begin{lstlisting}
-	def _density(self, x):
-	X = self.samples.values
-	kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(X)
-	x = np.reshape(x,(1,len(x)))
-	logdensity = kde.score_samples(x)[0]
-	return np.exp(logdensity).item()
-	\end{lstlisting}
-	\caption[Implementation of computing the probability density for a given point]{Implementation of computing the probability density for a given point}
-	\label{fig:code_probability_density}
-\end{figure}
-
+\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables which only have to be applied here. Figure \ref{list:code_fitting_a_model} shows my implementation of the process. There, the variable $self.model\_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples that were generated during the fitting process are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen, albeit to some extent incorrectly labeled as test data.
+\begin{lstlisting}[caption={Implementation of fitting a model}, label={list:code_fitting_a_model},captionpos=b]
+    import pymc3 as pm
+    def _fit(self):
+        with self.model_structure:
+            # Draw samples
+            nr_of_samples = 500
+            trace = pm.sample(nr_of_samples,chains=1,cores=1)
+        for varname in trace.varnames:
+            self.samples[varname] = trace[varname]
+            ppc = pm.sample_ppc(trace)
+        for varname in self.model_structure.observed_RVs:
+            # each sample has 100 draws in the ppc, 
+            # so take only the first one for each sample
+            self.samples[str(varname)] = 
+                [samples[0] for samples in np.asarray(ppc[str(varname)])]			
+        # Change order of sample columns 
+        # so that it matches order of fields
+        self.samples = self.samples[self.names]
+        self.test_data = self.samples
+        return ()
+\end{lstlisting}
+\paragraph{Marginalizing a model} normally means that one has to integrate over the variables that should be removed. In the case of Probabilistic Programming where we have only samples instead of analytical functions, it is far easier: The samples of the variables one wants to marginalize out are just removed and that's it. The corresponding code is shown in \autoref{list:code_marginalizing_a_model}.
+\begin{lstlisting}[caption={Implementation of marginalizing a model}, label={list:code_marginalizing_a_model},captionpos=b]
+    def _marginalizeout(self, keep, remove):
+        # Remove all variables in remove
+        for varname in remove:
+            if varname in list(self.samples.columns):
+                self.samples = self.samples.drop(varname,axis=1)
+        return ()
+\end{lstlisting}
+\paragraph{Conditioning a model} follows the same principle as marginalizing: Samples that do not fall inside the interval dictated by the condition are just removed. This operation is implemented as shown in \autoref{list:code_conditioning_a_model}.
+\begin{lstlisting}[caption={Implementation of conditioning a model}, label={list:code_conditioning_a_model},captionpos=b]
+    def _conditionout(self, keep, remove):
+        names = remove
+        fields = self.fields if names is None else self.byname(names)
+        # Here: Konditioniere auf die Domaene der Variablen in remove
+        for field in fields:
+            # filter out values smaller than domain minimum
+            filter = self.samples.loc[:,str(field['name'])] > 
+                field['domain'].value()[0]
+            self.samples.where(filter, inplace = True)
+            # filter out values bigger than domain maximum
+            filter = self.samples.loc[:,str(field['name'])] < 
+                field['domain'].value()[1]
+            self.samples.where(filter, inplace = True)
+    self.samples.dropna(inplace=True)
+    return ()
+\end{lstlisting}
+\paragraph{Getting a probability density} in the context of Probabilistic Programming is not as straightforward as in classical statistics since we do not have probability density function. This function instead can be approximated by the samples drawn from the posterior. In the implementation at hand, the chosen approximation method is the kernel density estimation using Gaussian kernels, provided by the scikit-learn package \cite{scikit-learn}. In this method, each data point is assigned a Gaussian curve centered on the point. The density for a given point is then determined by summing up the densities of all the Gaussians. It is implemented as shown in \autoref{list:code_probability_density}.
+\begin{lstlisting}[caption={Implementation of computing the probability density for a given point}, label={list:code_probability_density},captionpos=b]
+    def _density(self, x):
+        X = self.samples.values
+        kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(X)
+        x = np.reshape(x,(1,len(x)))
+        logdensity = kde.score_samples(x)[0]
+        return np.exp(logdensity).item()
+\end{lstlisting}
 \paragraph{Treating independent variables}
 Independent variables are variables that are part of a model but for which no probability distribution is learned. Displaying independent variables currently is not supported in Lumen. That means that a model is allowed to include such variables, but the independent variables themselves cannot be visualized.
 
@@ -835,24 +789,20 @@ Independent variables are variables that are part of a model but for which no pr
 \textit{In this chapter, case examples are presented to show how the finished interface performs in practice.}
 
 \subsection{First simple example}
-As a basic example to implement in PyMC3 we choose the model from \autoref{sec:Comparison}. The expectation here is that the resulting Lumen plot should look much like the visualizations in \autoref{fig:code_use_case_1}. The model contains the random variables $X$ and $mu$, the data for it was generated by the following  distributions:
+As a basic example to implement in PyMC3 we choose the model from \autoref{sec:Comparison}. The expectation here is that the resulting Lumen plot should look much like the visualizations in \autoref{fig:ground_truth_posterior_1}. The model contains the random variables $X$ and $mu$, the data for it was generated by the following  distributions:
 \begin{equation}
 \begin{split}
 X &\sim N(\mu,1), \\
 \mu &\sim N(0,1),
 \end{split}
 \end{equation}
-The priors for $X$ and $mu$ match exactly these distributions. The corresponding model is described in PyMC3 as shown in \autoref{fig:code_use_case_1}.
-\begin{figure}[h]
-	\begin{lstlisting}
+The priors for $X$ and $mu$ match exactly these distributions. The corresponding model is described in PyMC3 as shown in \autoref{list:code_use_case_1}.
+\begin{lstlisting}[caption={PyMC3 model of use case 1}, label={list:code_use_case_1},captionpos=b]
     basic_model = pm.Model()
-	with basic_model:
-		mu = pm.Normal('mu', mu=0, sd=1)
-		X = pm.Normal('X', mu=mu, sd=1, observed=data['X'])
-	\end{lstlisting}
-	\caption[PyMC3 model of use case 1]{PyMC3 model of use case 1}
-	\label{fig:code_use_case_1}
-\end{figure}
+    with basic_model:
+        mu = pm.Normal('mu', mu=0, sd=1)
+        X = pm.Normal('X', mu=mu, sd=1, observed=data['X'])
+\end{lstlisting}
 Visualizing this model in Lumen results in the plot shown in \autoref{fig:lumen_use_case_1}. Considering the different ranges in the $mu$-axis, the plot looks quite similar to the visualizations in \autoref{fig:ground_truth_posterior_1}, meeting the expectations.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/lumen_use_case_1.png}
@@ -880,38 +830,32 @@ The following priors are assigned to the random variables:
 \sigma &\sim |N(0,1)|
 \end{split}
 \end{equation}
-The code creating this model is shown in \autoref{fig:code_use_case_2}. It differs from the implementation of Salvatier et al in that the variables $X_1$ and $X_2$ are also treated as random variables. This change was made since we want to display these variables in Lumen, and Lumen currently can only display random variables.
-\begin{figure}[h]
-	\begin{lstlisting}
-	np.random.seed(123)
-	alpha, sigma = 1, 1
-	beta_0 = 1
-	beta_1 = 2.5
-	size = 100
-	X1 = np.random.randn(size)
-	X2 = np.random.randn(size) * 0.2
-	Y = alpha + beta_0 * X1 + beta_1 * X2 + np.random.randn(size) * sigma
-	data = pd.DataFrame({'X1': X1, 'X2': X2, 'Y': Y})
+The code creating this model is shown in \autoref{list:code_use_case_2}. It differs from the implementation of Salvatier et al in that the variables $X_1$ and $X_2$ are also treated as random variables. This change was made since we want to display these variables in Lumen, and Lumen currently can only display random variables.
+\begin{lstlisting}[caption={PyMC3 model of linear regression example}, label={list:code_use_case_2},captionpos=b]
+    np.random.seed(123)
+    alpha, sigma = 1, 1
+    beta_0 = 1
+    beta_1 = 2.5
+    size = 100
+    X1 = np.random.randn(size)
+    X2 = np.random.randn(size) * 0.2
+    Y = alpha + beta_0 * X1 + beta_1 * X2 + np.random.randn(size) * sigma
+    data = pd.DataFrame({'X1': X1, 'X2': X2, 'Y': Y})
 	
-	basic_model = pm.Model()
-	with basic_model:
-	     # Priors for unknown model parameters
-	     alpha = pm.Normal('alpha', mu=0, sd=10)
-	     beta_0 = pm.Normal('beta_0', mu=0, sd=10)
-	     beta_1 = pm.Normal('beta_1', mu=0, sd=10)
-	     sigma = pm.HalfNormal('sigma', sd=1)
-	
-	     # Expected value of outcome
-	     mu = alpha + beta_0 * data['X1'] + beta_1 * data['X2']
-	
-	     # Likelihood (sampling distribution) of observations
-	     Y = pm.Normal('Y', mu=mu, sd=sigma, observed=data['Y'])
-	     X1 = pm.Normal('X1', mu=data['X1'], sd=sigma, observed=data['X1'])
-	     X2 = pm.Normal('X2', mu=data['X2'], sd=sigma, observed=data['X2'])
-	\end{lstlisting}
-	\caption[PyMC3 model of use case 2]{PyMC3 model of a linear regression model}
-	\label{fig:code_use_case_2}
-\end{figure}
+    basic_model = pm.Model()
+    with basic_model:
+         # Priors for unknown model parameters
+         alpha = pm.Normal('alpha', mu=0, sd=10)
+         beta_0 = pm.Normal('beta_0', mu=0, sd=10)
+         beta_1 = pm.Normal('beta_1', mu=0, sd=10)
+         sigma = pm.HalfNormal('sigma', sd=1)
+         # Expected value of outcome 
+         mu = alpha + beta_0 * data['X1'] + beta_1 * data['X2']
+         # Likelihood (sampling distribution) of observations
+         Y = pm.Normal('Y', mu=mu, sd=sigma, observed=data['Y'])
+         X1 = pm.Normal('X1', mu=data['X1'], sd=sigma, observed=data['X1'])
+         X2 = pm.Normal('X2', mu=data['X2'], sd=sigma, observed=data['X2'])
+\end{lstlisting}
 Plotting the two variables $X1$ and $X2$ against each other and comparing this to the posterior probability density for those two variables results in the plot shown in \autoref{fig:linreg_pymc3_plot}. The model clearly does not catch the data, its spread is too high in $X2$ direction and too low in $X1$ direction.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/linreg_pymc3_plot.png}
@@ -947,31 +891,31 @@ Simulations from posterior distributions are obtained for $\tau$, $\mu$ and $\th
 	\label{fig:eightschools_sinharay_summaries_plot}
 \end{figure}
 \\
-To visualize the model in Lumen, the model is first generated in PyMC3 using the code shown in \autoref{fig:eight_schools_PyMC3_code}. Then, the plots generated by Sinharay et al shown in \autoref{fig:eightschools_sinharay_summaries_plot} are replicated for the PyMC3 model to check if it was correctly carried over to PyMC3. The results are shown in \autoref{fig:eightschools_PyMC3_summaries_plot}. The plots of both models look very similar, leading to the conclusion that both implementations correctly describe the same model.
-\begin{figure}[h]
-	\begin{lstlisting}
-	scores = [28.39,7.94,-2.75,6.82,-0.64,0.63,18.01,12.16]
-	standard_errors = [14.9,10.2,16.3,11.0,9.4,11.4,10.4,17.6]
-	data = pd.DataFrame({'test_scores': scores, 'standard_errors': standard_errors})
+To visualize the model in Lumen, the model is first generated in PyMC3 using the code shown in \autoref{list:eight_schools_PyMC3_code}. Then, the plots generated by Sinharay et al shown in \autoref{fig:eightschools_sinharay_summaries_plot} are replicated for the PyMC3 model to check if it was correctly carried over to PyMC3. The results are shown in \autoref{fig:eightschools_PyMC3_summaries_plot}. The plots of both models look very similar, leading to the conclusion that both implementations correctly describe the same model.
+\begin{lstlisting}[caption={PyMC3 model of the eight schools example}, label={list:eight_schools_PyMC3_code},captionpos=b]
+    scores = [28.39,7.94,-2.75,6.82,-0.64,0.63,18.01,12.16]
+    standard_errors = [14.9,10.2,16.3,11.0,9.4,11.4,10.4,17.6]
+    data = pd.DataFrame({'test_scores': scores, 
+        'standard_errors': standard_errors})
 
-	with pm.Model() as normal_normal_model:
-		tau = pm.Uniform('tau',lower=0,upper=10)
-		mu = pm.Uniform('mu',lower=0,upper=10)
-		theta_1 = pm.Normal('theta_1', mu=mu, sd=tau)
-		theta_2 = pm.Normal('theta_2', mu=mu, sd=tau)
-		theta_3 = pm.Normal('theta_3', mu=mu, sd=tau)
-		theta_4 = pm.Normal('theta_4', mu=mu, sd=tau)
-		theta_5 = pm.Normal('theta_5', mu=mu, sd=tau)
-		theta_6 = pm.Normal('theta_6', mu=mu, sd=tau)
-		theta_7 = pm.Normal('theta_7', mu=mu, sd=tau)
-		theta_8 = pm.Normal('theta_8', mu=mu, sd=tau)
-		theta = [theta_1,theta_2,theta_3,theta_4,theta_5,theta_6,theta_7,theta_8]
+    with pm.Model() as normal_normal_model:
+        tau = pm.Uniform('tau',lower=0,upper=10)
+        mu = pm.Uniform('mu',lower=0,upper=10)
+        theta_1 = pm.Normal('theta_1', mu=mu, sd=tau)
+        theta_2 = pm.Normal('theta_2', mu=mu, sd=tau)
+        theta_3 = pm.Normal('theta_3', mu=mu, sd=tau)
+        theta_4 = pm.Normal('theta_4', mu=mu, sd=tau)
+        theta_5 = pm.Normal('theta_5', mu=mu, sd=tau)
+        theta_6 = pm.Normal('theta_6', mu=mu, sd=tau)
+        theta_7 = pm.Normal('theta_7', mu=mu, sd=tau)
+        theta_8 = pm.Normal('theta_8', mu=mu, sd=tau)
+        theta = [theta_1,theta_2,theta_3,theta_4,
+            theta_5,theta_6,theta_7,theta_8]
 
-		test_scores = pm.Normal('test_scores',mu=theta,sd=data['standard_errors'], observed=data['test_scores'])
-	\end{lstlisting}
-	\caption[PyMC3 model of the eight schools example]{PyMC3 model of the eight schools example}
-	\label{fig:eight_schools_PyMC3_code}
-\end{figure}
+        test_scores = pm.Normal('test_scores',mu=theta,
+            sd=data['standard_errors'], 
+            observed=data['test_scores'])
+\end{lstlisting}
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/eight_schools_pymc3_summaries_plot.png}
 	\caption[Histograms of the test statistics of the simulated values generated by the PyMC3 model]{Histograms of the test statistics of the simulated values generated by the PyMC3 model}
@@ -1007,6 +951,7 @@ In the course of the thesis a simplified Bayesian model was created and visualiz
 Make Display of summaries possible in Lumen. Part of the groundwork is already laid, specific types of aggregations can already be displayed. Not distributions of multiple simulations, though.
 
 \listoffigures
+\lstlistoflistings
         
 \bibliography{Literatur.bib}
 \bibliographystyle{ieeetr}
