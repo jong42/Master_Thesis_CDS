@@ -805,8 +805,9 @@ The priors for $X$ and $mu$ match exactly these distributions. The corresponding
 \end{lstlisting}
 Visualizing this model in Lumen results in the plot shown in \autoref{fig:lumen_use_case_1}. Considering the different ranges in the $mu$-axis, the plot looks quite similar to the visualizations in \autoref{fig:ground_truth_posterior_1}, meeting the expectations.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/lumen_use_case_1.png}
-	\caption{Lumen visualization of use case 1}
+	\centering
+	\includegraphics[width=0.75\textwidth]{images/lumen_use_case_1_2.png}
+	\caption{Lumen visualization of the example model from \autoref{sec:Comparison}}
 	\label{fig:lumen_use_case_1}
 \end{figure}
 \subsection{Linear Regression}
@@ -923,7 +924,8 @@ To visualize the model in Lumen, the model is first generated in PyMC3 using the
 \end{figure}
 Generating the same plots in Lumen is not possible since the calculation and display of summary statistics is not supported there. Instead, the observed estimates can be shown and compared to their posterior distribution, as it is done in \autoref{fig:eightschools_lumen_vis}. It looks not very informative, though. One problem is that the data consists of very few points. Also, only half of them are shown in the plot since Lumen splits the data into training and test data in advance and only displays the training data. The test data has no further use for Bayesian models. Another problem is that the visualization is fragmentized into multiple peaks, making it hard to judge the overall fit to the data.
 \begin{figure}
-	\includegraphics[width=\textwidth]{images/eight_schools_lumen_vis.png}
+	\centering
+	\includegraphics[width=0.75\textwidth]{images/eight_schools_lumen_vis.png}
 	\caption[Visualization of the coaching effects for the eight schools model in Lumen]{Visualization of the coaching effects for the eight schools model in Lumen}
 	\label{fig:eightschools_lumen_vis}
 \end{figure}
@@ -949,6 +951,8 @@ In the course of the thesis a simplified Bayesian model was created and visualiz
 
 \section{Outlook}
 Make Display of summaries possible in Lumen. Part of the groundwork is already laid, specific types of aggregations can already be displayed. Not distributions of multiple simulations, though.
+
+Display of independent variables
 
 \listoffigures
 \lstlistoflistings
