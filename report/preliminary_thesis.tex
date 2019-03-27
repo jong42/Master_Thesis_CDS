@@ -85,20 +85,27 @@
 \maketitle
 
 \begin{abstract}
-A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber, Microsoft and DARPA focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future. However, in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. The thesis at hand aim to improve this situation by providing an interface between a popular PPL named PyMC3 and the software Lumen, which provides several visualization methods for statistical models. The thesis shows how arbitrary models built in PyMC3 can be visualized with Lumen using the interface. It becomes clear that even for very simple cases, visualization can contribute an important part in understanding and validating the model, since Bayesian models often behave unexpectedly. Lumen can therefore act as a useful tool for model checking.
+A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber, Microsoft and DARPA focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future. However, in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. The thesis at hand aims to improve this situation by providing an interface between a popular PPL named PyMC3 and the software Lumen which provides several visualization methods for statistical models. The thesis shows how arbitrary models built in PyMC3 can be visualized with Lumen using the interface. It becomes clear that even for very simple cases, visualization can contribute an important part in understanding and validating the model, since Bayesian models often behave unexpectedly. Lumen can therefore act as a useful tool for model checking.
 \end{abstract}
+
+\section*{Affidavit}
+I hereby confirm that my thesis entitled "Bringing together visual analysis and probabilistic programming languages" is the result of my own work. I did not receive any help or support from commercial consultants. All sources and/or materials applied are listed and specified in the thesis.\\
+Furthermore, I confirm that this thesis has not yet been submitted as part of another examination process neither in identical nor in similar form.
+\vspace{4cm}
+
+Place, Date \hfill Signature \hspace{2cm}
 
 \tableofcontents
 
 \section{Introduction}
 %The overall goal of the thesis is to build an API that makes it possible to a PyMC3 user to get his model visualized in lumen with minimal effort. 
 A probabilistic programming language (PPL) provides methods to represent a probabilistic model by using the full power of a general purpose programming language. Thereby it is possible to specify complex models with a comparatively low amount of code. With Uber \cite{bingham2018pyro}, Microsoft \cite{gordon2014probabilistic} and DARPA \cite{Hardesty2015} focusing research efforts towards this area, PPLs are likely to play an important role in science and industry in the near future.
-However in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application and the Lumen software as a means of visualizing the resulting models. Having covered the theoretical aspects, the focus is then laid on practical implementations: The same Bayesian model is built once with and once without PyMC3 and the results are compared, to illustrate the functionality of Bayesian modeling and of PyMC3 in particular. After that the core task of the thesis, the implementation of the interface, is described. For this purpose, operations like model fitting, model marginalization and model conditioning have to be implemented using PyMC3. Also a kernel density estimator is used to generate a probability density function out of samples. Finally, a number of examples are shown to illustrate the usefulness of the visualization, and the thesis is concluded.
+However, in most cases, models built by PPLs lack appropriate ways to be properly visualized, although visualization is an important first step in detecting errors and assessing the overall fitness of a model. This could be resolved by the software Lumen which provides several visualization methods for statistical models. Previous to this thesis, PPLs were not yet supported by Lumen. The goal of the master thesis at hand is to change that by implementing an interface between Lumen and PyMC3, a PPL wrapped in a python package, so that exploring PPL models by visual analytics becomes possible. The report starts with explaining the basic concepts of Bayesian statistics, along with the most popular sampling methods used to draw inference from Bayesian models. Following that, the idea of probabilistic programming is introduced, as well as the PyMC3 package as a concrete application and the Lumen software as a means of visualizing the resulting models. Having covered the theoretical aspects, the focus is then laid on practical implementations: The same Bayesian model is built once with and once without PyMC3 and the results are compared to illustrate the functionality of Bayesian modeling and of PyMC3 in particular. After that, the core task of the thesis, the implementation of the interface, is described. For this purpose, operations like model fitting, model marginalization and model conditioning have to be implemented using PyMC3. Also a kernel density estimator is used to generate a probability density function out of samples. Finally, a number of examples are shown to illustrate the usefulness of the visualization, and the thesis is concluded.
 \section{Concepts of Bayesian Statistics}
 \textit{In this chapter, the theoretical concepts of building statistical models using a Bayesian approach are explained, as well as the methods to draw inference from a model by sampling. The former requires an understanding of basic calculation rules for working with conditional probabilities. These rules are further explained in Appendix \autoref{appendix:Rules of Probabilistic Inference}.}
 \subsection{General principle}
 \label{subsec: General principle}
-Bayesian data analysis can be used for parameter estimation and prediction of new data points. Before doing Bayesian data analysis one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach where model parameters are just single points. In Bayesian data analysis model parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these so-called prior distributions. Finding a good prior can be a complex task. A prior should represent the knowledge that the researcher has about the parameter previous to seeing any data.
+Bayesian data analysis can be used for parameter estimation and prediction of new data points. Before doing Bayesian data analysis one has to come up with a model whose parameters can then be estimated by Bayesian methods and that can then be used for prediction. In addition to specifying the model, it is necessary to specify prior distributions on the model parameters. This is a major difference to the classical frequentist approach where model parameters are just single points. In Bayesian data analysis model parameters are treated as random variables that follow a probability distribution. So the first step is usually to define these so-called prior distributions. Finding a good prior can be a complex task. A prior should represent the knowledge that the researcher has about the parameter previous to seeing any data.
 \paragraph{Parameter estimation}
 Once the model as well as the priors are specified, parameter estimation can be performed by applying the Bayes rule to calculate posterior distributions on the parameters, that is, probability distributions on the parameters given the observed data. The Bayes rule allows to invert the order of a conditional probability and goes as follows:
 \begin{equation}
@@ -143,7 +150,7 @@ p(X) &= \int p(\theta,X) d \theta \\
 &=  \int p(X|\theta) * p(\theta) d \theta
 \end{split}
 \end{equation}
-Calculating this integral can be very difficult or impossible since the integral can be multidimensional \cite{1439840954}. So it is not always possible to get the posterior distribution of the parameters analytically. Therefore, methods to sample from the posterior distribution of the parameters have been developed. These methods are called Markov Chain Monte Carlo methods (MCMC), or Markov chain simulations. A Markov chain is a sequence of events where the probability for each event only depends on the preceding event \cite{Oxforddictionaries}. MCMC methods all have in common that parameter values are drawn repeatedly as some form of such a Markov chain: In each iteration, the parameter values $\theta^t$ depend only on the values of the preceding iteration $\theta^{t-1}$. So in each step $t$, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Once it has converged, the parameter draws can be used as samples. Some of the more popular MCMC methods are explained below.
+Calculating this integral can be very difficult or impossible since the integral can be multidimensional \cite{1439840954}. So it is not always possible to get the posterior distribution of the parameters analytically. Therefore, methods to sample from the posterior distribution of the parameters have been developed. These methods are called Markov Chain Monte Carlo methods (MCMC) or Markov chain simulations. A Markov chain is a sequence of events where the probability for each event only depends on the preceding event \cite{Oxforddictionaries}. MCMC methods all have in common that parameter values are drawn repeatedly as some form of such a Markov chain: In each iteration, the parameter values $\theta^t$ depend only on the values of the preceding iteration $\theta^{t-1}$. So in each step $t$, values are drawn from a transition distribution $T_t(\theta^t|\theta^{t-1})$. This distribution has to be constructed in a way that it converges to the posterior distribution $p(\theta|X)$. Once it has converged, the parameter draws can be used as samples. Some of the more popular MCMC methods are explained below.
 \paragraph{Gibbs Sampling}
 Gibbs Sampling assumes that we don't know the joint posterior distribution $p(\theta = \theta_0,...,\theta_n)$, but we do know the conditional distribution $p(\theta_i | \theta_0,...,\theta_{i-1},\theta_{i+1},...,\theta{n} )$ for each quantity $\theta_i$. At first, arbitrary starting points are set for $\theta$, then each $\theta_i$ is drawn from its conditional distribution given the latest values of the other quantities. This is repeated until convergence is achieved
 \cite{Martz1994}.
@@ -164,7 +171,7 @@ This algorithm is equivalent to sampling from a probability distribution. The mo
 %The Metropolis-Hastings sampler is a generalization of the metropolis sampler where the probability of accepting the proposed point is calculated differently.
 %Metropolis Hastings additionally has the ratio between the proposal distributions in it \cite{chib1995understanding}. Metropolis is chosen in a way that these cancel out.
 \paragraph{Hamiltonian Monte-Carlo}
-The base approach of Hamiltonian Monte Carlo (HMC) is that we assume a particle in a multidimensional space where each dimension represents a variable of the target distribution and thus the location $\theta$ of the particle represents a specific point on the target distribution. As in the metropolis algorithm, a starting location is arbitrarily chosen. The difference to the metropolis algorithm now lies in the generation of the new locations. An auxiliary variable $r$ and the parameters $L$ and $\epsilon$ are introduced for this purpose. $r$ represents the momentum of the particle, $L$ is the number of steps to get to one sample, and $\epsilon$ is the step size for one of these steps. For generating one sample point, a change of locations is proposed $L$ times and is accepted or rejected according to the metropolis algorithm. In each of the $L$ steps, $\theta$ and $r$ are updated by using the so-called leapfrog integrator, which is shown in \autoref{eq:leapfrog}. 
+The base approach of Hamiltonian Monte Carlo (HMC) is that we assume a particle in a multidimensional space where each dimension represents a variable of the target distribution and thus the location $\theta$ of the particle represents a specific point on the target distribution. As in the metropolis algorithm, a starting location is arbitrarily chosen. The difference to the metropolis algorithm now lies in the generation of the new locations. An auxiliary variable $r$ and the parameters $L$ and $\epsilon$ are introduced for this purpose. $r$ represents the momentum of the particle, $L$ is the number of steps to get to one sample and $\epsilon$ is the step size for one of these steps. For generating one sample point, a change of locations is proposed $L$ times and is accepted or rejected according to the metropolis algorithm. In each of the $L$ steps, $\theta$ and $r$ are updated by using the so-called leapfrog integrator, which is shown in \autoref{eq:leapfrog}. 
 %\begin{algorithm}
 %	\caption{Leapfrog integrator}
 %	\label{alg:leapfrog}
@@ -209,7 +216,7 @@ Once the stop is reached, a sample is drawn from all the points that were visite
 %The model can then be validated by predicting new data points and compare this new data to a test data set \cite{1439840954}.
 
 
-Since a model almost never catches all aspects of reality, it is necessary, after a Bayesian model has been found, to carry out model checks. Traditionally, model checking has been performed by calculating test quantities or test statistics. A test quantity is usually a scalar summary of data and parameters. A test statistic is also a summary of data, but is conditioned on a fixed set of parameters. It can be used in Bayesian as well as in non-Bayesian contexts. Those summaries are then used to compute a tail-area-probability, also called p-value. In the case of a test statistic, the p-value gives the probability that, given a parameter $\theta$, a test statistic $T$ for replicated data $X^{rep}$ is greater or equal the test statistic  for the observed data $X$, as shown in \autoref{eq:classical_p}:
+Since a model almost never catches all aspects of reality it is necessary, after a Bayesian model has been found, to carry out model checks. Traditionally, model checking has been performed by calculating test quantities or test statistics. A test quantity is usually a scalar summary of data and parameters. A test statistic is also a summary of data, but is conditioned on a fixed set of parameters. It can be used in Bayesian as well as in non-Bayesian contexts. Those summaries are then used to compute a tail-area-probability, also called p-value. In the case of a test statistic, the p-value gives the probability that, given a parameter $\theta$, a test statistic $T$ for replicated data $X^{rep}$ is greater or equal the test statistic  for the observed data $X$, as shown in \autoref{eq:classical_p}:
 \begin{equation}
 p_C = Pr(T(X^{rep}) >= T(X) | \theta)
 \label{eq:classical_p}
@@ -221,7 +228,7 @@ p_B = Pr(T(X^{rep},\theta) >= T(X,\theta) | X)
 \label{eq:bayesian_p}
 \end{equation}
 \cite{1439840954}\\
-If a test quantity has a p-value close to 0 or 1, it means that the test quantity for the simulated data is nearly always larger (when it is close to 1) or smaller (close to 0) than the test quantity for the observed data, and therefore the aspect that is analyzed by the test quantity is not well captured in the model.\\
+If a test quantity has a p-value close to 0 or 1, it means that the test quantity for the simulated data is nearly always larger (when it is close to 1) or smaller (close to 0) than the test quantity for the observed data and therefore the aspect that is analyzed by the test quantity is not well captured in the model.\\
 Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an alternative form of model checking. He even claims that "when more complex models are being used, graphical checks are more necessary than ever to detect areas of model misfit" \cite{gelman2004exploratory}. In graphical model checking, the visualization plays the role of the test quantity. Even though test quantities are usually scalars, one can also compute them as vectors so that they can be displayed graphically \cite{gelman2004exploratory}. When we take this one step further, in my opinion, the data and the parameters can be seen as a vector summary of themselves, so by displaying them, as it is done in this thesis later, we are performing a regular model check according to the proceedings described above. TODO: Check this in regard of sufficient statistics.
 
 %In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
@@ -335,16 +342,16 @@ Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an 
 
 \section{Probabilistic Programming Languages}
 
-\textit{In this section, the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is, and a number of PPLs are introduced}
+\textit{In this section, the idea of Probabilistic Programming is explained. It is defined what a Probabilistic Programming Language(PPL) is and a number of PPLs are introduced}
 
 \subsection{Probabilistic Programming}
-According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities, and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in \autoref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistic reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data, together with its logic of how each circumstance affects the outcome, to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
+According to Pfeffer \cite{9781617292330}, probabilistic programming is the process of creating a probabilistic reasoning system with the means of a programming language. A probabilistic reasoning system is, in turn, a structure that uses knowledge and logic to calculate a probability. Here, knowledge can be interpreted as data about certain quantities and logic can be interpreted as the knowledge about how these quantities interact and influence each other. Pfeffer \cite{9781617292330} uses the example shown in \autoref{fig:example_prs} to illustrate the functionality of a probabilistic reasoning system. There, we want to calculate the probability of scoring a goal by a corner kick during a game of soccer. The probabilistic reasoning system includes general knowledge about the situation, for example, that overall 9\% of corner kicks result in a goal. That is what is called the korner-kick model in the example. Additional data about the circumstances of this particular situation are given to the system as evidence. In the example, these circumstances are a tall center forward, an inexperienced goalie and strong winds. The system now uses this data together with its logic of how each circumstance affects the outcome to calculate probabilities for a given event, here, the scoring of a goal. The part of computing these probabilities is called inference algorithm in the example.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/probabilistic_reasoning_system.PNG}
 	\caption[General workflow example of a probabilistic reasoning system. Source: \cite{9781617292330}]{General workflow example of a probabilistic reasoning system}
 	\label{fig:example_prs}
 \end{figure}
-From a data science perspective, this means that a Probabilistic Programming Language(PPL) provides ways of describing a probability model and drawing inference from it, which, in the ideal case, are more flexible, more efficient, and better to understand than traditional approaches \cite{Hardesty2015}. Currently, a number of PPLs is publicly available, with the most popular being mentioned below:
+From a data science perspective, this means that a Probabilistic Programming Language(PPL) provides ways of describing a probability model and drawing inference from it which, in the ideal case, are more flexible, more efficient and better to understand than traditional approaches \cite{Hardesty2015}. Currently, a number of PPLs is publicly available, with the most popular being mentioned below:
 \paragraph{Stan}
 is an open-source program written in C++ that is designed for Bayesian inference on user-specified models. As described in \cite{Gelman_2015}, it consists of the following components:
 \begin{itemize}
@@ -358,7 +365,7 @@ It also provides basic plotting methods for the posterior distributions of param
 \end{itemize}
 \paragraph{Edward}
 %http://edwardlib.org/getting-started
-is a python library that allows working with graphical models, neural networks, implicit generative models and Bayesian programs. It supports most of the above mentioned sampling methods and relies on TensorFlow \cite{tran2016edward}
+is a python library that allows working with graphical models, neural networks, implicit generative models and Bayesian programs. It supports most of the abovementioned sampling methods and relies on TensorFlow \cite{tran2016edward}
 \paragraph{Pyro}
 is a PPL built in Python that focuses on deep learning and artificial intelligence. It uses the deep learning platform PyTorch as a backend \cite{bingham2018pyro}.
 \paragraph{Figaro}
@@ -532,9 +539,10 @@ Visualizing a model as described above can require marginalizing and conditionin
 
 \section{Example: Building a probabilistic model}
 \label{sec:Comparison}
-\textit{To check if PyMC3 is applied correctly, I fit a Bayesian model first without the use of a PPL. Then I fit the same model by using PyMC3. The results of both approaches are compared.}
-\\
-Assume we want to fit a model with the two dimensions $x$ and $mu$ One of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore, we assume the following priors:
+\textit{The practical part of the thesis starts here. To check if PyMC3 is applied correctly, a Bayesian model is fitted first without the use of a PPL. Then the same model is fitted by using PyMC3. The results of both approaches are compared.}
+\linebreak
+\linebreak
+Assume we want to fit a model with the two dimensions $x$ and $mu$. One of them, $x$, we can observe, the other one, $mu$, we can't observe. Furthermore, we set the following priors:
 \begin{equation}
 \label{eq:data_generating_manual_example}
 \begin{split}
@@ -542,7 +550,7 @@ mu &\sim N(0,1)\\
 x &\sim N(mu,1)
 \end{split}
 \end{equation}
-Assume again, that we observe some data $X$ of the observable dimension $x$.
+Assume again that we observe some data $X$ of the observable dimension $x$.
 We now want to compute the joint posterior distribution of both dimensions $mu$ and $x$, conditioned on the observed data $X$.
 \\
 The data $X$ is generated as follows:\\
@@ -572,7 +580,7 @@ The joint posterior distribution is computed as shown in \autoref{eq:jointposter
 \end{equation}
 Each element of the last line of \autoref{eq:jointposterior} can be implemented in Python relatively easy: 
 \\
-The likelihood for any new data point given $mu$, $P(x|mu)$, is, according to our model assumptions, the density of $x$ in a normal distribution with mean $mu$. It can be be implemented as shown in \autoref{list:likelihood_new_data_point}.
+The likelihood for any new data point given $mu$, $P(x|mu)$, is according to our model assumptions the density of $x$ in a normal distribution with mean $mu$. It can be be implemented as shown in \autoref{list:likelihood_new_data_point}.
 \begin{lstlisting}[caption={Implementation of the likelihood for one data point}, label={list:likelihood_new_data_point},captionpos=b]
 from scipy.stats import norm
 def likelihood_x(x,mu):
@@ -630,12 +638,12 @@ To evaluate the above mentioned expectations, it is not necessary to keep the no
 \begin{equation}
 P(x,mu|Y) = P(x|mu) * P(X|mu) * P(mu)
 \end{equation}
-When we consider only the first and the last term of from the right of this formula, it behaves exactly as expected: \begin{equation}
-P(x=high|mu=high)*P(mu=high) = P(x=high|mu=zero)*P(mu=zero)
+When we consider only the first and the last term of from the right of this formula, it behaves exactly as the expectation above states: \begin{equation}
+P(x=1|mu=1)*P(mu=1) = P(x=1|mu=1)*P(mu=0)
 \end{equation}
 and 
 \begin{equation}
-P(x=high|mu=high)*P(mu=high) >> P(x=low|mu=high)*P(mu=high)
+P(x=1|mu=1)*P(mu=1) > P(x=-1|mu=1)*P(mu=1)
 \end{equation} What was messing with the expectations is the term in the middle which gives the likelihood of the observed data. For a value of $mu$ that is far from the true mean, that term quickly becomes extremely small since all the data points speak against it. That's why the distribution is so strongly centered to the middle: All the outer values of $mu$ are getting assigned extremely low density values by this middle term. 
 %I still don't quite understand why it is centered \textit{that} strong: The real $mu$ is distributed far wider, with a standard deviation of 1.
 The dependence between $mu$ and $x$ is in fact still there in the joint posterior distribution, it's just overlapped by the centering effect of the data. To understand this example better, I make changes in the model and/or in the data generation and look how those changes affect the posterior distributions. Firstly, the model is learned without any data points. It delivers the distribution that is shown in \autoref{fig:ground_truth_posterior_5}.
@@ -723,7 +731,7 @@ First, the same data is generated as in \autoref{subsec: Complete example of a s
 \autoref{fig:PyMC3_joint_posterior_samples_simple_model} shows these samples in comparison to the posterior distribution from \autoref{fig:ground_truth_posterior_1}. The red crosses depict the samples, the background distribution is the same as in \autoref{fig:ground_truth_posterior_1}. It is clearly visible that the samples from the PyMC3 implementation match the distribution from the manual implementation, so it is assumed that the PyMC3 captures the model correctly.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/PyMC3_joint_posterior_samples_simple_model_2.png}
-	\caption[Comparison between the posterior samples drawn by PyMC3 and the posterior distribution calculated without PyMC3]{Comparison between the posterior samples drawn by PyMC3 and the posterior distribution calculated without PyMC3}
+	\caption[Comparison between the posterior samples drawn by PyMC3 and the posterior distribution calculated without PyMC3]{Comparison between the posterior samples drawn by PyMC3 and the posterior distribution calculated without PyMC3.}
 	\label{fig:PyMC3_joint_posterior_samples_simple_model}
 \end{figure}
 
@@ -739,7 +747,7 @@ Visualizing a model as described in \autoref{sec:Lumen} can require marginalizin
 	\item computing the probability density for a given data point
 \end{itemize}
 Visualizing models built with PyMC3 in Lumen requires the abovementioned operations to be carried out for those models. Expanding Lumen by implementing these operations for arbitrary models poses the main task of the thesis at hand. Below is explained how this was done for each of these operations.
-\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming, it means drawing samples from all random variables so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables which only have to be applied here. Figure \ref{list:code_fitting_a_model} shows my implementation of the process. There, the variable $self.model\_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples that were generated during the fitting process are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen, albeit to some extent incorrectly labeled as test data.
+\paragraph{Fitting a model} in Bayesian statistics means finding the joint posterior distribution. In the context of Probabilistic Programming it means drawing samples from all random variables so that the joint posterior distribution can be approximated. PyMC3 provides methods for sampling from both observed and unobserved random variables which only have to be applied here. Figure \ref{list:code_fitting_a_model} shows the implementation of the process. There, the variable $self.model\_structure$ holds the full model that was created before in PyMC3. As an additional feature, since in Bayesian data analysis there is no test data, the samples that were generated during the fitting process are assigned to the variable that originally was supposed to hold the test data. This way, the sample points can later be visualized in Lumen, albeit to some extent incorrectly labeled as test data.
 \begin{lstlisting}[caption={Implementation of fitting a model}, label={list:code_fitting_a_model},captionpos=b]
 import pymc3 as pm
 def _fit(self):
@@ -816,7 +824,7 @@ Independent variables are variables that are part of a model but for which no pr
 
 \section{Example Cases}
 
-\textit{In this chapter, case examples are presented to show how the finished interface performs in practice.}
+\textit{In this chapter, example models are created in PyMC3 to show how the finished interface performs in practice.}
 
 \subsection{First simple example}
 As a basic example to implement in PyMC3 we choose the model from \autoref{sec:Comparison}. The expectation here is that the resulting Lumen plot should look much like the visualizations in \autoref{fig:ground_truth_posterior_1}. The model contains the random variables $X$ and $mu$, the data for it was generated by the following  distributions:
@@ -862,7 +870,7 @@ The following priors are assigned to the random variables:
 \sigma &\sim |N(0,1)|
 \end{split}
 \end{equation}
-The code creating this model is shown in \autoref{list:code_use_case_2}. It differs from the implementation of Salvatier et al in that the variables $X_1$ and $X_2$ are also treated as random variables. This change was made since we want to display these variables in Lumen, and Lumen currently can only display random variables.
+The code creating this model is shown in \autoref{list:code_use_case_2}. It differs from the implementation of Salvatier et al in that the former independent variables $X_1$ and $X_2$ are now treated as random variables. This change was made since we want to display these variables in Lumen, and Lumen currently is not able to display independent variables.\\
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={PyMC3 model of linear regression example}, label={list:code_use_case_2},captionpos=b]
 np.random.seed(123)
@@ -899,17 +907,15 @@ with basic_model:
          )
 \end{lstlisting}
 \end{minipage}
-Plotting the two variables $X1$ and $X2$ against each other and comparing this to the posterior probability density for those two variables results in the plot shown in \autoref{fig:linreg_pymc3_plot}. The model clearly does not catch the data, its spread is too high in $X2$ direction and too low in $X1$ direction.
+Plotting the two variables $X_1$ and $X_2$ against each other and comparing this to the posterior probability density for those two variables results in the plot shown in \autoref{fig:linreg_pymc3_plot}. The Lumen visualization here is able to clearly identify a mismatch between model and data: The spread of the posterior distribution is too high in $X_2$ direction and too low in $X_1$ direction. It might be that the change of the variables $X_1$ and $X_2$ from independent to random variables introduced this discrepancy.
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/linreg_pymc3_plot.png}
 	\caption[Lumen visualization of two observed variables from the linear regression model]{Lumen visualization of two observed variables from the linear regression model}
 	\label{fig:linreg_pymc3_plot}
 \end{figure}
-\\
-TODO: Where does that discrepancy come from? Maybe do some classical posterior checks and see if they detect the discrepancy also.
 \subsection{Eight schools model}
 \label{subsec:eight_schools}
-The problem shown below is often used in the literature as an example to illustrate Bayesian modeling \cite{1439840954}\cite{sinharay2003posterior}\cite{rubin1981estimation}. It is about eight schools where the impact of a coaching program on test results was estimated. For each school a separate estimate and a standard error was calculated. These estimates are shown in \autoref{tab:eightschools_data} and serve as data for our modeling problem.\\ 
+The problem shown below is often used in the literature as an example to illustrate Bayesian modeling \cite{1439840954}\cite{sinharay2003posterior}\cite{rubin1981estimation}. It is about eight schools where the impact of a coaching program on test results was estimated. For each school, a separate estimate and a standard error was calculated. These estimates are shown in \autoref{tab:eightschools_data} and serve as data for our modeling problem.\\ 
 Sinharay et al now fit a hierarchical model for this process and apply a number of methods to check in which ways their models deviates from the data \cite{sinharay2003posterior}. Below, one of their methods is recapitulated and it is analyzed if the conclusions they draw can also be deduced from a visualization of the model in Lumen.
 \begin{table}
 	\includegraphics[width=\textwidth]{images/eightschools_data.png}
@@ -986,19 +992,19 @@ Generating the same plots in Lumen is not possible since the calculation and dis
  \section{Discussion}
 Each of the abovementioned example models could successfully be visualized in Lumen via the interface created during the thesis at hand. In the linear regression example in \autoref{subsec:linreg}, the Lumen visualization helped detecting the misfit between model and data. However, models with a big number of variables were not tested during this work. For such complex models, a visualization could likely be hindered by the circumstance that the number of samples needed to cover the whole parameter space probably increases quickly with the number of parameters. This holds especially for conditioning a model: The probability that even one sample point falls within such an interval becomes very small for increasing number of parameters. 
 \\
-Apart from that, the potential benefits that Lumen could bring for users of probabilistic models has still to be discussed: Validating models is a possibility here, but this is typically done by displaying test statistics of simulated data. As of now, Lumen instead only displays the probability density of the simulated data itself, and does not aggregate it to test statistics. In the eight schools example in \autoref{subsec:eight_schools}, it did not perform so well in showing the similarities or discrepancies between model and data, compared to the classical method of displaying test statistics. Hence, expanding Lumen so that it can display distributions of test statistics might be a reasonable step for future work.
+Apart from that, the potential benefits that Lumen could bring for users of probabilistic models still have to be pointed out more specifically: Validating models is a possibility here, but this is typically done by displaying test statistics of simulated data. As of now, Lumen instead only displays the probability density of the simulated data itself, and does not aggregate it to test statistics. In the eight schools example in \autoref{subsec:eight_schools}, it did not perform so well in showing the similarities or discrepancies between model and data, compared to the classical method of displaying test statistics. Hence, expanding Lumen so that it can display distributions of test statistics might be a reasonable step for future work.
 \\
-On the other hand it is also important to learn how probabilistic models are currently used and validated in practice. Other ways of validating probabilistic models might be in use, that are not mentioned so much in literature as the abovementioned one.
+On the other hand, it is also important to learn how probabilistic models are currently used and validated in practice. Other ways of validating probabilistic models might be in use, that are not mentioned so much in literature as the abovementioned one.
 %As seen in \autoref{sec:Comparison}, Bayesian models do not always behave as one would first expect. It might not have practical implications but contributes to a better understanding of the behaviour of Bayesian models.
 %However, this could only be noticed because the true values of the parameters were known in advance. The visualization of the model in Lumen shown in \autoref{fig:code_use_case_1} does not give away these conclusions since the true parameter values are not known.
 \section {Conclusion and outlook}
-In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen it has to be possible to marginalize and condition the model as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the above mentioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of Gaussians and then take the density from there.\\
+In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen, it has to be possible to marginalize and condition the model as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the abovementioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of Gaussians and then take the density from there.\\
 In the course of the thesis a simplified Bayesian model was created and visualized. Even this most simplified model did not behave as intuitively expected. Since it is very difficult to correctly assess the behavior of a Bayesian model by just looking at the code, especially for complex models, but even, as shown here, for the most simple ones, validating a model by visualizing it becomes extremely important. The interface implemented here makes it possible to check PyMC3 models in Lumen which can help spotting discrepancies between the model and the expectations of the researcher.\\
 Several fields remain where future work could bring rewarding results:
 \begin{itemize}
 	\item In terms of validating models, it could be useful to enable Lumen to aggregate observed and simulated data and display those aggregations. This is a widespread method for validating Bayesian models and would therefore pose a valuable addition to the existing abilities of the program.
 	\item Being able to display independent variables would also be beneficial. Although they have no posterior distribution, independent variables are often important parts of a model and visualizing them can give valuable insights for judging the model fitness.
-	\item It is likely that models used in practice are much more complex than the ones showed in the thesis at hand. It is also likely that the performance of Lumen might have difficulties in dealing with increasing model complexity, due to a lack of samples. Enabling the program to stay functional and performant when dealing with more complex models is therefore crucial for a broader application.
+	\item It is likely that models used in practice are much more complex than the ones showed in the thesis at hand. It is also likely that the performance of Lumen might have difficulties in dealing with increasing model complexity, due to a lack of samples. Enabling the program to stay functional and performant when dealing with more complex models is therefore crucial for its broader application.
 \end{itemize}
 Lumen is already providing useful features for performing visual analytics. By realizing these improvements it can develop its full potential as a powerful tool for validating and exploring probabilistic models.
 
@@ -1027,7 +1033,7 @@ Lumen is already providing useful features for performing visual analytics. By r
 \section{Rules of Probabilistic Inference}
 \label{appendix:Rules of Probabilistic Inference}
 
-When working with Bayesian models it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule, and the Bayes' rule. The following explanations are taken from Pfeffer \cite{9781617292330}.
+When working with Bayesian models it will be necessary to transform conditional, marginal and joint distributions into one another. There are three rules of probabilistic inference which achieve this: The chain rule, the total probability rule and the Bayes' rule. The following explanations are taken from Pfeffer \cite{9781617292330}.
 
 \paragraph{Chain rule}
 
@@ -1047,7 +1053,7 @@ P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\bold
 
 \paragraph{Bayes' rule}
 
-Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect, given the cause. 
+Bayes' rule calculates the probability of a cause, given an effect, by using the prior probability of the cause and the probability of the effect given the cause. 
 
 \begin{equation}
 P(X|Y) = ( P(Y|X) * P(X) ) / P(Y)
