@@ -229,7 +229,7 @@ p_B = Pr(T(X^{rep},\theta) >= T(X,\theta) | X)
 \end{equation}
 \cite{1439840954}\\
 If a test quantity has a p-value close to 0 or 1, it means that the test quantity for the simulated data is nearly always larger (when it is close to 1) or smaller (close to 0) than the test quantity for the observed data and therefore the aspect that is analyzed by the test quantity is not well captured in the model.\\
-Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an alternative form of model checking. He even claims that "when more complex models are being used, graphical checks are more necessary than ever to detect areas of model misfit" \cite{gelman2004exploratory}. In graphical model checking, the visualization plays the role of the test quantity. Even though test quantities are usually scalars, one can also compute them as vectors so that they can be displayed graphically \cite{gelman2004exploratory}. When we take this one step further, in my opinion, the data and the parameters can be seen as a vector summary of themselves, so by displaying them, as it is done in this thesis later, we are performing a regular model check according to the proceedings described above. TODO: Check this in regard of sufficient statistics.
+Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an alternative form of model checking. He even claims that "when more complex models are being used, graphical checks are more necessary than ever to detect areas of model misfit" \cite{gelman2004exploratory}. In graphical model checking, the visualization plays the role of the test quantity. Even though test quantities are usually scalars, one can also compute them as vectors so that they can be displayed graphically \cite{gelman2004exploratory}. When we take this one step further, in my opinion, the data and the parameters can be seen as a vector summary of themselves, so by displaying them, as it is done in this thesis later, we are performing a regular model check according to the proceedings described above. 
 
 %In Bayesian analysis, both the prior and the likelihood distribution can be sources of error.
 %
@@ -296,7 +296,7 @@ Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an 
 %This process of comparing observed to simulated data in a Bayesian context is called posterior predictive checking.
 
 
-% In Lumen: One can check the models behaviour, that is, the interaction of pairs of variables.
+% In Lumen: One can check the models behavior, that is, the interaction of pairs of variables.
 % Gelman et al \cite{1439840954} describe drawing data from the posterior distribution and then comparing it to the training data as a means of validating a model. With PyMC3 and Lumen, we can actually do even better and compare the actual posterior distribution to the training data.
 % Comparison of summaries is not possible in Lumen since it only shows the actual data, no summaries.
 
@@ -304,7 +304,7 @@ Gelman \cite{gelman2004exploratory} argues that visualization can be seen as an 
 %\label{Choosing an appropriate prior distribution}
 %There are two interpretations of prior distributions. The \textit{population} interpretation, where the prior distribution is thought of as a population of possible parameters, from where the current parameter is drawn. This, as far as I understand, requires the range of possible values to be known, e.g from past experience. On the other hand, the \textit{state of knowledge} interpretation looks at the prior distribution as an expression of the user's knowledge or uncertainty, so that the assumption is plausible, that the real parameter value is taken from a random realization of the prior distribution.
 %\\
-%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit non informative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common non informative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parametrization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
+%When we have lots of knowledge about the parameter already, it makes sense to choose an \textit informative prior, which has a big influence on the posterior distribution.On the other hand, if one does not want prior beliefs to affect the outcome of an analysis, one should not choose informative priors, even when lots of knowledge is available. E.g. when testing a hypothesis, it is not wise to include information in the prior that supports the hypothesis for fairness reasons(?? look that up again on p. 56.). If there is no sufficient data to estimate a prior, it is desirable to choose a prior that is \textit non informative, meaning that it will contribute very little to the posterior distribution ('let the data speak for itself'). A common non informative prior, motivated by Laplace's principle of insufficient reason, is the uniform distribution. However, the uniform distribution is not ideal since it is dependent on the parameterization: Applying a uniform distribution to $p(x)$ leads to a non-uniform distribution when looking at $p(x^2)$ and the other way round \cite{1439840954}. Jeffrey's approach to find noninformative prior distributions negates this problem by choosing a prior that is invariant to the parameterization (see https://eventuallyalmosteverywhere.wordpress.com/2013/05/10/bayesian-inference-and-the-jeffreys-prior/).
 %Besides informative and noninformative prior distributions there is also the \textit {weakly informative} prior distribution. This kind of prior does affect the posterior distribution in terms of regularization (e.g. it prevents extreme outliers), but it does not contain any further special knowledge about the parameter. A normal distribution with high variance is often used as weakly informative prior.
 %\\
 %The parameters of the prior distributions are called hyperparameters. The property that prior and posterior distribution are of the parametric form (e.g., both are a beta distribution) (for a given likelihood distribution), is called conjugacy. Conjugate prior distributions have the advantages of being computationally convenient and being interpretable as additional data.
@@ -685,7 +685,7 @@ x &\sim N(0,2)
 \end{equation}
 %I've not found out yet if there is a parameterization for a normal distribution that generates the same data as the hierarchical model described here. So far as I can tell, the data produced by the non-hierarchic process should look different than the data produced by the hierarchic process. This makes me expect the posterior calculated by using data from such a non-hierarchical model look at least slightly different from the hierarchical case. However, 
 As one can see in \autoref{fig:ground_truth_posterior_6}, the distribution looks very similar. The histogram for the variable $mu$ is not shown there, since $mu$ is no longer part of the data generating mechanism. In the model, $mu$ is still considered and a posterior distribution for it is learned. The similarity between \autoref{fig:ground_truth_posterior_1} and \autoref{fig:ground_truth_posterior_6} is not surprising since the data generated from the according mechanisms in \autoref{eq:data_generating_manual_example} and \autoref{eq:nonhierarchical} looks very similar, even if the actual data generating mechanisms are different. 
-% The property that different mechanisms can geenrate the same data and are therefore indistinguishible, is called Nonidentifiability.
+% The property that different mechanisms can generate the same data and are therefore indistinguishable, is called Nonidentifiability.
 
 %At this point I cannot tell if the differences introduced by the change in data generation are actually very small, or if the posterior distributions are really the same apart from random errors, and there is either an error in the code or in my thinking.
 \begin{figure}
@@ -974,7 +974,7 @@ with pm.Model() as normal_normal_model:
         observed=data['test_scores'])
 \end{lstlisting}
 \end{minipage}
-Generating the same plots in Lumen is not possible since the calculation and display of summary statistics is not supported there. Instead, the observed estimates can be shown and compared to their posterior distribution, as it is done in \autoref{fig:eightschools_lumen_vis}. It looks not very informative, though. One problem is that the data consists of very few points. Another problem is that the visualization is fragmentized into multiple peaks, making it hard to judge the overall fit to the data.
+Generating the same plots in Lumen is not possible since the calculation and display of summary statistics is not supported there. Instead, the observed estimates can be shown and compared to their posterior distribution, as it is done in \autoref{fig:eightschools_lumen_vis}. It looks not very informative, though. One problem is that the data consists of very few points. Another problem is that the visualization is fragmented into multiple peaks, making it hard to judge the overall fit to the data.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.75\textwidth]{images/eight_schools_lumen_vis.png}
@@ -995,7 +995,7 @@ Each of the abovementioned example models could successfully be visualized in Lu
 Apart from that, the potential benefits that Lumen could bring for users of probabilistic models still have to be pointed out more specifically: Validating models is a possibility here, but this is typically done by displaying test statistics of simulated data. As of now, Lumen instead only displays the probability density of the simulated data itself, and does not aggregate it to test statistics. In the eight schools example in \autoref{subsec:eight_schools}, it did not perform so well in showing the similarities or discrepancies between model and data, compared to the classical method of displaying test statistics. Hence, expanding Lumen so that it can display distributions of test statistics might be a reasonable step for future work.
 \\
 On the other hand, it is also important to learn how probabilistic models are currently used and validated in practice. Other ways of validating probabilistic models might be in use, that are not mentioned so much in literature as the abovementioned one.
-%As seen in \autoref{sec:Comparison}, Bayesian models do not always behave as one would first expect. It might not have practical implications but contributes to a better understanding of the behaviour of Bayesian models.
+%As seen in \autoref{sec:Comparison}, Bayesian models do not always behave as one would first expect. It might not have practical implications but contributes to a better understanding of the behavior of Bayesian models.
 %However, this could only be noticed because the true values of the parameters were known in advance. The visualization of the model in Lumen shown in \autoref{fig:code_use_case_1} does not give away these conclusions since the true parameter values are not known.
 \section {Conclusion and outlook}
 In the thesis at hand an interface was implemented to link the visualization software Lumen to the probabilistic programming language PyMC3. To visualize a model in Lumen, it has to be possible to marginalize and condition the model as well as estimating a probability density for a given point. PyMC3 draws inference by generating samples from a posterior distribution, so the necessary operations to perform the abovementioned tasks also work with these samples: Marginalizing and conditioning is done by removing columns or rows, respectively, from the samples. Estimating a probability density is done by approximating the samples through a sum of Gaussians and then take the density from there.\\
@@ -1037,7 +1037,7 @@ When working with Bayesian models it will be necessary to transform conditional,
 
 \paragraph{Chain rule}
 
-The chain rule is used to calculate a \gls{joint probability distribution} of several variables from local \gls{conditional probability distribution}s of these variables:
+The chain rule is used to calculate a joint probability distribution of several variables from local conditional probability distributions of these variables:
 
 \begin{equation}
 P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2 ,...X_{n-1}) )
@@ -1045,7 +1045,7 @@ P(X_1 ,X_2 ,...X_n ) = P(X_1 )P(X_2 | X_1 )P(X_3 | X_1 ,X_2 )...P(X_n | X_1 ,X_2
 
 \paragraph{Total probability rule}
 
-The total probability rule calculates the probability distribution over a subset of variables, also called a \gls{marginal distribution}, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
+The total probability rule calculates the probability distribution over a subset of variables, also called a marginal distribution, by summing out all the other variables, that is by summing the probability distributions for each combination of values of these variables:
 
 \begin{equation}
 P(\boldsymbol X |\boldsymbol Z ) = \sum_{\boldsymbol y}   P(\boldsymbol X ,\boldsymbol Y =\boldsymbol y |\boldsymbol Z )
